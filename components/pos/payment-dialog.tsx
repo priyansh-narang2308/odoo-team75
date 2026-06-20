@@ -138,29 +138,30 @@ export function PaymentDialog({
       return data.data.id;
     } else {
       // Create new order
+      const createBody: Record<string, unknown> = { source: "CASHIER" };
+      if (tableId) createBody.tableId = tableId;
+      if (sessionId) createBody.sessionId = sessionId;
+      if (customerId) createBody.customerId = customerId;
+      if (appliedPromotionId) createBody.promotionId = appliedPromotionId;
+
       const orderRes = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(createBody),
       });
       const orderData = await orderRes.json();
       if (!orderData.ok)
         throw new Error(orderData.error || "Failed to create order");
       const newOrderId = orderData.data.id;
 
-      for (const item of items) {
-        const itemBody: Record<string, unknown> = {
-          productId: item.productId,
-          quantity: item.quantity,
-        };
-        if (item.notes) itemBody.notes = item.notes;
-
-        await fetch(`/api/orders/${newOrderId}/items`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(itemBody),
-        });
-      }
+      // Update the newly created draft order with all items
+      const updateRes = await fetch(`/api/orders/${newOrderId}/update-cart`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const updateData = await updateRes.json();
+      if (!updateData.ok) throw new Error(updateData.error || "Failed to add items to order");
       return newOrderId;
     }
   }
@@ -190,13 +191,6 @@ export function PaymentDialog({
       const payData = await payRes.json();
       if (!payData.ok) throw new Error(payData.error);
 
-      // Send to kitchen
-      await fetch(`/api/orders/${orderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "SENT" }),
-      });
-
       onSuccess(orderId, "Cash");
     } catch (err: any) {
       setError(err.message || "Payment failed");
@@ -225,12 +219,6 @@ export function PaymentDialog({
       });
       const payData = await payRes.json();
       if (!payData.ok) throw new Error(payData.error);
-
-      await fetch(`/api/orders/${orderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "SENT" }),
-      });
 
       onSuccess(orderId, "UPI");
     } catch (err: any) {
@@ -287,13 +275,6 @@ export function PaymentDialog({
             setLoading(false);
             return;
           }
-
-          // Send to kitchen
-          await fetch(`/api/orders/${cafeOrderId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "SENT" }),
-          });
 
           onSuccess(cafeOrderId, "Razorpay");
         },

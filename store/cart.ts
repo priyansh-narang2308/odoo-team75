@@ -158,6 +158,7 @@ export const useCartStore = create<CartState>()(
         orderId: state.orderId,
         customerId: state.customerId,
         customerName: state.customerName,
+        appliedPromotion: state.appliedPromotion,
       }),
     },
   ),

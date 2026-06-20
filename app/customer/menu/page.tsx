@@ -38,6 +38,18 @@ interface CustomerSession {
   tableId: string | null;
 }
 
+function computeDisplayStatus(status: string, items?: { kdsStatus: string }[]) {
+  if (status === "DRAFT" || status === "CANCELLED") return status;
+  if (!items || items.length === 0) return status;
+  
+  const statuses = items.map((i: any) => i.kdsStatus);
+  if (statuses.length > 0) {
+    if (statuses.every((s) => s === "COMPLETED")) return "READY";
+    if (statuses.some((s) => s === "PREPARING" || s === "COMPLETED")) return "PREPARING";
+  }
+  return status;
+}
+
 export default function CustomerMenuPage() {
   const router = useRouter();
   const [customer, setCustomer] = useState<CustomerSession | null>(null);
@@ -872,20 +884,20 @@ export default function CustomerMenuPage() {
                             display: "inline-block",
                             marginTop: "4px",
                             background:
-                              order.status === "PAID"
+                              computeDisplayStatus(order.status, order.items) === "READY" || computeDisplayStatus(order.status, order.items) === "PAID"
                                 ? "rgba(34,197,94,0.15)"
                                 : order.status === "CANCELLED"
                                   ? "rgba(239,68,68,0.15)"
                                   : "rgba(245,158,11,0.15)",
                             color:
-                              order.status === "PAID"
+                              computeDisplayStatus(order.status, order.items) === "READY" || computeDisplayStatus(order.status, order.items) === "PAID"
                                 ? "#4ade80"
                                 : order.status === "CANCELLED"
                                   ? "#f87171"
                                   : "#fbbf24",
                           }}
                         >
-                          {order.status}
+                          {computeDisplayStatus(order.status, order.items)}
                         </div>
                       </div>
                     </div>

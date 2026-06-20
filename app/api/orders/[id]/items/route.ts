@@ -130,6 +130,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       grandTotal: Number(updatedOrder.grandTotal),
     };
     io.to("cashier").emit(SOCKET_EVENTS.ORDER_UPDATED, payload);
+    io.to("admin").emit(SOCKET_EVENTS.ORDER_UPDATED, payload);
     if (order.tableId) {
       io.to(`table:${order.tableId}`).emit(
         SOCKET_EVENTS.ORDER_UPDATED,
@@ -191,12 +192,20 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
   const io = getIO();
   if (io) {
-    io.to("cashier").emit(SOCKET_EVENTS.ORDER_UPDATED, {
+    const payload = {
       orderId: id,
       orderNumber: updatedOrder.orderNumber,
       status: updatedOrder.status,
       grandTotal: Number(updatedOrder.grandTotal),
-    });
+    };
+    io.to("cashier").emit(SOCKET_EVENTS.ORDER_UPDATED, payload);
+    io.to("admin").emit(SOCKET_EVENTS.ORDER_UPDATED, payload);
+    if (currentOrder?.tableId) {
+      io.to(`table:${currentOrder.tableId}`).emit(
+        SOCKET_EVENTS.ORDER_UPDATED,
+        payload,
+      );
+    }
   }
 
   return NextResponse.json({ ok: true, data: updatedOrder });

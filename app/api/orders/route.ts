@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         customerId: customerSession.customerId,
         ...(history ? {} : { tableId: tableId || customerSession.tableId }),
         ...(status
-          ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" }
+          ? { status: { in: status.split(",") as any } }
           : {}),
       },
       include: {
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
   const orders = await prisma.order.findMany({
     where: {
       ...(status
-        ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" }
+        ? { status: { in: status.split(",") as any } }
         : {}),
       ...(tableId ? { tableId } : {}),
       ...dateFilter,

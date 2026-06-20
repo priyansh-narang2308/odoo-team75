@@ -209,12 +209,21 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
   const io = getIO();
   if (io) {
-    io.to("cashier").emit(SOCKET_EVENTS.ORDER_STATUS, {
+    const payload = {
       orderId: id,
       orderNumber: updatedOrder.orderNumber,
       status: "CANCELLED",
       tableId: updatedOrder.tableId,
-    });
+    };
+    io.to("cashier").emit(SOCKET_EVENTS.ORDER_STATUS, payload);
+    io.to("admin").emit(SOCKET_EVENTS.ORDER_STATUS, payload);
+
+    if (updatedOrder.tableId) {
+      io.to(`table:${updatedOrder.tableId}`).emit(
+        SOCKET_EVENTS.ORDER_STATUS,
+        payload,
+      );
+    }
   }
 
   return NextResponse.json({ ok: true, data: updatedOrder });

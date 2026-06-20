@@ -36,20 +36,6 @@ export async function GET(request: Request) {
         where: { status: { in: ["DRAFT", "SENT"] } },
         select: { id: true, status: true, grandTotal: true },
       },
-      reservations: {
-        where: {
-          reserveTime: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-        select: {
-          id: true,
-          reserveTime: true,
-          customerName: true,
-          phone: true,
-          seats: true,
-        },
-      },
     },
     orderBy: [{ floor: { sortOrder: "asc" } }, { tableNumber: "asc" }],
   });

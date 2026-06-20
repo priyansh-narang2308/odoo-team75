@@ -159,14 +159,20 @@ export function AdminDashboard() {
     const handleRefresh = () => fetchDataRef.current?.();
     socket.on(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
     socket.on(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
+    socket.on(SOCKET_EVENTS.ORDER_UPDATED, handleRefresh);
     socket.on(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
+    socket.on(SOCKET_EVENTS.KDS_ITEM_UPDATED, handleRefresh);
     socket.on(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleRefresh);
+    socket.on(SOCKET_EVENTS.TABLE_STATUS, handleRefresh);
 
     return () => {
       socket.off(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
       socket.off(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
+      socket.off(SOCKET_EVENTS.ORDER_UPDATED, handleRefresh);
       socket.off(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
+      socket.off(SOCKET_EVENTS.KDS_ITEM_UPDATED, handleRefresh);
       socket.off(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleRefresh);
+      socket.off(SOCKET_EVENTS.TABLE_STATUS, handleRefresh);
     };
   }, [socket]);
 

@@ -83,21 +83,21 @@ export async function POST(req: Request) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const io = (global as any).io;
         if (io) {
+          const paymentPayload = {
+            orderId: updatedOrder.id,
+            method: "UPI/QR",
+          };
           // Notify table
           if (updatedOrder.tableId) {
             io.to(`table:${updatedOrder.tableId}`).emit(
               SOCKET_EVENTS.PAYMENT_RECEIVED,
-              {
-                orderId: updatedOrder.id,
-                method: "UPI/QR",
-              },
+              paymentPayload,
             );
           }
           // Notify cashier
-          io.to("cashier").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, {
-            orderId: updatedOrder.id,
-            method: "UPI/QR",
-          });
+          io.to("cashier").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
+          // Notify admin dashboard
+          io.to("admin").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
         } else if (redis) {
           // Fallback to redis pubsub if IO isn't global
           await redis.publish(
@@ -106,6 +106,7 @@ export async function POST(req: Request) {
               event: SOCKET_EVENTS.PAYMENT_RECEIVED,
               room: [
                 "cashier",
+                "admin",
                 updatedOrder.tableId ? `table:${updatedOrder.tableId}` : null,
               ].filter(Boolean),
               payload: { orderId: updatedOrder.id, method: "UPI/QR" },

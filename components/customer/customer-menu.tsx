@@ -72,6 +72,18 @@ const KDS_STATUS_LABEL: Record<string, { label: string; color: string }> = {
   COMPLETED: { label: "Completed", color: "#4ade80" },
 };
 
+function computeDisplayStatus(status: string, items?: { kdsStatus: string }[]) {
+  if (status === "DRAFT" || status === "CANCELLED") return status;
+  if (!items || items.length === 0) return status;
+  
+  const statuses = items.map((i: any) => i.kdsStatus);
+  if (statuses.length > 0) {
+    if (statuses.every((s) => s === "COMPLETED")) return "READY";
+    if (statuses.some((s) => s === "PREPARING" || s === "COMPLETED")) return "PREPARING";
+  }
+  return status;
+}
+
 export function CustomerMenu({
   tableId,
   tableNumber,
@@ -430,11 +442,13 @@ export function CustomerMenu({
         >
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
             <div style={{ fontSize: "36px", marginBottom: "8px" }}>
-              {activeOrder.status === "PAID"
+              {computeDisplayStatus(activeOrder.status, activeOrder.items) === "READY"
                 ? "✅"
-                : activeOrder.status === "SENT"
+                : computeDisplayStatus(activeOrder.status, activeOrder.items) === "PREPARING"
                   ? "👨‍🍳"
-                  : "⏳"}
+                  : computeDisplayStatus(activeOrder.status, activeOrder.items) === "PAID"
+                    ? "💸"
+                    : "⏳"}
             </div>
             <h2
               style={{ margin: "0 0 4px", fontSize: "20px", fontWeight: "800" }}
@@ -449,13 +463,20 @@ export function CustomerMenu({
                 fontSize: "13px",
                 fontWeight: "700",
                 background:
-                  activeOrder.status === "PAID"
+                  computeDisplayStatus(activeOrder.status, activeOrder.items) === "READY"
                     ? "rgba(34,197,94,0.15)"
+                    : computeDisplayStatus(activeOrder.status, activeOrder.items) === "PREPARING"
+                    ? "rgba(96,165,250,0.15)"
                     : "rgba(245,158,11,0.15)",
-                color: activeOrder.status === "PAID" ? "#4ade80" : "#fbbf24",
+                color: 
+                  computeDisplayStatus(activeOrder.status, activeOrder.items) === "READY" 
+                    ? "#4ade80" 
+                    : computeDisplayStatus(activeOrder.status, activeOrder.items) === "PREPARING"
+                    ? "#60a5fa"
+                    : "#fbbf24",
               }}
             >
-              {activeOrder.status === "PAID" ? "Paid ✓" : "In Kitchen"}
+              {computeDisplayStatus(activeOrder.status, activeOrder.items)}
             </div>
           </div>
 
@@ -723,20 +744,20 @@ export function CustomerMenu({
                             display: "inline-block",
                             marginTop: "4px",
                             background:
-                              order.status === "PAID"
+                              computeDisplayStatus(order.status, order.items) === "READY" || computeDisplayStatus(order.status, order.items) === "PAID"
                                 ? "rgba(34,197,94,0.15)"
                                 : order.status === "CANCELLED"
                                   ? "rgba(239,68,68,0.15)"
                                   : "rgba(245,158,11,0.15)",
                             color:
-                              order.status === "PAID"
+                              computeDisplayStatus(order.status, order.items) === "READY" || computeDisplayStatus(order.status, order.items) === "PAID"
                                 ? "#4ade80"
                                 : order.status === "CANCELLED"
                                   ? "#f87171"
                                   : "#fbbf24",
                           }}
                         >
-                          {order.status}
+                          {computeDisplayStatus(order.status, order.items)}
                         </div>
                       </div>
                     </div>

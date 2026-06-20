@@ -38,11 +38,7 @@ interface Order {
 }
 
 function computeDisplayStatus(order: Order) {
-  if (
-    order.status === "DRAFT" ||
-    order.status === "CANCELLED" ||
-    order.status === "PAID"
-  )
+  if (order.status === "DRAFT" || order.status === "CANCELLED")
     return order.status;
 
   if (!order.items || order.items.length === 0) return order.status;
@@ -107,12 +103,16 @@ export function OrdersManager() {
 
     socket.on(SOCKET_EVENTS.ORDER_STATUS, handleOrderUpdate);
     socket.on(SOCKET_EVENTS.ORDER_PLACED, handleOrderUpdate);
+    socket.on(SOCKET_EVENTS.ORDER_UPDATED, handleOrderUpdate);
+    socket.on(SOCKET_EVENTS.PAYMENT_RECEIVED, handleOrderUpdate);
     socket.on(SOCKET_EVENTS.KDS_ITEM_UPDATED, handleOrderUpdate);
     socket.on(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleOrderUpdate);
 
     return () => {
       socket.off(SOCKET_EVENTS.ORDER_STATUS, handleOrderUpdate);
       socket.off(SOCKET_EVENTS.ORDER_PLACED, handleOrderUpdate);
+      socket.off(SOCKET_EVENTS.ORDER_UPDATED, handleOrderUpdate);
+      socket.off(SOCKET_EVENTS.PAYMENT_RECEIVED, handleOrderUpdate);
       socket.off(SOCKET_EVENTS.KDS_ITEM_UPDATED, handleOrderUpdate);
       socket.off(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleOrderUpdate);
     };

@@ -56,7 +56,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     where: { id },
     include: {
       items: {
-        include: { product: { select: { name: true, taxRate: true } } },
+        include: { product: { select: { name: true, taxRate: true, showInKds: true } } },
       },
       table: {
         select: { tableNumber: true, floor: { select: { name: true } } },
@@ -188,6 +188,26 @@ export async function POST(request: Request, { params }: RouteParams) {
         status: "available",
       });
     }
+
+    // Emit KDS ticket directly since cashier quick-service orders go straight to PAID
+    const kdsPayload = {
+      orderId: id,
+      orderNumber: order.orderNumber,
+      tableId: order.tableId,
+      tableNumber: order.table?.tableNumber,
+      source: order.source,
+      createdAt: order.createdAt.toISOString(),
+      items: order.items
+        .filter((item) => item.product.showInKds !== false)
+        .map((item) => ({
+          id: item.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          notes: item.notes,
+          kdsStatus: item.kdsStatus,
+        })),
+    };
+    io.to("kitchen").emit(SOCKET_EVENTS.KDS_NEW_TICKET, kdsPayload);
   }
 
   // Send email receipt

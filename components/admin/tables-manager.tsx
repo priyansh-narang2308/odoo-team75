@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSocket } from "@/components/providers/socket-provider";
+import { SOCKET_EVENTS } from "@/lib/socket-events";
 import {
   Plus,
   QrCode,
@@ -78,6 +80,38 @@ export function TablesManager() {
     url: string;
     tableNumber: string;
   } | null>(null);
+  const { socket } = useSocket();
+
+  // Refetch tables for real-time updates
+  const refetchTablesRef = useRef<() => void>(null as any);
+  const refetchTables = useCallback(() => {
+    fetch("/api/tables")
+      .then((r) => r.json())
+      .then((t) => {
+        if (t.data) setTables(t.data);
+      });
+  }, []);
+  refetchTablesRef.current = refetchTables;
+
+  // Real-time: join admin room & refresh on table/order events
+  useEffect(() => {
+    if (!socket) return;
+    socket.emit(SOCKET_EVENTS.JOIN_ADMIN);
+
+    const handleRefresh = () => refetchTablesRef.current?.();
+
+    socket.on(SOCKET_EVENTS.TABLE_STATUS, handleRefresh);
+    socket.on(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
+    socket.on(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
+    socket.on(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
+
+    return () => {
+      socket.off(SOCKET_EVENTS.TABLE_STATUS, handleRefresh);
+      socket.off(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
+      socket.off(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
+      socket.off(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
+    };
+  }, [socket]);
 
   useEffect(() => {
     Promise.all([
