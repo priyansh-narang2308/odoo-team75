@@ -98,9 +98,9 @@ export default function CustomerLoginPage() {
   };
 
   const inputStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    color: "#f0eee8",
+    background: "#ffffff",
+    border: "1px solid #d1d5db",
+    color: "#111827",
     borderRadius: "10px",
     padding: "12px 16px",
     fontSize: "15px",
@@ -112,7 +112,7 @@ export default function CustomerLoginPage() {
 
   const labelStyle: React.CSSProperties = {
     fontSize: "13px",
-    color: "#8a8a9a",
+    color: "#374151",
     marginBottom: "6px",
     display: "block",
     fontWeight: "500",
@@ -132,8 +132,8 @@ export default function CustomerLoginPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #0f0f13 0%, #1a1a24 100%)",
-          color: "#8a8a9a",
+          background: "#F3F4F6",
+          color: "#6b7280",
           fontSize: "16px",
         }}
       >
@@ -147,342 +147,367 @@ export default function CustomerLoginPage() {
       style={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background:
-          "linear-gradient(135deg, #0f0f13 0%, #1a1a24 50%, #0f0f13 100%)",
-        padding: "24px",
-        position: "relative",
-        overflow: "hidden",
+        background: "#F3F4F6",
       }}
     >
-      {/* Background accent */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "600px",
-          height: "600px",
-          background:
-            "radial-gradient(circle, rgba(200, 121, 65, 0.08) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+      <style>{`
+        .split-left {
+          display: none;
+        }
+        .split-right {
+          flex: 1;
+        }
+        @media (min-width: 800px) {
+          .split-left {
+            display: block;
+            flex: 1.2;
+            background-image: url('/left.png');
+            background-size: cover;
+            background-position: top center;
+            background-repeat: no-repeat;
+          }
+          .split-right {
+            flex: 1;
+          }
+        }
+      `}</style>
+
+      <div className="split-left" />
 
       <div
+        className="split-right"
         style={{
-          width: "100%",
-          maxWidth: "420px",
-          animation: "fadeIn 0.4s ease both",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          position: "relative",
+          overflowY: "auto",
         }}
       >
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div
-            style={{
-              width: "72px",
-              height: "72px",
-              borderRadius: "20px",
-              background: "linear-gradient(135deg, #c87941, #a06030)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "32px",
-              margin: "0 auto 16px",
-              boxShadow: "0 0 40px rgba(200, 121, 65, 0.3)",
-            }}
-          >
-            ☕
-          </div>
-          <h1
-            className="font-caveat"
-            style={{
-              fontSize: "42px",
-              fontWeight: "700",
-              margin: "0 0 8px",
-              background: "linear-gradient(135deg, #f0eee8, #c87941)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Café Odoo
-          </h1>
-          <p style={{ color: "#8a8a9a", fontSize: "14px", margin: 0 }}>
-            Customer Portal — Sign in to browse the menu
-          </p>
-        </div>
-
-        {/* Auth card */}
+        {/* Background accent */}
         <div
           style={{
-            background: "rgba(26,26,36,0.9)",
-            border: "1px solid rgba(42,42,58,0.8)",
-            borderRadius: "20px",
-            padding: "28px",
-            backdropFilter: "blur(16px)",
+            position: "absolute",
+            top: "20%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "600px",
+            height: "600px",
+            background:
+              "radial-gradient(circle, rgba(113, 75, 103, 0.08) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "420px",
+            marginTop: "6vh",
+            animation: "fadeIn 0.4s ease both",
           }}
         >
-          {/* Mode Toggle */}
-          <div
-            style={{
-              display: "flex",
-              background: "rgba(255,255,255,0.04)",
-              borderRadius: "10px",
-              padding: "4px",
-              marginBottom: "20px",
-            }}
-          >
-            {(["login", "register"] as const).map((m) => (
-              <button
-                key={m}
-                id={`customer-mode-${m}`}
-                onClick={() => {
-                  setMode(m);
-                  setError(null);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "9px",
-                  borderRadius: "7px",
-                  background:
-                    mode === m
-                      ? "linear-gradient(135deg, #c87941, #a06030)"
-                      : "transparent",
-                  color: mode === m ? "#fff" : "#8a8a9a",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.2s",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                {m === "login" ? "Sign In" : "Sign Up"}
-              </button>
-            ))}
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div
+          {/* Logo */}
+          <div style={{ textAlign: "center", marginBottom: "32px" }}>
+            <h1
+              className="font-caveat"
               style={{
-                background: "rgba(239,68,68,0.1)",
-                border: "1px solid rgba(239,68,68,0.3)",
-                borderRadius: "8px",
-                padding: "12px 16px",
-                color: "#f87171",
-                fontSize: "14px",
-                marginBottom: "16px",
+                fontSize: "42px",
+                fontWeight: "700",
+                margin: "0 0 8px",
+                color: "#714B67",
               }}
             >
-              {error}
-            </div>
-          )}
+              Customer Portal
+            </h1>
 
-          {/* Login Form */}
-          {mode === "login" && (
-            <form
-              onSubmit={loginForm.handleSubmit(handleLogin)}
-              style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+            <p
+              style={{
+                marginTop: "10px",
+                color: "#6b7280",
+                fontSize: "16px",
+              }}
             >
-              <div>
-                <label style={labelStyle}>Email</label>
-                <input
-                  id="customer-login-email"
-                  type="email"
-                  style={inputStyle}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  {...loginForm.register("email")}
-                />
-                {loginForm.formState.errors.email && (
-                  <p style={errorTextStyle}>
-                    {loginForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label style={labelStyle}>Password</label>
-                <input
-                  id="customer-login-password"
-                  type="password"
-                  style={inputStyle}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  {...loginForm.register("password")}
-                />
-                {loginForm.formState.errors.password && (
-                  <p style={errorTextStyle}>
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-              <button
-                id="customer-login-submit"
-                type="submit"
-                disabled={loading}
-                style={{
-                  marginTop: "8px",
-                  background: loading
-                    ? "#5a3a20"
-                    : "linear-gradient(135deg, #c87941, #a06030)",
-                  color: "#fff",
-                  padding: "14px",
-                  borderRadius: "10px",
-                  fontWeight: "700",
-                  fontSize: "15px",
-                  boxShadow: loading
-                    ? "none"
-                    : "0 4px 16px rgba(200,121,65,0.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "none",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  width: "100%",
-                }}
-              >
-                {loading ? "Signing in..." : "Sign In"}
-              </button>
-            </form>
-          )}
+              Sign in to browse the menu and place your order.
+            </p>
+          </div>
 
-          {/* Register Form */}
-          {mode === "register" && (
-            <form
-              onSubmit={registerForm.handleSubmit(handleRegister)}
-              style={{ display: "flex", flexDirection: "column", gap: "14px" }}
-            >
-              <div>
-                <label style={labelStyle}>Your Name</label>
-                <input
-                  id="customer-reg-name"
-                  style={inputStyle}
-                  placeholder="e.g. Aryan"
-                  autoComplete="name"
-                  {...registerForm.register("name")}
-                />
-                {registerForm.formState.errors.name && (
-                  <p style={errorTextStyle}>
-                    {registerForm.formState.errors.name.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label style={labelStyle}>Email</label>
-                <input
-                  id="customer-reg-email"
-                  type="email"
-                  style={inputStyle}
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  {...registerForm.register("email")}
-                />
-                {registerForm.formState.errors.email && (
-                  <p style={errorTextStyle}>
-                    {registerForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label style={labelStyle}>Password</label>
-                <input
-                  id="customer-reg-password"
-                  type="password"
-                  style={inputStyle}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  {...registerForm.register("password")}
-                />
-                {registerForm.formState.errors.password && (
-                  <p style={errorTextStyle}>
-                    {registerForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-              <button
-                id="customer-reg-submit"
-                type="submit"
-                disabled={loading}
-                style={{
-                  marginTop: "8px",
-                  background: loading
-                    ? "#5a3a20"
-                    : "linear-gradient(135deg, #c87941, #a06030)",
-                  color: "#fff",
-                  padding: "14px",
-                  borderRadius: "10px",
-                  fontWeight: "700",
-                  fontSize: "15px",
-                  boxShadow: loading
-                    ? "none"
-                    : "0 4px 16px rgba(200,121,65,0.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "none",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  width: "100%",
-                }}
-              >
-                {loading ? "Creating account..." : "Create Account"}
-              </button>
-            </form>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div
-          style={{
-            marginTop: "20px",
-            textAlign: "center",
-            fontSize: "13px",
-            color: "#5a5a6a",
-            marginBottom: "16px",
-          }}
-        >
-          Scan the QR code on your table for table-linked ordering
-        </div>
-
-        {/* Not a Customer Button */}
-        <div
-          style={{
-            textAlign: "center",
-          }}
-        >
-          <a
-            href="http://localhost:3001/login"
-            id="not-a-customer-btn"
+          {/* Auth card */}
+          <div
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              background: "rgba(255, 255, 255, 0.03)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              color: "#8a8a9a",
-              textDecoration: "none",
-              fontSize: "13px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)";
-              e.currentTarget.style.color = "#f0eee8";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.03)";
-              e.currentTarget.style.color = "#8a8a9a";
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              borderRadius: "20px",
+              padding: "28px",
+              boxShadow:
+                "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
             }}
           >
-            Not a Customer?
-          </a>
+            {/* Mode Toggle */}
+            <div
+              style={{
+                display: "flex",
+                background: "#F3F4F6",
+                borderRadius: "10px",
+                padding: "4px",
+                marginBottom: "20px",
+              }}
+            >
+              {(["login", "register"] as const).map((m) => (
+                <button
+                  key={m}
+                  id={`customer-mode-${m}`}
+                  onClick={() => {
+                    setMode(m);
+                    setError(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: "9px",
+                    borderRadius: "7px",
+                    background: mode === m ? "#ffffff" : "transparent",
+                    color: mode === m ? "#714B67" : "#6b7280",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s",
+                    border: "none",
+                    cursor: "pointer",
+                    boxShadow:
+                      mode === m ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                  }}
+                >
+                  {m === "login" ? "Sign In" : "Sign Up"}
+                </button>
+              ))}
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div
+                style={{
+                  background: "rgba(239,68,68,0.1)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "8px",
+                  padding: "12px 16px",
+                  color: "#f87171",
+                  fontSize: "14px",
+                  marginBottom: "16px",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Login Form */}
+            {mode === "login" && (
+              <form
+                onSubmit={loginForm.handleSubmit(handleLogin)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                <div>
+                  <label style={labelStyle}>Email</label>
+                  <input
+                    id="customer-login-email"
+                    type="email"
+                    style={inputStyle}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    {...loginForm.register("email")}
+                  />
+                  {loginForm.formState.errors.email && (
+                    <p style={errorTextStyle}>
+                      {loginForm.formState.errors.email.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label style={labelStyle}>Password</label>
+                  <input
+                    id="customer-login-password"
+                    type="password"
+                    style={inputStyle}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    {...loginForm.register("password")}
+                  />
+                  {loginForm.formState.errors.password && (
+                    <p style={errorTextStyle}>
+                      {loginForm.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+                <button
+                  id="customer-login-submit"
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    marginTop: "8px",
+                    background: loading ? "#9ca3af" : "#714B67",
+                    color: "#fff",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    boxShadow: loading
+                      ? "none"
+                      : "0 4px 12px rgba(113, 75, 103, 0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "none",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    width: "100%",
+                  }}
+                >
+                  {loading ? "Signing in..." : "Sign In"}
+                </button>
+              </form>
+            )}
+
+            {/* Register Form */}
+            {mode === "register" && (
+              <form
+                onSubmit={registerForm.handleSubmit(handleRegister)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                <div>
+                  <label style={labelStyle}>Your Name</label>
+                  <input
+                    id="customer-reg-name"
+                    style={inputStyle}
+                    placeholder="John Doe"
+                    autoComplete="name"
+                    {...registerForm.register("name")}
+                  />
+                  {registerForm.formState.errors.name && (
+                    <p style={errorTextStyle}>
+                      {registerForm.formState.errors.name.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label style={labelStyle}>Email</label>
+                  <input
+                    id="customer-reg-email"
+                    type="email"
+                    style={inputStyle}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    {...registerForm.register("email")}
+                  />
+                  {registerForm.formState.errors.email && (
+                    <p style={errorTextStyle}>
+                      {registerForm.formState.errors.email.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label style={labelStyle}>Password</label>
+                  <input
+                    id="customer-reg-password"
+                    type="password"
+                    style={inputStyle}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    {...registerForm.register("password")}
+                  />
+                  {registerForm.formState.errors.password && (
+                    <p style={errorTextStyle}>
+                      {registerForm.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+                <button
+                  id="customer-reg-submit"
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    marginTop: "8px",
+                    background: loading ? "#9ca3af" : "#714B67",
+                    color: "#fff",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    boxShadow: loading
+                      ? "none"
+                      : "0 4px 12px rgba(113, 75, 103, 0.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "none",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    width: "100%",
+                  }}
+                >
+                  {loading ? "Creating account..." : "Create Account"}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div
+            style={{
+              marginTop: "20px",
+              textAlign: "center",
+              fontSize: "13px",
+              color: "#6b7280",
+              marginBottom: "16px",
+            }}
+          >
+            Scan the QR code on your table for table-linked ordering
+          </div>
+
+          {/* Not a Customer Button */}
+          <div
+            style={{
+              textAlign: "center",
+            }}
+          >
+            <a
+              href="http://localhost:3001/login"
+              id="not-a-customer-btn"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "10px 20px",
+                borderRadius: "10px",
+                background: "#ffffff",
+                border: "1px solid #d1d5db",
+                color: "#374151",
+                textDecoration: "none",
+                fontSize: "13px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F3F4F6";
+                e.currentTarget.style.borderColor = "#9ca3af";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.borderColor = "#d1d5db";
+              }}
+            >
+              Not a Customer?
+            </a>
+          </div>
         </div>
       </div>
     </div>
