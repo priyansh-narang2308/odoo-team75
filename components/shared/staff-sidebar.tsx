@@ -19,6 +19,7 @@ import {
   Receipt,
   Menu,
   X,
+  Calendar,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import Image from "next/image";

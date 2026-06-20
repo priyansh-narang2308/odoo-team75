@@ -24,7 +24,9 @@ import {
   Users,
   MapPin,
   ShoppingBag,
+  Calendar,
 } from "lucide-react";
+import { ReservationsManager } from "@/components/admin/reservations-manager";
 import { useSocket } from "@/components/providers/socket-provider";
 import { SOCKET_EVENTS } from "@/lib/socket-events";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,6 +69,13 @@ interface Table {
   floorId: string;
   floor?: { id: string; name: string; gridWidth: number; gridHeight: number };
   orders?: { id: string; status: string; grandTotal: number }[];
+  reservations?: {
+    id: string;
+    reserveTime: string;
+    customerName: string;
+    phone: string | null;
+    seats: number;
+  }[];
   x: number;
   y: number;
   width: number;
@@ -76,7 +85,7 @@ interface Table {
 
 export function POSTerminal() {
   const router = useRouter();
-  const [step, setStep] = useState<"TABLE_SELECTION" | "MENU">(
+  const [step, setStep] = useState<"TABLE_SELECTION" | "MENU" | "RESERVATIONS">(
     "TABLE_SELECTION",
   );
   const [products, setProducts] = useState<Product[]>([]);
@@ -146,6 +155,7 @@ export function POSTerminal() {
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
   const [selectedTableId, setSelectedTableId] = useState<string>("");
   const [actionTableId, setActionTableId] = useState<string | null>(null);
+  const [reservedTableId, setReservedTableId] = useState<string | null>(null);
 
   // Session Management
   const [activeSession, setActiveSession] = useState<{
@@ -582,6 +592,7 @@ export function POSTerminal() {
       ? tables.filter((t) => t.floorId === activeFloor.id && t.isActive)
       : [];
     const actionTable = tables.find((t) => t.id === actionTableId);
+    const reservedTable = tables.find((t) => t.id === reservedTableId);
 
     return (
       <AnimatePresence>
@@ -858,6 +869,10 @@ export function POSTerminal() {
                             table.orders && table.orders.length > 0;
                           const activeOrder = table.orders?.[0] || null;
 
+                          const isReserved =
+                            table.status === "RESERVED" ||
+                            (table.reservations && table.reservations.length > 0);
+
                           let statusColor = "#10b981"; // green
                           let statusBg = "rgba(16, 185, 129, 0.12)";
                           let borderHighlight = "1.5px solid #10b981";
@@ -866,7 +881,7 @@ export function POSTerminal() {
                             statusColor = "#ef4444"; // red
                             statusBg = "rgba(239, 68, 68, 0.12)";
                             borderHighlight = "1.5px solid #ef4444";
-                          } else if (table.status === "RESERVED") {
+                          } else if (isReserved) {
                             statusColor = "#f59e0b"; // amber
                             statusBg = "rgba(245, 158, 11, 0.12)";
                             borderHighlight = "1.5px solid #f59e0b";
@@ -880,6 +895,8 @@ export function POSTerminal() {
                                   hasActiveOrder || table.status === "OCCUPIED";
                                 if (isOccupied) {
                                   setActionTableId(table.id);
+                                } else if (isReserved) {
+                                  setReservedTableId(table.id);
                                 } else {
                                   changeTable(table.id);
                                 }
@@ -949,7 +966,7 @@ export function POSTerminal() {
                               >
                                 {hasActiveOrder || table.status === "OCCUPIED"
                                   ? "Occupied"
-                                  : table.status === "RESERVED"
+                                  : isReserved
                                     ? "Reserved"
                                     : "Free"}
                               </span>
@@ -1211,6 +1228,180 @@ export function POSTerminal() {
                   </div>
                 )}
               </AnimatePresence>
+
+              {/* Reservation Details Dialog */}
+              <AnimatePresence>
+                {reservedTableId && reservedTable && (
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: "rgba(0, 0, 0, 0.6)",
+                      backdropFilter: "blur(8px)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 1100,
+                    }}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      style={{
+                        width: "90%",
+                        maxWidth: "400px",
+                        background: "var(--color-bg-elevated)",
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "20px",
+                        padding: "24px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "18px",
+                        boxShadow: "var(--shadow-lg), 0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <h3
+                          style={{
+                            margin: 0,
+                            fontSize: "18px",
+                            fontWeight: "800",
+                            color: "var(--color-primary)",
+                          }}
+                        >
+                          Table {reservedTable.tableNumber} Reservation
+                        </h3>
+                        <button
+                          onClick={() => setReservedTableId(null)}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            color: "var(--color-text-muted)",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "4px",
+                            borderRadius: "50%",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              "var(--color-bg-overlay)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "transparent")
+                          }
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        {reservedTable.reservations && reservedTable.reservations.length > 0 ? (
+                          reservedTable.reservations.map((res) => {
+                            const resDate = new Date(res.reserveTime);
+                            return (
+                              <div
+                                key={res.id}
+                                style={{
+                                  background: "var(--color-bg-overlay)",
+                                  border: "1px solid var(--color-border)",
+                                  borderRadius: "12px",
+                                  padding: "16px",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "8px",
+                                }}
+                              >
+                                <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--color-text)" }}>
+                                  Customer: {res.customerName}
+                                </div>
+                                {res.phone && (
+                                  <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
+                                    Phone: {res.phone}
+                                  </div>
+                                )}
+                                <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
+                                  Guests: {res.seats} seats
+                                </div>
+                                <div style={{ fontSize: "13px", color: "var(--color-primary)", fontWeight: "600" }}>
+                                  Time: {String(resDate.getHours()).padStart(2, '0')}:{String(resDate.getMinutes()).padStart(2, '0')} ({resDate.toLocaleDateString()})
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <p style={{ margin: 0, fontSize: "14px", color: "var(--color-text-muted)" }}>
+                            No active reservations listed for this table.
+                          </p>
+                        )}
+                      </div>
+
+                      <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const tid = reservedTable.id;
+                            setReservedTableId(null);
+                            changeTable(tid);
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: "10px",
+                            background: "linear-gradient(135deg, var(--color-primary), #a06030)",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "10px",
+                            fontWeight: "700",
+                            fontSize: "13px",
+                            cursor: "pointer",
+                            transition: "opacity 0.2s",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+                          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                        >
+                          Start Order
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setReservedTableId(null)}
+                          style={{
+                            padding: "10px 20px",
+                            background: "transparent",
+                            color: "var(--color-text-faint)",
+                            border: "1px solid var(--color-border-muted)",
+                            borderRadius: "10px",
+                            fontWeight: "600",
+                            fontSize: "13px",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.color = "var(--color-text)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.color =
+                              "var(--color-text-faint)")
+                          }
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
         )}
@@ -1247,6 +1438,53 @@ export function POSTerminal() {
         }}
       >
         Loading terminal...
+      </div>
+    );
+  }
+
+  if (step === "RESERVATIONS") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          background: "var(--color-bg)",
+          color: "var(--color-text)",
+          padding: "24px",
+          overflowY: "auto",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1200px",
+            width: "100%",
+            margin: "0 auto 20px",
+          }}
+        >
+          <button
+            onClick={() => setStep("TABLE_SELECTION")}
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              fontWeight: "600",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              transition: "background-color 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-bg-overlay)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--color-bg-elevated)")}
+          >
+            ← Back to Terminal
+          </button>
+        </div>
+        <ReservationsManager />
       </div>
     );
   }
@@ -1354,7 +1592,7 @@ export function POSTerminal() {
             gap: "32px",
           }}
         >
-          {/* Quick Actions (Takeaway) */}
+          {/* Quick Actions (Takeaway & Reservations) */}
           <div>
             <h3
               style={{
@@ -1366,68 +1604,133 @@ export function POSTerminal() {
             >
               Quick Service
             </h3>
-            <button
-              onClick={() => changeTable("")}
-              style={{
-                width: "100%",
-                maxWidth: "320px",
-                background: "var(--color-bg-elevated)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "16px",
-                padding: "24px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: "8px",
-                textAlign: "left",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.border = "1px solid var(--color-primary)";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.border = "1px solid var(--color-border)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              <div
+            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+              <button
+                onClick={() => changeTable("")}
                 style={{
-                  width: "42px",
-                  height: "42px",
-                  borderRadius: "12px",
-                  background: "var(--color-primary)",
+                  flex: "1 1 300px",
+                  maxWidth: "320px",
+                  background: "var(--color-bg-elevated)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "16px",
+                  padding: "24px",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.border = "1px solid var(--color-primary)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.border = "1px solid var(--color-border)";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                <ShoppingBag size={20} />
-              </div>
-              <div style={{ marginTop: "12px" }}>
-                <span
+                <div
                   style={{
-                    fontSize: "18px",
-                    fontWeight: "700",
-                    color: "var(--color-text)",
+                    width: "42px",
+                    height: "42px",
+                    borderRadius: "12px",
+                    background: "var(--color-primary)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
                   }}
                 >
-                  Takeaway / Quick Order
-                </span>
-                <p
+                  <ShoppingBag size={20} />
+                </div>
+                <div style={{ marginTop: "12px" }}>
+                  <span
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "700",
+                      color: "var(--color-text)",
+                    }}
+                  >
+                    Takeaway / Quick Order
+                  </span>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: "13px",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    Create direct counter order without assigning a table.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setStep("RESERVATIONS")}
+                style={{
+                  flex: "1 1 300px",
+                  maxWidth: "320px",
+                  background: "var(--color-bg-elevated)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "16px",
+                  padding: "24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.border = "1px solid var(--color-primary)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.border = "1px solid var(--color-border)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                <div
                   style={{
-                    margin: "4px 0 0",
-                    fontSize: "13px",
-                    color: "var(--color-text-muted)",
+                    width: "42px",
+                    height: "42px",
+                    borderRadius: "12px",
+                    background: "var(--color-primary)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
                   }}
                 >
-                  Create direct counter order without assigning a table.
-                </p>
-              </div>
-            </button>
+                  <Calendar size={20} />
+                </div>
+                <div style={{ marginTop: "12px" }}>
+                  <span
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "700",
+                      color: "var(--color-text)",
+                    }}
+                  >
+                    Table Reservations
+                  </span>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: "13px",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    Manage call-in table bookings and check slots.
+                  </p>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Floors Section */}

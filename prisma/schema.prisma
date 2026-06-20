@@ -112,6 +112,7 @@ model Table {
   floorId       String
   floor         Floor     @relation(fields: [floorId], references: [id], onDelete: Cascade)
   orders        Order[]
+  reservations  Reservation[]
   x             Int       @default(0)
   y             Int       @default(0)
   width         Int       @default(1)
@@ -296,4 +297,16 @@ model Notification {
   orderId    String?
   tableId    String?
   createdAt  DateTime @default(now())
+}
+
+model Reservation {
+  id           String   @id @default(cuid())
+  customerName String
+  phone        String?
+  seats        Int      // Number of people
+  reserveTime  DateTime // The date and time of reservation
+  tableId      String
+  table        Table    @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
