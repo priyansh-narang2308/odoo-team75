@@ -55,8 +55,10 @@ export async function generateAndSaveQR(table: { id: string; floorId: string; ta
   const pythonScript = path.join(process.cwd(), "lib", "generate_qr.py");
   const logoPath = path.join(process.cwd(), "public", "logo.png");
 
+  const pythonCmd = process.platform === "win32" ? "python" : "python3";
+
   try {
-    execSync(`python3 "${pythonScript}" "${qrUrl}" "${qrFilePath}" "${logoPath}"`);
+    execSync(`${pythonCmd} "${pythonScript}" "${qrUrl}" "${qrFilePath}" "${logoPath}"`);
   } catch (error: any) {
     console.error("Python QR generation failed, using standard fallback:", error.message || error);
     await QRCode.toFile(qrFilePath, qrUrl, {

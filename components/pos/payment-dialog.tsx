@@ -39,6 +39,7 @@ interface PaymentDialogProps {
   appliedPromotionId?: string | null;
   discountTotal?: number;
   orderId?: string | null;
+  isSettlingBill?: boolean;
   onSuccess: (orderId: string, paymentMethod: string) => void;
   onClose: () => void;
 }
@@ -56,6 +57,7 @@ export function PaymentDialog({
   appliedPromotionId,
   discountTotal = 0,
   orderId,
+  isSettlingBill = false,
   onSuccess,
   onClose,
 }: PaymentDialogProps) {
@@ -111,6 +113,10 @@ export function PaymentDialog({
 
   // ── Create order + items helper ──
   async function createCafeOrder(): Promise<string> {
+    if (isSettlingBill && orderId) {
+      return orderId;
+    }
+
     const body: Record<string, unknown> = {
       source: "CASHIER",
       items,

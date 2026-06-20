@@ -20,6 +20,8 @@ enum Role {
 enum OrderStatus {
   DRAFT // Active, being built
   SENT // Sent to kitchen (customer orders start here)
+  PREPARING // Items are being prepared in kitchen
+  READY // All items completed, ready to serve
   PAID // Payment completed
   CANCELLED // Voided
 }
@@ -230,7 +232,7 @@ model Order {
   user   User?   @relation(fields: [userId], references: [id])
 
   tableId String?
-  table   Table?  @relation(fields: [tableId], references: [id])
+  table   Table?  @relation(fields: [tableId], references: [id], onDelete: Cascade)
 
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id])

@@ -37,7 +37,9 @@ export async function GET(request: Request) {
         customerId: customerSession.customerId,
         ...(history ? {} : { tableId: tableId || customerSession.tableId }),
         ...(status
-          ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" }
+          ? status.includes(",")
+            ? { status: { in: status.split(",") as any[] } }
+            : { status: status as any }
           : {}),
       },
       include: {
@@ -74,7 +76,9 @@ export async function GET(request: Request) {
   const orders = await prisma.order.findMany({
     where: {
       ...(status
-        ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" }
+        ? status.includes(",")
+          ? { status: { in: status.split(",") as any[] } }
+          : { status: status as any }
         : {}),
       ...(tableId ? { tableId } : {}),
       ...dateFilter,
@@ -214,15 +218,17 @@ export async function POST(request: Request) {
       });
     }
 
-    // Notify admin room that a new order was created
+    // Notify admin and cashier rooms that a new order was created
     const io = getIO();
     if (io) {
-      io.to("admin").emit(SOCKET_EVENTS.ORDER_PLACED, {
+      const payload = {
         orderId: order.id,
         orderNumber: order.orderNumber,
         status: order.status,
         tableId: order.tableId,
-      });
+      };
+      io.to("admin").emit(SOCKET_EVENTS.ORDER_PLACED, payload);
+      io.to("cashier").emit(SOCKET_EVENTS.ORDER_PLACED, payload);
     }
 
     return NextResponse.json({ ok: true, data: order }, { status: 201 });

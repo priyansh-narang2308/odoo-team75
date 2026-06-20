@@ -157,6 +157,8 @@ export function POSTerminal() {
   const [selectedTableId, setSelectedTableId] = useState<string>("");
   const [actionTableId, setActionTableId] = useState<string | null>(null);
   const [reservedTableId, setReservedTableId] = useState<string | null>(null);
+  const [activeTableOrder, setActiveTableOrder] = useState<any>(null);
+  const [isAppending, setIsAppending] = useState(false);
 
   // Session Management
   const [activeSession, setActiveSession] = useState<{
@@ -377,8 +379,18 @@ export function POSTerminal() {
         if (tblsData.ok) {
           setTables(tblsData.data || []);
         }
+        
+        if (selectedTableId) {
+          const ordRes = await fetch(`/api/orders?tableId=${selectedTableId}&status=SENT,PREPARING,READY`);
+          const ordData = await ordRes.json();
+          if (ordData.ok && ordData.data && ordData.data.length > 0) {
+            setActiveTableOrder(ordData.data[0]);
+          } else {
+            setActiveTableOrder(null);
+          }
+        }
       } catch (err) {
-        console.error("Failed to refresh tables:", err);
+        console.error("Failed to refresh:", err);
       }
     };
 
@@ -386,12 +398,14 @@ export function POSTerminal() {
     socket.on(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
     socket.on(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
     socket.on(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleRefresh);
+    socket.on(SOCKET_EVENTS.KDS_ITEM_UPDATED, handleRefresh);
 
     return () => {
       socket.off(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
       socket.off(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
       socket.off(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
       socket.off(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleRefresh);
+      socket.off(SOCKET_EVENTS.KDS_ITEM_UPDATED, handleRefresh);
     };
   }, [socket]);
 
@@ -496,6 +510,23 @@ export function POSTerminal() {
     setIsTableModalOpen(false);
     setStep("MENU");
   };
+
+  useEffect(() => {
+    if (selectedTableId) {
+      fetch(`/api/orders?tableId=${selectedTableId}&status=SENT,PREPARING,READY`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.ok && d.data && d.data.length > 0) {
+            setActiveTableOrder(d.data[0]);
+          } else {
+            setActiveTableOrder(null);
+          }
+        })
+        .catch(() => setActiveTableOrder(null));
+    } else {
+      setActiveTableOrder(null);
+    }
+  }, [selectedTableId]);
 
   const selectedTable = tables.find((t) => t.id === selectedTableId);
   const renderChairsAroundTable = (seats: number, statusColor: string) => {
@@ -2574,22 +2605,51 @@ export function POSTerminal() {
 
         {/* Cart Items */}
         <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
-          {items.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "40px 20px",
-                color: "var(--color-text-faint)",
-              }}
-            >
-              <ShoppingCart
-                size={40}
-                style={{ margin: "0 auto 12px", opacity: 0.3 }}
-              />
-              <p style={{ margin: 0, fontSize: "14px" }}>
-                Select items from the menu
-              </p>
+          {/* Active Order Items */}
+          {activeTableOrder && activeTableOrder.items && activeTableOrder.items.length > 0 && (
+            <div style={{ paddingBottom: "12px", borderBottom: items.length > 0 ? "1px solid var(--color-border-muted)" : "none", marginBottom: items.length > 0 ? "12px" : "0" }}>
+              <h4 style={{ margin: "0 0 8px", fontSize: "12px", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Already Ordered</h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                {activeTableOrder.items.map((item: any) => (
+                  <div key={item.id} style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", padding: "6px", background: "rgba(0,0,0,0.02)", borderRadius: "6px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span>{item.quantity}x {item.product.name}</span>
+                      <span style={{
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        background: item.kdsStatus === "TO_COOK" ? "rgba(107,114,128,0.1)" : item.kdsStatus === "PREPARING" ? "rgba(59,130,246,0.1)" : "rgba(34,197,94,0.1)",
+                        color: item.kdsStatus === "TO_COOK" ? "#9ca3af" : item.kdsStatus === "PREPARING" ? "#60a5fa" : "#4ade80"
+                      }}>
+                        {item.kdsStatus === "TO_COOK" ? "To cook" : item.kdsStatus === "PREPARING" ? "Preparing" : "Completed"}
+                      </span>
+                    </div>
+                    <span style={{ color: "var(--color-text-muted)" }}>{formatCurrency(Number(item.lineTotal))}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
+
+          {items.length === 0 ? (
+            (!activeTableOrder || activeTableOrder.items?.length === 0) && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px 20px",
+                  color: "var(--color-text-faint)",
+                }}
+              >
+                <ShoppingCart
+                  size={40}
+                  style={{ margin: "0 auto 12px", opacity: 0.3 }}
+                />
+                <p style={{ margin: 0, fontSize: "14px" }}>
+                  Select items from the menu
+                </p>
+              </div>
+            )
           ) : (
             <div
               style={{ display: "flex", flexDirection: "column", gap: "8px" }}
@@ -2856,40 +2916,124 @@ export function POSTerminal() {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "8px" }}
             >
-              {/* Checkout (pay-first for counter customers) */}
-              <button
-                id="checkout-pay-btn"
-                onClick={() => setShowCheckout(true)}
-                disabled={items.length === 0}
-                style={{
-                  background:
-                    "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
-                  color: "#fff",
-                  padding: "13px",
-                  justifyContent: "center",
-                  fontWeight: "700",
-                  fontSize: "15px",
-                  boxShadow: "0 4px 16px rgba(var(--color-primary-rgb), 0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "none",
-                  borderRadius: "10px",
-                  cursor: "pointer",
-                  width: "100%",
-                }}
-              >
-                <CreditCard size={16} />
-                Checkout &amp; Pay
-              </button>
+              {/* Checkout / Send to Kitchen */}
+              {selectedTableId ? (
+                <button
+                  id="checkout-send-btn"
+                  onClick={async () => {
+                    setIsAppending(true);
+                    try {
+                      const res = await fetch("/api/orders/append", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          tableId: selectedTableId,
+                          source: "CASHIER",
+                          items: items.map(i => ({ productId: i.productId, quantity: i.quantity, notes: i.notes }))
+                        })
+                      });
+                      const data = await res.json();
+                      if (data.ok) {
+                        toast.success("Items sent to kitchen");
+                        clearCart();
+                        // activeTableOrder will be refreshed by socket
+                      } else {
+                        toast.error(data.error || "Failed to send to kitchen");
+                      }
+                    } catch {
+                      toast.error("Failed to send to kitchen");
+                    } finally {
+                      setIsAppending(false);
+                    }
+                  }}
+                  disabled={items.length === 0 || isAppending}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
+                    color: "#fff",
+                    padding: "13px",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    boxShadow: "0 4px 16px rgba(var(--color-primary-rgb), 0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: items.length === 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                    opacity: items.length === 0 ? 0.5 : 1
+                  }}
+                >
+                  <ShoppingCart size={16} />
+                  {isAppending ? "Sending..." : "Send to Kitchen"}
+                </button>
+              ) : (
+                <button
+                  id="checkout-pay-btn"
+                  onClick={() => setShowCheckout(true)}
+                  disabled={items.length === 0}
+                  style={{
+                    background:
+                      "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
+                    color: "#fff",
+                    padding: "13px",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    boxShadow: "0 4px 16px rgba(var(--color-primary-rgb), 0.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: items.length === 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                    opacity: items.length === 0 ? 0.5 : 1
+                  }}
+                >
+                  <CreditCard size={16} />
+                  Checkout &amp; Pay
+                </button>
+              )}
+
+              {/* Settle Bill Button if table has active order */}
+              {selectedTableId && activeTableOrder && (
+                <button
+                  id="settle-bill-btn"
+                  onClick={() => setShowCheckout(true)}
+                  style={{
+                    background: "transparent",
+                    color: "var(--color-primary)",
+                    padding: "13px",
+                    justifyContent: "center",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    border: "1px solid var(--color-primary)",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <CreditCard size={16} />
+                  Settle Bill ({formatCurrency(Number(activeTableOrder.grandTotal))})
+                </button>
+              )}
 
               <button
                 id="clear-cart-btn"
                 onClick={() => {
                   clearCart();
-                  setSelectedTableId("");
-                  setStep("TABLE_SELECTION");
+                  if (!activeTableOrder) {
+                    setSelectedTableId("");
+                    setStep("TABLE_SELECTION");
+                  }
                 }}
+                disabled={items.length === 0}
                 style={{
                   background: "transparent",
                   color: "var(--color-text-faint)",
@@ -2898,11 +3042,12 @@ export function POSTerminal() {
                   fontSize: "13px",
                   border: "1px solid var(--color-border-muted)",
                   borderRadius: "10px",
-                  cursor: "pointer",
+                  cursor: items.length === 0 ? "not-allowed" : "pointer",
                   width: "100%",
+                  opacity: items.length === 0 ? 0.5 : 1
                 }}
               >
-                Clear Order
+                Clear Cart
               </button>
             </div>
           </div>
@@ -2912,29 +3057,41 @@ export function POSTerminal() {
       {/* ── Checkout Payment Dialog ── */}
       {showCheckout && (
         <PaymentDialog
-          grandTotal={grandTotal()}
-          subtotal={subtotal()}
-          taxTotal={taxTotal()}
-          items={items}
+          grandTotal={activeTableOrder ? Number(activeTableOrder.grandTotal) : grandTotal()}
+          subtotal={activeTableOrder ? Number(activeTableOrder.subtotal) : subtotal()}
+          taxTotal={activeTableOrder ? Number(activeTableOrder.taxTotal) : taxTotal()}
+          items={activeTableOrder ? activeTableOrder.items.map((i: any) => ({
+            productId: i.productId,
+            name: i.product.name,
+            price: Number(i.product.price),
+            taxRate: Number(i.product.taxRate),
+            quantity: i.quantity,
+          })) : items}
           tableId={selectedTableId || null}
           sessionId={activeSession?.id || null}
           customerId={customerId}
-          orderId={orderId}
-          appliedPromotionId={appliedPromotion?.id}
-          discountTotal={discountTotal()}
+          appliedPromotionId={appliedPromotion?.id || null}
+          discountTotal={activeTableOrder ? Number(activeTableOrder.discountTotal || 0) : discountTotal()}
+          orderId={activeTableOrder ? activeTableOrder.id : orderId}
+          isSettlingBill={!!activeTableOrder}
           onSuccess={async (orderId, method) => {
             // Capture snapshot BEFORE clearing cart
             const snap = {
-              items: items.map((i) => ({
+              items: activeTableOrder ? activeTableOrder.items.map((i: any) => ({
+                name: i.product.name,
+                quantity: i.quantity,
+                unitPrice: Number(i.product.price),
+                lineTotal: Number(i.quantity * i.product.price),
+              })) : items.map((i) => ({
                 name: i.name,
                 quantity: i.quantity,
                 unitPrice: i.price,
                 lineTotal: i.price * i.quantity,
               })),
-              subtotal: subtotal(),
-              tax: taxTotal(),
-              discount: discountTotal(),
-              grand: grandTotal(),
+              subtotal: activeTableOrder ? Number(activeTableOrder.subtotal) : subtotal(),
+              tax: activeTableOrder ? Number(activeTableOrder.taxTotal) : taxTotal(),
+              discount: activeTableOrder ? Number(activeTableOrder.discountTotal || 0) : discountTotal(),
+              grand: activeTableOrder ? Number(activeTableOrder.grandTotal) : grandTotal(),
             };
             setShowCheckout(false);
             const res = await fetch(`/api/orders/${orderId}`);

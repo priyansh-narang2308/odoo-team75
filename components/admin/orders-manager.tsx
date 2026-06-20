@@ -22,7 +22,7 @@ import toast from "react-hot-toast";
 interface Order {
   id: string;
   orderNumber: number;
-  status: "DRAFT" | "SENT" | "PAID" | "CANCELLED";
+  status: "DRAFT" | "SENT" | "PREPARING" | "READY" | "PAID" | "CANCELLED";
   source: "CUSTOMER" | "CASHIER";
   createdAt: string;
   grandTotal: number;
@@ -38,20 +38,6 @@ interface Order {
 }
 
 function computeDisplayStatus(order: Order) {
-  if (
-    order.status === "DRAFT" ||
-    order.status === "CANCELLED" ||
-    order.status === "PAID"
-  )
-    return order.status;
-
-  if (!order.items || order.items.length === 0) return order.status;
-
-  const statuses = order.items.map((i) => i.kdsStatus);
-  if (statuses.every((s) => s === "COMPLETED")) return "READY";
-  if (statuses.some((s) => s === "PREPARING" || s === "COMPLETED"))
-    return "PREPARING";
-
   return order.status;
 }
 
@@ -656,6 +642,32 @@ export function OrdersManager() {
                   >
                     <span>
                       {item.quantity}x {item.product.name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        background:
+                          item.kdsStatus === "TO_COOK"
+                            ? "rgba(107,114,128,0.1)"
+                            : item.kdsStatus === "PREPARING"
+                              ? "rgba(59,130,246,0.1)"
+                              : "rgba(34,197,94,0.1)",
+                        color:
+                          item.kdsStatus === "TO_COOK"
+                            ? "#9ca3af"
+                            : item.kdsStatus === "PREPARING"
+                              ? "#60a5fa"
+                              : "#4ade80",
+                      }}
+                    >
+                      {item.kdsStatus === "TO_COOK"
+                        ? "To cook"
+                        : item.kdsStatus === "PREPARING"
+                          ? "Preparing"
+                          : "Completed"}
                     </span>
                   </div>
                 ))}
