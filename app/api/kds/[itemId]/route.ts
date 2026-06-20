@@ -52,7 +52,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   // Re-fetch items AFTER the update to avoid stale pre-update data
   const freshItems = await prisma.orderItem.findMany({
-    where: { orderId: item.orderId },
+    where: { 
+      orderId: item.orderId,
+      product: {
+        showInKds: true
+      }
+    },
     select: { kdsStatus: true },
   });
 
@@ -80,6 +85,36 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const allCompleted = freshItems.every(
       (i: { kdsStatus: string }) => i.kdsStatus === "COMPLETED",
     );
+    const anyPreparingOrCompleted = freshItems.some(
+      (i: { kdsStatus: string }) => i.kdsStatus === "PREPARING" || i.kdsStatus === "COMPLETED"
+    );
+
+    let newOrderStatus: "READY" | "PREPARING" | null = null;
+    if (allCompleted) {
+      newOrderStatus = "READY";
+    } else if (anyPreparingOrCompleted) {
+      newOrderStatus = "PREPARING";
+    }
+
+    if (newOrderStatus && item.order.status !== "PAID" && item.order.status !== "CANCELLED" && item.order.status !== newOrderStatus) {
+      await prisma.order.update({
+        where: { id: item.orderId },
+        data: { status: newOrderStatus },
+      });
+
+      const statusPayload = {
+        orderId: item.orderId,
+        status: newOrderStatus,
+      };
+      io.to("cashier").emit(SOCKET_EVENTS.ORDER_STATUS, statusPayload);
+      io.to("admin").emit(SOCKET_EVENTS.ORDER_STATUS, statusPayload);
+      if (item.order.tableId) {
+        io.to(`table:${item.order.tableId}`).emit(
+          SOCKET_EVENTS.ORDER_STATUS,
+          statusPayload,
+        );
+      }
+    }
 
     if (allCompleted) {
       const completePayload = {

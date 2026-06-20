@@ -156,12 +156,8 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
     }
   }
 
-  const table = await prisma.table.update({
+  const table = await prisma.table.delete({
     where: { id },
-    data: {
-      isActive: false,
-      tableNumber: `${existingTable.tableNumber}_deleted_${Date.now()}_${id.slice(-4)}`,
-    },
   });
 
   return NextResponse.json({ ok: true, data: table });

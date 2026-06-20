@@ -49,6 +49,8 @@ interface Props {
   subtotal: number;
   taxTotal: number;
   customerName: string;
+  existingOrderId?: string | null;
+  existingOrderNumber?: number | null;
   onSuccess: (
     orderId: string,
     orderNumber: number,
@@ -66,6 +68,8 @@ export function CustomerPaymentSheet({
   subtotal,
   taxTotal,
   customerName,
+  existingOrderId,
+  existingOrderNumber,
   onSuccess,
   onBack,
 }: Props) {
@@ -74,6 +78,7 @@ export function CustomerPaymentSheet({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [razorpayReady, setRazorpayReady] = useState(false);
+  const [upiSubmitted, setUpiSubmitted] = useState(false);
 
   // Coupon state
   const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
@@ -209,11 +214,15 @@ export function CustomerPaymentSheet({
     setCouponSuccess(null);
   };
 
-  // ── Create café order + items ──
+  // ── Create or reuse café order + items ──
   async function createCafeOrder(): Promise<{
     id: string;
     orderNumber: number;
   }> {
+    if (existingOrderId && existingOrderNumber) {
+      return { id: existingOrderId, orderNumber: existingOrderNumber };
+    }
+
     const orderBody: Record<string, unknown> = { source: "CUSTOMER" };
     if (tableId) orderBody.tableId = tableId;
     if (appliedPromo) {
@@ -314,12 +323,6 @@ export function CustomerPaymentSheet({
               setLoading(false);
               return;
             }
-            // Send to kitchen
-            await fetch(`/api/orders/${cafeOrderId}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "SENT" }),
-            });
             onSuccess(cafeOrderId!, cafeOrderNumber!, "Razorpay");
           } catch {
             setError(
@@ -347,6 +350,19 @@ export function CustomerPaymentSheet({
         err?.message ||
         "Something went wrong. Please try again.";
       setError(msg);
+      setLoading(false);
+    }
+  }
+
+  async function handleUpiSubmit() {
+    setLoading(true);
+    setError(null);
+    try {
+      await createCafeOrder();
+      setUpiSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || "Failed to submit order");
+    } finally {
       setLoading(false);
     }
   }
@@ -1000,34 +1016,106 @@ export function CustomerPaymentSheet({
               )}
             </div>
 
-            {/* Info banner */}
-            <div
-              style={{
-                background: "rgba(var(--color-primary-rgb),0.08)",
-                border: "1px solid rgba(var(--color-primary-rgb),0.25)",
-                borderRadius: "12px",
-                padding: "14px 16px",
-                display: "flex",
-                gap: "10px",
-                alignItems: "flex-start",
-              }}
-            >
-              <AlertCircle
-                size={16}
-                style={{ color: sv.primary, flexShrink: 0, marginTop: "1px" }}
-              />
-              <div
-                style={{ fontSize: "13px", color: sv.text, lineHeight: "1.5" }}
-              >
-                <strong>After paying</strong>, show your UPI app payment
-                confirmation to the staff. They will confirm and send your order
-                to the kitchen.
-                <br />
-                <span style={{ color: sv.muted, fontSize: "12px" }}>
-                  Or switch to Razorpay for instant auto-confirmation.
-                </span>
-              </div>
-            </div>
+            {/* Info banner & Submit */}
+            {!upiSubmitted ? (
+              <>
+                <div
+                  style={{
+                    background: "rgba(var(--color-primary-rgb),0.08)",
+                    border: "1px solid rgba(var(--color-primary-rgb),0.25)",
+                    borderRadius: "12px",
+                    padding: "14px 16px",
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <AlertCircle
+                    size={16}
+                    style={{ color: sv.primary, flexShrink: 0, marginTop: "1px" }}
+                  />
+                  <div
+                    style={{ fontSize: "13px", color: sv.text, lineHeight: "1.5" }}
+                  >
+                    <strong>First</strong>, submit your order to the staff. Then scan the QR code to pay via UPI.
+                  </div>
+                </div>
+
+                <button
+                  id="submit-upi-order-btn"
+                  onClick={handleUpiSubmit}
+                  disabled={loading}
+                  style={{
+                    width: "100%",
+                    padding: "15px",
+                    borderRadius: "14px",
+                    background: loading
+                      ? "var(--color-bg-overlay)"
+                      : "var(--color-primary)",
+                    color: loading ? "var(--color-text-muted)" : "#fff",
+                    fontWeight: "700",
+                    fontSize: "16px",
+                    border: "none",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                    boxShadow: "0 8px 24px rgba(var(--color-primary-rgb),0.2)",
+                  }}
+                >
+                  {loading ? (
+                    <Loader2
+                      size={18}
+                      style={{ animation: "spin 1s linear infinite" }}
+                    />
+                  ) : (
+                    <QrCode size={18} />
+                  )}
+                  {loading ? "Submitting..." : "Submit Order to Staff"}
+                </button>
+              </>
+            ) : (
+              <>
+                <div
+                  style={{
+                    background: "rgba(74,222,128,0.08)",
+                    border: "1px solid rgba(74,222,128,0.25)",
+                    borderRadius: "12px",
+                    padding: "14px 16px",
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <AlertCircle
+                    size={16}
+                    style={{ color: "#4ade80", flexShrink: 0, marginTop: "1px" }}
+                  />
+                  <div
+                    style={{ fontSize: "13px", color: sv.text, lineHeight: "1.5" }}
+                  >
+                    <strong>Order Submitted!</strong> Please pay using the QR code above and show your confirmation to the staff. They will approve your order and send it to the kitchen.
+                  </div>
+                </div>
+                <button
+                  onClick={onBack}
+                  style={{
+                    width: "100%",
+                    padding: "15px",
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.1)",
+                    color: sv.text,
+                    fontWeight: "700",
+                    fontSize: "16px",
+                    border: `1px solid ${sv.border}`,
+                    cursor: "pointer",
+                  }}
+                >
+                  Done
+                </button>
+              </>
+            )}
 
             <button
               id="switch-to-razorpay-btn"

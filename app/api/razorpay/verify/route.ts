@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     where: { id: cafeOrderId },
     include: {
       items: {
-        include: { product: { select: { name: true, taxRate: true } } },
+        include: { product: { select: { name: true, taxRate: true, showInKds: true } } },
       },
       table: { select: { tableNumber: true } },
       customer: { select: { name: true, email: true } },
@@ -185,6 +185,26 @@ export async function POST(request: Request) {
         status: "available",
       });
     }
+
+    // Send ticket to kitchen
+    const kdsPayload = {
+      orderId: cafeOrderId,
+      orderNumber: cafeOrder.orderNumber,
+      tableId: cafeOrder.tableId,
+      tableNumber: cafeOrder.table?.tableNumber,
+      source: cafeOrder.source,
+      createdAt: cafeOrder.createdAt.toISOString(),
+      items: cafeOrder.items
+        .filter((item) => item.product.showInKds !== false)
+        .map((item) => ({
+          id: item.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          notes: item.notes,
+          kdsStatus: item.kdsStatus,
+        })),
+    };
+    io.to("kitchen").emit(SOCKET_EVENTS.KDS_NEW_TICKET, kdsPayload);
   }
 
   return NextResponse.json({

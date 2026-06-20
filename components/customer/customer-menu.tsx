@@ -48,6 +48,8 @@ interface OrderStatus {
   orderNumber: number;
   status: string;
   items: { productName: string; quantity: number; kdsStatus: string }[];
+  subtotal: number;
+  taxTotal: number;
   grandTotal: number;
 }
 
@@ -141,6 +143,8 @@ export function CustomerMenu({
             orderId: o.id,
             orderNumber: o.orderNumber,
             status: o.status,
+            subtotal: Number(o.subtotal),
+            taxTotal: Number(o.taxTotal),
             grandTotal: Number(o.grandTotal),
             items: o.items.map((i: any) => ({
               productName: i.product.name,
@@ -241,9 +245,47 @@ export function CustomerMenu({
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   const placeOrder = async () => {
-    // Now just opens the payment sheet
-    setShowCart(false);
-    setShowPayment(true);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/orders/append", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tableId,
+          source: "CUSTOMER",
+          items: cart.map(i => ({ productId: i.productId, quantity: i.quantity, notes: i.notes }))
+        })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+
+      const oRes = await fetch(`/api/orders?tableId=${tableId}&status=SENT`);
+      const oData = await oRes.json();
+      if (oData.ok && oData.data?.length > 0) {
+        const o = oData.data[0];
+        setActiveOrder({
+          orderId: o.id,
+          orderNumber: o.orderNumber,
+          status: o.status,
+          subtotal: Number(o.subtotal),
+          taxTotal: Number(o.taxTotal),
+          grandTotal: Number(o.grandTotal),
+          items: o.items.map((i: any) => ({
+            productName: i.product.name,
+            quantity: i.quantity,
+            kdsStatus: i.kdsStatus,
+          })),
+        });
+      }
+
+      setCart([]);
+      setShowCart(false);
+      setView("status");
+    } catch (err: any) {
+      alert("Failed to place order: " + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const loadProfile = () => {
@@ -543,6 +585,23 @@ export function CustomerMenu({
             )}
           </div>
 
+          <button
+            id="request-bill-btn"
+            onClick={() => setShowPayment(true)}
+            style={{
+              width: "100%",
+              padding: "13px",
+              borderRadius: "12px",
+              background: styleVars.primary,
+              color: "#fff",
+              fontWeight: "600",
+              border: "none",
+              marginBottom: "12px",
+            }}
+          >
+            Request Bill / Settle Up
+          </button>
+          
           <button
             id="add-more-btn"
             onClick={() => setView("menu")}
@@ -1491,6 +1550,18 @@ export function CustomerMenu({
                   {formatCurrency(cartTotal + cartTax)}
                 </span>
               </div>
+              <div style={{
+                background: "rgba(245,158,11,0.1)",
+                border: "1px solid rgba(245,158,11,0.3)",
+                color: "#d97706",
+                padding: "10px",
+                borderRadius: "8px",
+                fontSize: "12px",
+                marginBottom: "16px",
+                textAlign: "center"
+              }}>
+                ⚠️ Items are sent directly to the kitchen and <strong>cannot be cancelled</strong> once placed.
+              </div>
               <button
                 id="place-order-btn"
                 onClick={placeOrder}
@@ -1529,9 +1600,11 @@ export function CustomerMenu({
         <CustomerPaymentSheet
           tableId={tableId}
           cart={cart}
-          grandTotal={cartTotal + cartTax}
-          subtotal={cartTotal}
-          taxTotal={cartTax}
+          existingOrderId={activeOrder?.orderId || null}
+          existingOrderNumber={activeOrder?.orderNumber || null}
+          grandTotal={activeOrder ? activeOrder.grandTotal : cartTotal + cartTax}
+          subtotal={activeOrder ? activeOrder.subtotal : cartTotal}
+          taxTotal={activeOrder ? activeOrder.taxTotal : cartTax}
           customerName={customer.name}
           onSuccess={async (orderId, orderNumber, paymentMethod) => {
             setShowPayment(false);
@@ -1563,6 +1636,8 @@ export function CustomerMenu({
                 orderId,
                 orderNumber,
                 status: "SENT",
+                subtotal: Number(order.subtotal),
+                taxTotal: Number(order.taxTotal),
                 grandTotal: Number(order.grandTotal),
                 items: order.items.map((i: any) => ({
                   productName: i.product.name,

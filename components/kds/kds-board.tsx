@@ -34,6 +34,7 @@ interface KDSTicket {
   tableNumber: string | null;
   source: string;
   createdAt: string;
+  updatedAt: string;
   items: KDSItem[];
 }
 
@@ -67,24 +68,27 @@ const NEXT_STATUS: Record<KDSStatus, KDSStatus | null> = {
   COMPLETED: null,
 };
 
-function useElapsed(createdAt: string) {
+function useElapsed(createdAt: string, stoppedAt?: string) {
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     const tick = () => {
+      const end = stoppedAt ? new Date(stoppedAt).getTime() : Date.now();
       const secs = Math.floor(
-        (Date.now() - new Date(createdAt).getTime()) / 1000,
+        (end - new Date(createdAt).getTime()) / 1000,
       );
-      setElapsed(secs);
+      setElapsed(Math.max(0, secs));
     };
     tick();
-    const t = setInterval(tick, 1000);
-    return () => clearInterval(t);
-  }, [createdAt]);
+    if (!stoppedAt) {
+      const t = setInterval(tick, 1000);
+      return () => clearInterval(t);
+    }
+  }, [createdAt, stoppedAt]);
   return elapsed;
 }
 
-function ElapsedBadge({ createdAt }: { createdAt: string }) {
-  const secs = useElapsed(createdAt);
+function ElapsedBadge({ createdAt, stoppedAt }: { createdAt: string; stoppedAt?: string }) {
+  const secs = useElapsed(createdAt, stoppedAt);
   const mins = Math.floor(secs / 60);
   const s = secs % 60;
   const isUrgent = secs > 600; // 10+ min
@@ -119,7 +123,7 @@ export function KDSBoard() {
   const [tickets, setTickets] = useState<KDSTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [filter, setFilter] = useState<KDSStatus>("TO_COOK");
+  const [filter, setFilter] = useState<"ACTIVE" | "COMPLETED">("ACTIVE");
   const [searchQuery, setSearchQuery] = useState("");
   const [recentlyCompletedItems, setRecentlyCompletedItems] = useState<
     Record<string, number>
@@ -181,7 +185,7 @@ export function KDSBoard() {
   // Fetch initial tickets
   const fetchTickets = useCallback(async () => {
     try {
-      const res = await fetch("/api/orders?status=SENT&limit=20");
+      const res = await fetch("/api/orders?status=SENT,PREPARING,READY&limit=50");
       const data = await res.json();
       if (data.ok) {
         const mapped: KDSTicket[] = (data.data || []).map((o: any) => ({
@@ -191,6 +195,7 @@ export function KDSBoard() {
           tableNumber: o.table?.tableNumber ?? null,
           source: o.source,
           createdAt: o.createdAt,
+          updatedAt: o.updatedAt,
           items: o.items
             .filter((i: any) => i.product.showInKds !== false)
             .map((i: any) => ({
@@ -237,6 +242,7 @@ export function KDSBoard() {
               ? ticket
               : {
                   ...ticket,
+                  updatedAt: new Date().toISOString(),
                   items: ticket.items.map((item) =>
                     item.id === payload.itemId
                       ? { ...item, kdsStatus: payload.kdsStatus }
@@ -301,6 +307,7 @@ export function KDSBoard() {
     setTickets((prev) =>
       prev.map((t) => ({
         ...t,
+        updatedAt: t.items.some(i => i.id === itemId) ? new Date().toISOString() : t.updatedAt,
         items: t.items.map((i) =>
           i.id === itemId ? { ...i, kdsStatus: nextStatus } : i,
         ),
@@ -314,22 +321,15 @@ export function KDSBoard() {
     });
   };
 
-  const advanceEntireTicket = async (ticket: KDSTicket) => {
-    const itemsToAdvance = ticket.items.filter(
-      (i) => i.kdsStatus === filter && NEXT_STATUS[i.kdsStatus] !== null,
-    );
-
-    for (const item of itemsToAdvance) {
-      advanceItem(item.id, item.kdsStatus);
-    }
-  };
-
   const filteredVisibleTickets = tickets
+    .filter((t) => {
+      const allCompleted = t.items.length > 0 && t.items.every(i => i.kdsStatus === "COMPLETED");
+      if (filter === "ACTIVE") return !allCompleted;
+      return allCompleted;
+    })
     .map((t) => {
       const filteredItems = t.items.filter(
         (i) =>
-          i.kdsStatus === filter &&
-          (i.kdsStatus !== "COMPLETED" || i.id in recentlyCompletedItems) &&
           (!searchQuery ||
             i.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (i.categoryName &&
@@ -383,7 +383,7 @@ export function KDSBoard() {
 
         {/* Filters */}
         <div style={{ display: "flex", gap: "6px", marginLeft: "16px" }}>
-          {(["TO_COOK", "PREPARING", "COMPLETED"] as const).map((f) => (
+          {(["ACTIVE", "COMPLETED"] as const).map((f) => (
             <button
               key={f}
               id={`kds-filter-${f.toLowerCase()}`}
@@ -393,20 +393,13 @@ export function KDSBoard() {
                 borderRadius: "999px",
                 fontSize: "12px",
                 fontWeight: "600",
-                background: filter === f ? STATUS_COLORS[f]?.bg : "transparent",
-                color:
-                  filter === f
-                    ? STATUS_COLORS[f]?.text
-                    : "var(--color-text-muted)",
-                border: `1px solid ${
-                  filter === f
-                    ? STATUS_COLORS[f]?.border
-                    : "var(--color-border)"
-                }`,
+                background: filter === f ? (f === "ACTIVE" ? "rgba(59,130,246,0.15)" : STATUS_COLORS.COMPLETED.bg) : "transparent",
+                color: filter === f ? (f === "ACTIVE" ? "#3b82f6" : STATUS_COLORS.COMPLETED.text) : "var(--color-text-muted)",
+                border: `1px solid ${filter === f ? (f === "ACTIVE" ? "#3b82f6" : STATUS_COLORS.COMPLETED.border) : "var(--color-border)"}`,
                 cursor: "pointer",
               }}
             >
-              {STATUS_COLORS[f]?.label}
+              {f === "ACTIVE" ? "Active" : "Completed"}
             </button>
           ))}
         </div>
@@ -602,7 +595,7 @@ export function KDSBoard() {
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <ElapsedBadge createdAt={ticket.createdAt} />
+                  <ElapsedBadge createdAt={ticket.createdAt} stoppedAt={allDone ? ticket.updatedAt : undefined} />
                   {allDone && (
                     <span style={{ color: "#4ade80" }}>
                       <CheckCircle2 size={18} />
@@ -701,65 +694,27 @@ export function KDSBoard() {
                       </div>
                       <span
                         style={{
-                          fontSize: "11px",
+                          fontSize: "12px",
                           fontWeight: "700",
                           color: statusStyle.text,
-                          padding: "3px 8px",
+                          padding: "4px 10px",
                           borderRadius: "6px",
                           background: "rgba(0,0,0,0.2)",
                           flexShrink: 0,
                           marginLeft: "8px",
                         }}
                       >
-                        {canAdvance
-                          ? `→ ${STATUS_COLORS[NEXT_STATUS[item.kdsStatus]!].label}`
-                          : statusStyle.label}
+                        {item.kdsStatus === "TO_COOK"
+                          ? "Start preparing"
+                          : item.kdsStatus === "PREPARING"
+                            ? "Done"
+                            : "Completed"}
                       </span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Advance Entire Ticket Button */}
-              {ticket.items.some((i) => NEXT_STATUS[i.kdsStatus] !== null) && (
-                <div
-                  style={{
-                    padding: "10px",
-                    borderTop: "1px solid var(--color-border-muted)",
-                  }}
-                >
-                  <button
-                    onClick={() => advanceEntireTicket(ticket)}
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      background: "transparent",
-                      border: "1px dashed var(--color-border)",
-                      color: "var(--color-text-muted)",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background =
-                        "var(--color-bg-overlay)";
-                      e.currentTarget.style.color = "var(--color-text)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "transparent";
-                      e.currentTarget.style.color = "var(--color-text-muted)";
-                    }}
-                  >
-                    <FastForward size={14} /> Advance Order to Next Stage
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}
