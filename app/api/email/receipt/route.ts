@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
     const htmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-        <h2 style="text-align: center; color: #1a1a2e;">☕ Café Odoo</h2>
+        <h2 style="text-align: center; color: #1a1a2e;">☕ The Purple Cup Cafe</h2>
         <p style="text-align: center; color: #666;">Your Neighbourhood Café</p>
         
         <hr style="border: 1px solid #eee; margin: 20px 0;" />
@@ -107,9 +107,9 @@ export async function POST(req: Request) {
         accept: "application/json",
       },
       body: JSON.stringify({
-        sender: { name: "Café Odoo", email: "receipts@cafeodoo.com" },
+        sender: { name: "The Purple Cup Cafe", email: "receipts@cafeodoo.com" },
         to: [{ email: email }],
-        subject: `Receipt for Order #${orderNumber} - Café Odoo`,
+        subject: `Receipt for Order #${orderNumber} - The Purple Cup Cafe`,
         htmlContent: htmlContent,
       }),
     });

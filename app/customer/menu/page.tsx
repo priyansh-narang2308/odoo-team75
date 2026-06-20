@@ -183,7 +183,7 @@ export default function CustomerMenuPage() {
       >
         <div>
           <div style={{ fontSize: "16px", fontWeight: "700", color: s.text }}>
-            ☕ Café Odoo
+            ☕ The Purple Cup Cafe
           </div>
           <div style={{ fontSize: "12px", color: s.muted }}>
             Welcome, {customer?.name}

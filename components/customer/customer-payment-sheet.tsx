@@ -289,7 +289,7 @@ export function CustomerPaymentSheet({
         key: rzpData.data.keyId,
         amount: rzpData.data.amount,
         currency: "INR",
-        name: "Café Odoo",
+        name: "The Purple Cup Cafe",
         description: `Table Order #${cafeOrderNumber}`,
         order_id: rzpData.data.orderId,
         prefill: { name: customerName },
@@ -453,7 +453,7 @@ export function CustomerPaymentSheet({
           </div>
           {cart.map((item) => (
             <div
-              key={item.productId}
+              key={`${item.productId}-${item.notes || ""}`}
               style={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -462,9 +462,22 @@ export function CustomerPaymentSheet({
                 color: sv.text,
               }}
             >
-              <span>
-                ×{item.quantity} {item.name}
-              </span>
+              <div>
+                <span>
+                  ×{item.quantity} {item.name}
+                </span>
+                {item.notes && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: sv.muted,
+                      marginTop: "2px",
+                    }}
+                  >
+                    {item.notes}
+                  </div>
+                )}
+              </div>
               <span style={{ color: sv.muted }}>
                 {formatCurrency(item.price * item.quantity)}
               </span>

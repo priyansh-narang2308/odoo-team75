@@ -2,7 +2,7 @@ const FROM_EMAIL =
   process.env.SMTP_FROM_EMAIL ||
   process.env.EMAIL_FROM ||
   "receipt@cafeodoo.com";
-const FROM_NAME = process.env.EMAIL_FROM_NAME || "Café Odoo";
+const FROM_NAME = process.env.EMAIL_FROM_NAME || "The Purple Cup Cafe";
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
 
 export interface ReceiptItem {
@@ -68,7 +68,7 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
 <body>
   <div class="container">
     <div class="header">
-      <h1>☕ Café Odoo</h1>
+      <h1>☕ The Purple Cup Cafe</h1>
       <p>Thank you for your visit!</p>
     </div>
     <div class="body">
@@ -115,7 +115,7 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
     </div>
     <div class="footer">
       <p>We hope to see you again soon! ☕</p>
-      <p>Café Odoo • Your neighbourhood café</p>
+      <p>The Purple Cup Cafe • Your neighbourhood café</p>
     </div>
   </div>
 </body>
@@ -140,7 +140,7 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
             name: opts.customerName || "Customer",
           },
         ],
-        subject: `Your Order #${opts.orderNumber} at Café Odoo is confirmed! ☕`,
+        subject: `Your Order #${opts.orderNumber} at The Purple Cup Cafe is confirmed! ☕`,
         htmlContent,
       }),
     });

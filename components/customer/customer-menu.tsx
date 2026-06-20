@@ -88,9 +88,21 @@ export function CustomerMenu({
   const [showPayment, setShowPayment] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeOrder, setActiveOrder] = useState<OrderStatus | null>(null);
-  const [view, setView] = useState<"menu" | "status" | "profile">("menu");
+  const [view, setView] = useState<"menu" | "status" | "profile" | "product">(
+    "menu",
+  );
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // New States for Search and Product Detail
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [detailQty, setDetailQty] = useState(1);
+  const [detailOptions, setDetailOptions] = useState<{
+    variant?: string;
+    extras: string[];
+  }>({ extras: [] });
+
   const { socket } = useSocket();
   const [loggingOut, setLoggingOut] = useState(false);
   const [receipt, setReceipt] = useState<any | null>(null);
@@ -182,13 +194,17 @@ export function CustomerMenu({
     };
   }, [socket, tableId, activeOrder]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, quantity = 1, notes?: string) => {
     setCart((prev) => {
-      const ex = prev.find((i) => i.productId === product.id);
-      if (ex)
-        return prev.map((i) =>
-          i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i,
-        );
+      // For items with notes/variants, we might want to treat them as separate items, but for simplicity we'll group by ID and notes.
+      const exIndex = prev.findIndex(
+        (i) => i.productId === product.id && i.notes === notes,
+      );
+      if (exIndex >= 0) {
+        const newCart = [...prev];
+        newCart[exIndex].quantity += quantity;
+        return newCart;
+      }
       return [
         ...prev,
         {
@@ -196,19 +212,24 @@ export function CustomerMenu({
           name: product.name,
           price: Number(product.price),
           taxRate: Number(product.taxRate),
-          quantity: 1,
+          quantity: quantity,
+          notes: notes,
         },
       ];
     });
   };
 
-  const updateQty = (productId: string, qty: number) => {
+  const updateQty = (productId: string, qty: number, notes?: string) => {
     if (qty <= 0)
-      setCart((prev) => prev.filter((i) => i.productId !== productId));
+      setCart((prev) =>
+        prev.filter((i) => !(i.productId === productId && i.notes === notes)),
+      );
     else
       setCart((prev) =>
         prev.map((i) =>
-          i.productId === productId ? { ...i, quantity: qty } : i,
+          i.productId === productId && i.notes === notes
+            ? { ...i, quantity: qty }
+            : i,
         ),
       );
   };
@@ -237,9 +258,12 @@ export function CustomerMenu({
       .finally(() => setHistoryLoading(false));
   };
 
-  const filteredProducts = products.filter(
-    (p) => !selectedCat || p.category.id === selectedCat,
-  );
+  const filteredProducts = products.filter((p) => {
+    const matchesCat = !selectedCat || p.category.id === selectedCat;
+    const matchesSearch =
+      !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
 
   const styleVars = {
     bg: "var(--color-bg)",
@@ -290,7 +314,7 @@ export function CustomerMenu({
                 color: styleVars.text,
               }}
             >
-              Café Odoo
+              The Purple Cup Cafe
             </div>
             <div style={{ fontSize: "12px", color: styleVars.muted }}>
               {floorName} · Table {tableNumber}
@@ -366,23 +390,29 @@ export function CustomerMenu({
           )}
           <button
             id="view-menu-btn"
-            onClick={() => setView("menu")}
+            onClick={() => {
+              setView("menu");
+              setSelectedProduct(null);
+            }}
             style={{
               padding: "7px 12px",
               borderRadius: "8px",
               fontSize: "12px",
               fontWeight: "600",
               background:
-                view === "menu"
+                view === "menu" || view === "product"
                   ? "rgba(var(--color-primary-rgb),0.2)"
                   : "transparent",
-              border: `1px solid ${view === "menu" ? "var(--color-primary)" : styleVars.border}`,
-              color: view === "menu" ? "var(--color-primary)" : styleVars.muted,
+              border: `1px solid ${view === "menu" || view === "product" ? "var(--color-primary)" : styleVars.border}`,
+              color:
+                view === "menu" || view === "product"
+                  ? "var(--color-primary)"
+                  : styleVars.muted,
             }}
           >
             Menu
           </button>
-          {cartCount > 0 && view === "menu" && (
+          {cartCount > 0 && (view === "menu" || view === "product") && (
             <button
               id="show-cart-btn"
               onClick={() => setShowCart(true)}
@@ -771,6 +801,53 @@ export function CustomerMenu({
       {/* ===== MENU VIEW ===== */}
       {view === "menu" && (
         <div style={{ paddingBottom: "120px" }}>
+          {/* Search Bar */}
+          <div style={{ padding: "12px 16px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                background: "rgba(255,255,255,0.05)",
+                border: `1px solid ${styleVars.border}`,
+                borderRadius: "12px",
+                padding: "8px 14px",
+              }}
+            >
+              <span style={{ marginRight: "8px", color: styleVars.muted }}>
+                🔍
+              </span>
+              <input
+                type="text"
+                placeholder="Search product"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: styleVars.text,
+                  outline: "none",
+                  width: "100%",
+                  fontSize: "14px",
+                }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: styleVars.muted,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Category tabs */}
           <div
             style={{
@@ -835,6 +912,12 @@ export function CustomerMenu({
               return (
                 <div
                   key={product.id}
+                  onClick={() => {
+                    setSelectedProduct(product);
+                    setDetailQty(1);
+                    setDetailOptions({ extras: [] });
+                    setView("product");
+                  }}
                   style={{
                     background: styleVars.card,
                     border: `1px solid ${product.category.color ? product.category.color + "33" : styleVars.border}`,
@@ -843,6 +926,7 @@ export function CustomerMenu({
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    cursor: "pointer",
                   }}
                 >
                   <div style={{ flex: 1 }}>
@@ -882,78 +966,21 @@ export function CustomerMenu({
                     </div>
                   </div>
                   <div style={{ marginLeft: "12px", flexShrink: 0 }}>
-                    {inCart ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        <button
-                          id={`dec-${product.id}`}
-                          onClick={() =>
-                            updateQty(product.id, inCart.quantity - 1)
-                          }
-                          style={{
-                            width: "30px",
-                            height: "30px",
-                            borderRadius: "8px",
-                            background: styleVars.border,
-                            color: styleVars.text,
-                            padding: 0,
-                            justifyContent: "center",
-                            border: "none",
-                          }}
-                        >
-                          <Minus size={13} />
-                        </button>
-                        <span
-                          style={{
-                            fontWeight: "700",
-                            fontSize: "16px",
-                            minWidth: "20px",
-                            textAlign: "center",
-                          }}
-                        >
-                          {inCart.quantity}
-                        </span>
-                        <button
-                          id={`inc-${product.id}`}
-                          onClick={() => addToCart(product)}
-                          style={{
-                            width: "30px",
-                            height: "30px",
-                            borderRadius: "8px",
-                            background:
-                              product.category.color || styleVars.primary,
-                            color: "#fff",
-                            padding: 0,
-                            justifyContent: "center",
-                            border: "none",
-                          }}
-                        >
-                          <Plus size={13} />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        id={`add-${product.id}`}
-                        onClick={() => addToCart(product)}
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "10px",
-                          background: `${product.category.color || styleVars.primary}22`,
-                          color: product.category.color || styleVars.primary,
-                          border: `1px solid ${product.category.color ? product.category.color + "44" : styleVars.primary + "44"}`,
-                          padding: 0,
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Plus size={18} />
-                      </button>
-                    )}
+                    <div
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        borderRadius: "10px",
+                        background: `${product.category.color || styleVars.primary}22`,
+                        color: product.category.color || styleVars.primary,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "24px",
+                      }}
+                    >
+                      🍽️
+                    </div>
                   </div>
                 </div>
               );
@@ -962,49 +989,357 @@ export function CustomerMenu({
         </div>
       )}
 
-      {/* Cart bottom bar */}
-      {cartCount > 0 && view === "menu" && !showCart && (
+      {/* ===== PRODUCT DETAIL VIEW ===== */}
+      {view === "product" && selectedProduct && (
         <div
           style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: "16px",
-            background: "rgba(15,15,19,0.98)",
-            backdropFilter: "blur(12px)",
-            borderTop: `1px solid ${styleVars.border}`,
+            paddingBottom: "120px",
+            background: styleVars.bg,
+            minHeight: "100vh",
           }}
         >
-          <button
-            id="view-cart-bottom"
-            onClick={() => setShowCart(true)}
-            style={{
-              width: "100%",
-              padding: "15px",
-              borderRadius: "12px",
-              background: `linear-gradient(135deg, ${styleVars.primary}, var(--color-primary-dark))`,
-              color: "#fff",
-              fontWeight: "700",
-              fontSize: "16px",
-              justifyContent: "space-between",
-              boxShadow: "0 8px 24px rgba(var(--color-primary-rgb),0.3)",
-            }}
+          {/* Header with Back button */}
+          <div
+            style={{ padding: "16px", display: "flex", alignItems: "center" }}
           >
-            <span
+            <button
+              onClick={() => setView("menu")}
               style={{
-                background: "rgba(0,0,0,0.2)",
-                padding: "2px 10px",
-                borderRadius: "999px",
+                background: "rgba(255,255,255,0.1)",
+                border: "none",
+                color: styleVars.text,
+                padding: "8px 12px",
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "14px",
               }}
             >
-              {cartCount}
-            </span>
-            <span>View Cart</span>
-            <span>{formatCurrency(cartTotal + cartTax)}</span>
-          </button>
+              <span style={{ fontSize: "16px" }}>←</span> Back
+            </button>
+          </div>
+
+          {/* Large Image Area */}
+          <div
+            style={{
+              width: "100%",
+              height: "250px",
+              background: `linear-gradient(135deg, ${selectedProduct.category.color || styleVars.primary}44, ${styleVars.bg})`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "80px",
+            }}
+          >
+            🍽️
+          </div>
+
+          <div style={{ padding: "20px 16px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: "8px",
+              }}
+            >
+              <h1 style={{ fontSize: "24px", fontWeight: "800", margin: 0 }}>
+                {selectedProduct.name}
+              </h1>
+              <div
+                style={{
+                  fontSize: "20px",
+                  fontWeight: "700",
+                  color: selectedProduct.category.color || styleVars.primary,
+                }}
+              >
+                {formatCurrency(Number(selectedProduct.price))}
+              </div>
+            </div>
+            {selectedProduct.description && (
+              <p
+                style={{
+                  color: styleVars.muted,
+                  fontSize: "14px",
+                  margin: "0 0 20px 0",
+                  lineHeight: 1.5,
+                }}
+              >
+                {selectedProduct.description}
+              </p>
+            )}
+
+            {/* Dummy Variants (Radio) */}
+            <div style={{ marginBottom: "24px" }}>
+              <div style={{ display: "flex", gap: "20px" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontSize: "15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="variant"
+                    value="Regular"
+                    checked={
+                      detailOptions.variant === "Regular" ||
+                      !detailOptions.variant
+                    }
+                    onChange={(e) =>
+                      setDetailOptions({
+                        ...detailOptions,
+                        variant: e.target.value,
+                      })
+                    }
+                    style={{ accentColor: styleVars.primary }}
+                  />
+                  Regular
+                </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    fontSize: "15px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="variant"
+                    value="Large"
+                    checked={detailOptions.variant === "Large"}
+                    onChange={(e) =>
+                      setDetailOptions({
+                        ...detailOptions,
+                        variant: e.target.value,
+                      })
+                    }
+                    style={{ accentColor: styleVars.primary }}
+                  />
+                  Large
+                </label>
+              </div>
+            </div>
+
+            {/* Dummy Add-ons (Checkboxes) */}
+            <div style={{ marginBottom: "24px" }}>
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "700",
+                  marginBottom: "12px",
+                }}
+              >
+                Extras
+              </h3>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                {["Extra Cheese", "Extra Sauce", "Spicy"].map((ext) => (
+                  <label
+                    key={ext}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      fontSize: "15px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={detailOptions.extras.includes(ext)}
+                      onChange={(e) => {
+                        if (e.target.checked)
+                          setDetailOptions({
+                            ...detailOptions,
+                            extras: [...detailOptions.extras, ext],
+                          });
+                        else
+                          setDetailOptions({
+                            ...detailOptions,
+                            extras: detailOptions.extras.filter(
+                              (x) => x !== ext,
+                            ),
+                          });
+                      }}
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        accentColor: styleVars.primary,
+                      }}
+                    />
+                    {ext}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Add to Cart Bar */}
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: "rgba(15,15,19,0.98)",
+              borderTop: `1px solid ${styleVars.border}`,
+              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "16px",
+              zIndex: 40,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <span
+                style={{
+                  fontSize: "13px",
+                  color: styleVars.muted,
+                  fontWeight: "600",
+                }}
+              >
+                QTY
+              </span>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
+                <button
+                  onClick={() => setDetailQty(Math.max(1, detailQty - 1))}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "8px",
+                    background: styleVars.border,
+                    color: styleVars.text,
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Minus size={14} />
+                </button>
+                <span
+                  style={{
+                    fontWeight: "700",
+                    fontSize: "16px",
+                    minWidth: "20px",
+                    textAlign: "center",
+                  }}
+                >
+                  {detailQty}
+                </span>
+                <button
+                  onClick={() => setDetailQty(detailQty + 1)}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "8px",
+                    background: styleVars.border,
+                    color: styleVars.text,
+                    border: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                let notesStr = detailOptions.variant || "Regular";
+                if (detailOptions.extras.length > 0)
+                  notesStr += ` + ${detailOptions.extras.join(", ")}`;
+                addToCart(selectedProduct, detailQty, notesStr);
+                setView("menu");
+              }}
+              style={{
+                flex: 1,
+                background: `linear-gradient(135deg, ${styleVars.primary}, var(--color-primary-dark))`,
+                color: "#fff",
+                border: "none",
+                borderRadius: "12px",
+                padding: "14px",
+                fontWeight: "700",
+                fontSize: "15px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                boxShadow: "0 8px 24px rgba(var(--color-primary-rgb),0.3)",
+              }}
+            >
+              <span>Add to Cart</span>
+              <span>
+                {formatCurrency(Number(selectedProduct.price) * detailQty)}
+              </span>
+            </button>
+          </div>
         </div>
       )}
+
+      {/* Cart bottom bar */}
+      {cartCount > 0 &&
+        (view === "menu" || view === "product") &&
+        !showCart && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: "16px",
+              background: "rgba(15,15,19,0.98)",
+              backdropFilter: "blur(12px)",
+              borderTop: `1px solid ${styleVars.border}`,
+            }}
+          >
+            <button
+              id="view-cart-bottom"
+              onClick={() => setShowCart(true)}
+              style={{
+                width: "100%",
+                padding: "15px",
+                borderRadius: "12px",
+                background: `linear-gradient(135deg, ${styleVars.primary}, var(--color-primary-dark))`,
+                color: "#fff",
+                fontWeight: "700",
+                fontSize: "16px",
+                justifyContent: "space-between",
+                boxShadow: "0 8px 24px rgba(var(--color-primary-rgb),0.3)",
+              }}
+            >
+              <span
+                style={{
+                  background: "rgba(0,0,0,0.2)",
+                  padding: "2px 10px",
+                  borderRadius: "999px",
+                }}
+              >
+                {cartCount}
+              </span>
+              <span>View Cart</span>
+              <span>{formatCurrency(cartTotal + cartTax)}</span>
+            </button>
+          </div>
+        )}
 
       {/* Cart sheet */}
       {showCart && (
@@ -1056,7 +1391,7 @@ export function CustomerMenu({
             </div>
             {cart.map((item) => (
               <div
-                key={item.productId}
+                key={`${item.productId}-${item.notes || ""}`}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -1072,13 +1407,26 @@ export function CustomerMenu({
                   <div style={{ fontSize: "13px", color: styleVars.primary }}>
                     {formatCurrency(item.price)} ea.
                   </div>
+                  {item.notes && (
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: styleVars.muted,
+                        marginTop: "2px",
+                      }}
+                    >
+                      {item.notes}
+                    </div>
+                  )}
                 </div>
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 >
                   <button
                     id={`cart-dec-${item.productId}`}
-                    onClick={() => updateQty(item.productId, item.quantity - 1)}
+                    onClick={() =>
+                      updateQty(item.productId, item.quantity - 1, item.notes)
+                    }
                     style={{
                       width: "28px",
                       height: "28px",
@@ -1095,7 +1443,9 @@ export function CustomerMenu({
                   <span style={{ fontWeight: "700" }}>{item.quantity}</span>
                   <button
                     id={`cart-inc-${item.productId}`}
-                    onClick={() => updateQty(item.productId, item.quantity + 1)}
+                    onClick={() =>
+                      updateQty(item.productId, item.quantity + 1, item.notes)
+                    }
                     style={{
                       width: "28px",
                       height: "28px",

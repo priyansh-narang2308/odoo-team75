@@ -49,6 +49,7 @@ export function TablesManager() {
     gridHeight: 8,
   });
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  const [deleteTableId, setDeleteTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     tableNumber: "",
     seats: 4,
@@ -629,6 +630,10 @@ export function TablesManager() {
         }
       },
     });
+  };
+
+  const deactivateTable = (id: string) => {
+    setDeleteTableId(id);
   };
 
   const selectedFloor = floors.find((f) => f.id === selectedFloorId);

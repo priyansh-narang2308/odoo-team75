@@ -203,6 +203,8 @@ export function POSTerminal() {
   const [promoInput, setPromoInput] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
+  const [showPromoModal, setShowPromoModal] = useState(false);
+  const [autoPromotions, setAutoPromotions] = useState<any[]>([]);
 
   const handleApplyPromo = async () => {
     if (!promoInput.trim()) return;
@@ -219,6 +221,7 @@ export function POSTerminal() {
       if (data.ok && data.data) {
         setAppliedPromotion(data.data);
         setPromoInput("");
+        setShowPromoModal(false);
       } else {
         setPromoError(data.error || "Invalid promo code");
       }
@@ -313,9 +316,9 @@ export function POSTerminal() {
         );
         const data = await res.json();
         if (data.ok && data.data && data.data.length > 0) {
-          setAppliedPromotion(data.data[0]); // Apply the best auto-promotion
+          setAutoPromotions(data.data);
         } else {
-          setAppliedPromotion(null);
+          setAutoPromotions([]);
         }
       } catch (err) {
         console.error("Failed to fetch promotions", err);
@@ -324,6 +327,41 @@ export function POSTerminal() {
 
     fetchPromotions();
   }, [items, setAppliedPromotion]);
+
+  // Broadcast cart to customer-facing display in real-time
+  useEffect(() => {
+    if (!socket) return;
+    if (items.length > 0) {
+      socket.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_SYNC, {
+        items: items.map((i) => ({
+          productId: i.productId,
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+          imageUrl: i.imageUrl,
+        })),
+        subtotal: subtotal(),
+        taxTotal: taxTotal(),
+        discountTotal: discountTotal(),
+        grandTotal: grandTotal(),
+        storeName: "The Purple Cup Cafe",
+      });
+    } else {
+      socket.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_IDLE, {});
+    }
+  }, [items, socket, subtotal, taxTotal, discountTotal, grandTotal]);
+
+  // Emit checkout event to customer display when payment dialog opens
+  useEffect(() => {
+    if (!socket) return;
+    if (showCheckout) {
+      socket.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_CHECKOUT, {
+        grandTotal: grandTotal(),
+        upiId: null,
+        storeName: "The Purple Cup Cafe",
+      });
+    }
+  }, [showCheckout, socket, grandTotal]);
 
   // Real-time updates for table occupancy status
   useEffect(() => {
@@ -2228,28 +2266,91 @@ export function POSTerminal() {
                 <ChevronLeft size={15} />
               </button>
 
-              {Array.from({ length: totalMenuPages }).map((_, i) => (
-                <button
-                  key={i}
-                  id={`menu-page-${i}`}
-                  onClick={() => setMenuPage(i)}
-                  style={{
-                    minWidth: "32px",
-                    height: "32px",
-                    borderRadius: "8px",
-                    border: `1px solid ${menuPage === i ? "var(--color-primary)" : "var(--color-border)"}`,
-                    background:
-                      menuPage === i ? "var(--color-primary)" : "transparent",
-                    color: menuPage === i ? "#fff" : "var(--color-text-muted)",
-                    fontSize: "13px",
-                    fontWeight: menuPage === i ? "700" : "500",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  overflowX: "auto",
+                  paddingBottom: "4px",
+                  flexWrap: "nowrap",
+                  maxWidth: "100%",
+                }}
+              >
+                {(() => {
+                  const pages = [];
+                  const maxVisible = 5;
+                  let startPage = Math.max(
+                    0,
+                    menuPage - Math.floor(maxVisible / 2),
+                  );
+                  let endPage = startPage + maxVisible - 1;
+
+                  if (endPage >= totalMenuPages) {
+                    endPage = totalMenuPages - 1;
+                    startPage = Math.max(0, endPage - maxVisible + 1);
+                  }
+
+                  if (startPage > 0) {
+                    pages.push(0);
+                    if (startPage > 1) pages.push(-1);
+                  }
+
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(i);
+                  }
+
+                  if (endPage < totalMenuPages - 1) {
+                    if (endPage < totalMenuPages - 2) pages.push(-2);
+                    pages.push(totalMenuPages - 1);
+                  }
+
+                  return pages.map((pageIndex, idx) => {
+                    if (pageIndex < 0) {
+                      return (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          style={{
+                            color: "var(--color-text-muted)",
+                            padding: "0 4px",
+                            alignSelf: "flex-end",
+                            paddingBottom: "4px",
+                          }}
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        key={`page-${pageIndex}`}
+                        id={`menu-page-${pageIndex}`}
+                        onClick={() => setMenuPage(pageIndex)}
+                        style={{
+                          minWidth: "32px",
+                          height: "32px",
+                          flexShrink: 0,
+                          borderRadius: "8px",
+                          border: `1px solid ${menuPage === pageIndex ? "var(--color-primary)" : "var(--color-border)"}`,
+                          background:
+                            menuPage === pageIndex
+                              ? "var(--color-primary)"
+                              : "transparent",
+                          color:
+                            menuPage === pageIndex
+                              ? "#fff"
+                              : "var(--color-text-muted)",
+                          fontSize: "13px",
+                          fontWeight: menuPage === pageIndex ? "700" : "500",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        {pageIndex + 1}
+                      </button>
+                    );
+                  });
+                })()}
+              </div>
 
               <button
                 id="menu-page-next"
@@ -2638,59 +2739,39 @@ export function POSTerminal() {
                   <span>-{formatCurrency(discountTotal())}</span>
                 </div>
               ) : (
-                <div
+                <button
+                  onClick={() => setShowPromoModal(true)}
                   style={{
+                    padding: "12px 16px",
+                    borderRadius: "10px",
+                    background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+                    color: "#fff",
+                    border: "none",
+                    cursor: "pointer",
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    width: "100%",
+                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 6px 16px rgba(37, 99, 235, 0.35)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(37, 99, 235, 0.25)";
                   }}
                 >
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    <input
-                      type="text"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      placeholder="Promo Code"
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid var(--color-border)",
-                        background: "var(--color-bg)",
-                        color: "var(--color-text)",
-                        fontSize: "13px",
-                        textTransform: "uppercase",
-                      }}
-                      onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
-                    />
-                    <button
-                      onClick={handleApplyPromo}
-                      disabled={isApplyingPromo || !promoInput.trim()}
-                      style={{
-                        padding: "8px 16px",
-                        borderRadius: "8px",
-                        background: "var(--color-primary)",
-                        color: "white",
-                        border: "none",
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        cursor:
-                          isApplyingPromo || !promoInput.trim()
-                            ? "not-allowed"
-                            : "pointer",
-                        opacity:
-                          isApplyingPromo || !promoInput.trim() ? 0.7 : 1,
-                      }}
-                    >
-                      {isApplyingPromo ? "..." : "Apply"}
-                    </button>
-                  </div>
-                  {promoError && (
-                    <span style={{ color: "#ef4444", fontSize: "11px" }}>
-                      {promoError}
-                    </span>
-                  )}
-                </div>
+                  <Percent size={16} />
+                  Apply Coupon / Promo Code
+                </button>
               )}
               <div
                 style={{
@@ -2810,6 +2891,10 @@ export function POSTerminal() {
               } as any);
             }
             clearCart();
+            // Notify customer display of success
+            if (socket) {
+              socket.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_SUCCESS, {});
+            }
           }}
           onClose={() => setShowCheckout(false)}
         />
@@ -3034,6 +3119,170 @@ export function POSTerminal() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {/* Promo Modal */}
+      {showPromoModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+          onClick={(e) =>
+            e.target === e.currentTarget && setShowPromoModal(false)
+          }
+        >
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "16px",
+              padding: "28px",
+              width: "100%",
+              maxWidth: "400px",
+              animation: "fadeIn 0.2s ease",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
+                Coupon Code
+              </h3>
+              <button
+                onClick={() => setShowPromoModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--color-text)",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
+              <input
+                type="text"
+                placeholder="Enter Coupon Code"
+                value={promoInput}
+                onChange={(e) => {
+                  setPromoInput(e.target.value);
+                  if (appliedPromotion) setAppliedPromotion(null); // Clear radio if typing
+                }}
+                style={{
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-bg)",
+                  color: "var(--color-text)",
+                  textTransform: "uppercase",
+                }}
+              />
+
+              {autoPromotions.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "12px",
+                    marginTop: "10px",
+                    padding: "16px",
+                    background: "var(--color-bg-overlay)",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "13px",
+                      color: "var(--color-text-faint)",
+                    }}
+                  >
+                    Select it will apply on order
+                  </p>
+                  {autoPromotions.map((promo) => (
+                    <label
+                      key={promo.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="auto_promo"
+                        checked={appliedPromotion?.id === promo.id}
+                        onChange={() => {
+                          setAppliedPromotion(promo);
+                          setPromoInput(""); // Clear manual input
+                        }}
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          accentColor: "var(--color-primary)",
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: "600",
+                          color: "var(--color-text)",
+                        }}
+                      >
+                        {promo.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {promoError && (
+                <span style={{ color: "#ef4444", fontSize: "12px" }}>
+                  {promoError}
+                </span>
+              )}
+
+              <button
+                onClick={() => {
+                  if (promoInput.trim()) {
+                    handleApplyPromo();
+                  } else {
+                    setShowPromoModal(false);
+                  }
+                }}
+                style={{
+                  background: "var(--color-primary)",
+                  color: "white",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "none",
+                  fontWeight: "600",
+                  marginTop: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                {isApplyingPromo ? "Applying..." : "Enter"}
+              </button>
+            </div>
           </div>
         </div>
       )}

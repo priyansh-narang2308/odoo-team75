@@ -1,4 +1,4 @@
-# Café Odoo — Actor Workflows
+# The Purple Cup Cafe — Actor Workflows
 
 To master your hackathon pitch, you need to be able to explain the platform from the perspective of the **4 core actors**. Here is exactly how each person interacts with the system.
 

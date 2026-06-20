@@ -265,7 +265,7 @@ export function PaymentDialog({
         key: rzpData.data.keyId,
         amount: rzpData.data.amount,
         currency: "INR",
-        name: "Café Odoo",
+        name: "The Purple Cup Cafe",
         description: `Order #POS`,
         order_id: rzpData.data.orderId,
         theme: { color: "var(--color-primary)" },

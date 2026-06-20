@@ -552,7 +552,7 @@ export function StaffManager() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  placeholder="e.g. Riya Sharma"
+                  placeholder="John Doe"
                   required
                 />
               </div>

@@ -35,7 +35,7 @@ export function calculateChange(
 export function buildUPILink(
   upiId: string,
   amount: number,
-  name: string = "Cafe Odoo",
+  name: string = "The Purple Cup Cafe",
 ): string {
   const params = new URLSearchParams({
     pa: upiId,
