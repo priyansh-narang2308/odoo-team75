@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   if (!rl.success) {
     return NextResponse.json(
       { ok: false, error: "Too many payment attempts. Try again later." },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
@@ -34,7 +34,10 @@ export async function POST(request: Request, { params }: RouteParams) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const body = await request.json();
@@ -42,7 +45,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: parsed.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -64,20 +67,23 @@ export async function POST(request: Request, { params }: RouteParams) {
   });
 
   if (!order) {
-    return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Order not found" },
+      { status: 404 },
+    );
   }
 
   if (order.status === "PAID") {
     return NextResponse.json(
       { ok: false, error: "Order already paid" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (order.status === "CANCELLED") {
     return NextResponse.json(
       { ok: false, error: "Cannot pay a cancelled order" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -89,7 +95,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   if (!paymentMethod) {
     return NextResponse.json(
       { ok: false, error: "Payment method not available" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -140,7 +146,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     io.to("admin").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
 
     if (order.tableId) {
-      io.to(`table:${order.tableId}`).emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
+      io.to(`table:${order.tableId}`).emit(
+        SOCKET_EVENTS.PAYMENT_RECEIVED,
+        paymentPayload,
+      );
       // Update table status
       io.to("cashier").emit(SOCKET_EVENTS.TABLE_STATUS, {
         tableId: order.tableId,

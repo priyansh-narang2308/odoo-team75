@@ -21,13 +21,11 @@ async function recalculateOrder(orderId: string) {
     include: { product: true },
   });
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + Number(item.lineTotal),
-    0
-  );
+  const subtotal = items.reduce((sum, item) => sum + Number(item.lineTotal), 0);
   const taxTotal = items.reduce(
-    (sum, item) => sum + Number(item.lineTotal) * (Number(item.product.taxRate) / 100),
-    0
+    (sum, item) =>
+      sum + Number(item.lineTotal) * (Number(item.product.taxRate) / 100),
+    0,
   );
   const grandTotal = subtotal + taxTotal;
 
@@ -49,7 +47,10 @@ export async function GET(request: Request, { params }: RouteParams) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const order = await prisma.order.findUnique({
@@ -71,13 +72,19 @@ export async function GET(request: Request, { params }: RouteParams) {
   });
 
   if (!order) {
-    return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Order not found" },
+      { status: 404 },
+    );
   }
 
   // Customers can only view their own orders
   if (customerSession && !staffSession) {
     if (order.customerId !== customerSession.customerId) {
-      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+      return NextResponse.json(
+        { ok: false, error: "Forbidden" },
+        { status: 403 },
+      );
     }
   }
 
@@ -91,7 +98,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const body = await request.json();
@@ -99,7 +109,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) {
-    return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Order not found" },
+      { status: 404 },
+    );
   }
 
   const updated = await prisma.order.update({
@@ -134,7 +147,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     io.to("admin").emit(SOCKET_EVENTS.ORDER_STATUS, payload);
 
     if (updated.tableId) {
-      io.to(`table:${updated.tableId}`).emit(SOCKET_EVENTS.ORDER_STATUS, payload);
+      io.to(`table:${updated.tableId}`).emit(
+        SOCKET_EVENTS.ORDER_STATUS,
+        payload,
+      );
     }
 
     // When order is SENT → emit to kitchen
@@ -167,7 +183,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const staffSession = await getServerSession(authOptions);
   if (!staffSession || !["ADMIN", "CASHIER"].includes(staffSession.user.role)) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const order = await prisma.order.update({
