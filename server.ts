@@ -90,6 +90,24 @@ app.prepare().then(() => {
       console.log(`[Socket.IO] ${socket.id} joined admin`);
     });
 
+    // ---- Customer Display Relay ----
+    // Broadcast customer display events to ALL connected clients
+    socket.on(SOCKET_EVENTS.CUSTOMER_DISPLAY_SYNC, (data: unknown) => {
+      socket.broadcast.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_SYNC, data);
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOMER_DISPLAY_CHECKOUT, (data: unknown) => {
+      socket.broadcast.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_CHECKOUT, data);
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOMER_DISPLAY_SUCCESS, (data: unknown) => {
+      socket.broadcast.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_SUCCESS, data);
+    });
+
+    socket.on(SOCKET_EVENTS.CUSTOMER_DISPLAY_IDLE, (data: unknown) => {
+      socket.broadcast.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_IDLE, data);
+    });
+
     socket.on("disconnect", () => {
       console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
     });

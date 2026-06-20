@@ -18,6 +18,8 @@ import {
   CreditCard,
   Receipt,
   Menu,
+  Smartphone,
+  Monitor,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import Image from "next/image";
@@ -45,6 +47,16 @@ const navItems = {
       href: "/admin/payment-methods",
       label: "Payment Methods",
       icon: CreditCard,
+    },
+    {
+      href: "/admin/mobile-order",
+      label: "Mobile Order",
+      icon: Smartphone,
+    },
+    {
+      href: "/customer-display",
+      label: "Customer Display",
+      icon: Monitor,
     },
   ],
   CASHIER: [

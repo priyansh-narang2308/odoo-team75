@@ -22,6 +22,12 @@ export const SOCKET_EVENTS = {
   // ---- Payments ----
   PAYMENT_RECEIVED: "payment:received", // Payment confirmed
 
+  // ---- Customer Display ----
+  CUSTOMER_DISPLAY_SYNC: "customer_display:sync", // Sync cart items to customer display
+  CUSTOMER_DISPLAY_CHECKOUT: "customer_display:checkout", // Show UPI QR / payment screen
+  CUSTOMER_DISPLAY_SUCCESS: "customer_display:success", // Show "Thank you" screen
+  CUSTOMER_DISPLAY_IDLE: "customer_display:idle", // Reset to welcome screen
+
   // ---- Notifications ----
   NOTIFY_TOAST: "notify:toast", // Flash notification to specific room
   BILL_REQUESTED: "table:bill_request", // Customer taps "Request Bill"
