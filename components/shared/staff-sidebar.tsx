@@ -18,11 +18,10 @@ import {
   CreditCard,
   Receipt,
   Menu,
-  X,
-  Calendar,
+  Smartphone,
+  Monitor,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
-import Image from "next/image";
 
 interface Props {
   userName: string;

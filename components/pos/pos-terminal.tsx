@@ -25,6 +25,7 @@ import {
   MapPin,
   ShoppingBag,
   Calendar,
+  Percent,
 } from "lucide-react";
 import { ReservationsManager } from "@/components/admin/reservations-manager";
 import { useSocket } from "@/components/providers/socket-provider";
@@ -909,7 +910,8 @@ export function POSTerminal() {
 
                           const isReserved =
                             table.status === "RESERVED" ||
-                            (table.reservations && table.reservations.length > 0);
+                            (table.reservations &&
+                              table.reservations.length > 0);
 
                           let statusColor = "#10b981"; // green
                           let statusBg = "rgba(16, 185, 129, 0.12)";
@@ -1300,7 +1302,8 @@ export function POSTerminal() {
                         display: "flex",
                         flexDirection: "column",
                         gap: "18px",
-                        boxShadow: "var(--shadow-lg), 0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+                        boxShadow:
+                          "var(--shadow-lg), 0 20px 25px -5px rgba(0, 0, 0, 0.5)",
                       }}
                     >
                       <div
@@ -1345,8 +1348,15 @@ export function POSTerminal() {
                         </button>
                       </div>
 
-                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                        {reservedTable.reservations && reservedTable.reservations.length > 0 ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                        }}
+                      >
+                        {reservedTable.reservations &&
+                        reservedTable.reservations.length > 0 ? (
                           reservedTable.reservations.map((res) => {
                             const resDate = new Date(res.reserveTime);
                             return (
@@ -1362,31 +1372,71 @@ export function POSTerminal() {
                                   gap: "8px",
                                 }}
                               >
-                                <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--color-text)" }}>
+                                <div
+                                  style={{
+                                    fontSize: "14px",
+                                    fontWeight: "700",
+                                    color: "var(--color-text)",
+                                  }}
+                                >
                                   Customer: {res.customerName}
                                 </div>
                                 {res.phone && (
-                                  <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
+                                  <div
+                                    style={{
+                                      fontSize: "13px",
+                                      color: "var(--color-text-muted)",
+                                    }}
+                                  >
                                     Phone: {res.phone}
                                   </div>
                                 )}
-                                <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
+                                <div
+                                  style={{
+                                    fontSize: "13px",
+                                    color: "var(--color-text-muted)",
+                                  }}
+                                >
                                   Guests: {res.seats} seats
                                 </div>
-                                <div style={{ fontSize: "13px", color: "var(--color-primary)", fontWeight: "600" }}>
-                                  Time: {String(resDate.getHours()).padStart(2, '0')}:{String(resDate.getMinutes()).padStart(2, '0')} ({resDate.toLocaleDateString()})
+                                <div
+                                  style={{
+                                    fontSize: "13px",
+                                    color: "var(--color-primary)",
+                                    fontWeight: "600",
+                                  }}
+                                >
+                                  Time:{" "}
+                                  {String(resDate.getHours()).padStart(2, "0")}:
+                                  {String(resDate.getMinutes()).padStart(
+                                    2,
+                                    "0",
+                                  )}{" "}
+                                  ({resDate.toLocaleDateString()})
                                 </div>
                               </div>
                             );
                           })
                         ) : (
-                          <p style={{ margin: 0, fontSize: "14px", color: "var(--color-text-muted)" }}>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "var(--color-text-muted)",
+                            }}
+                          >
                             No active reservations listed for this table.
                           </p>
                         )}
                       </div>
 
-                      <div style={{ display: "flex", gap: "12px", marginTop: "6px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "12px",
+                          marginTop: "6px",
+                        }}
+                      >
                         <button
                           type="button"
                           onClick={() => {
@@ -1397,7 +1447,8 @@ export function POSTerminal() {
                           style={{
                             flex: 1,
                             padding: "10px",
-                            background: "linear-gradient(135deg, var(--color-primary), #a06030)",
+                            background:
+                              "linear-gradient(135deg, var(--color-primary), #a06030)",
                             color: "#fff",
                             border: "none",
                             borderRadius: "10px",
@@ -1406,8 +1457,12 @@ export function POSTerminal() {
                             cursor: "pointer",
                             transition: "opacity 0.2s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-                          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.opacity = "0.9")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.opacity = "1")
+                          }
                         >
                           Start Order
                         </button>
@@ -1516,8 +1571,14 @@ export function POSTerminal() {
               gap: "6px",
               transition: "background-color 0.2s",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-bg-overlay)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--color-bg-elevated)")}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                "var(--color-bg-overlay)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor =
+                "var(--color-bg-elevated)")
+            }
           >
             ← Back to Terminal
           </button>
@@ -1562,7 +1623,10 @@ export function POSTerminal() {
                 gap: "10px",
               }}
             >
-              ☕ <span className="gradient-text">The Purple Cup Cafe Terminal</span>
+              ☕{" "}
+              <span className="gradient-text">
+                The Purple Cup Cafe Terminal
+              </span>
             </h1>
             <p
               style={{
@@ -1662,11 +1726,13 @@ export function POSTerminal() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.border = "1px solid var(--color-primary)";
+                  e.currentTarget.style.border =
+                    "1px solid var(--color-primary)";
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.border = "1px solid var(--color-border)";
+                  e.currentTarget.style.border =
+                    "1px solid var(--color-border)";
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
@@ -1725,11 +1791,13 @@ export function POSTerminal() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.border = "1px solid var(--color-primary)";
+                  e.currentTarget.style.border =
+                    "1px solid var(--color-primary)";
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.border = "1px solid var(--color-border)";
+                  e.currentTarget.style.border =
+                    "1px solid var(--color-border)";
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
@@ -1919,7 +1987,6 @@ export function POSTerminal() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-
             <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
               Menu
             </h2>

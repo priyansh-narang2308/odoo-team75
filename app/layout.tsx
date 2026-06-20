@@ -3,7 +3,6 @@ import { Inter, Caveat } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "react-hot-toast";
-import { ThemeProvider } from "@/components/shared/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -38,21 +37,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${caveat.variable} h-full`}
+      className={`${inter.variable} ${caveat.variable} h-full light`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <SessionProvider>
-            {children}
-            <Toaster position="top-center" />
-          </SessionProvider>
-        </ThemeProvider>
+        <SessionProvider>
+          {children}
+          <Toaster position="top-center" />
+        </SessionProvider>
       </body>
     </html>
   );

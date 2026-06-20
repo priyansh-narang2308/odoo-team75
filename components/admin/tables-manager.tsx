@@ -1,7 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, QrCode, Download, Trash2, X, Layers, Move, Printer, Link, FileText } from "lucide-react";
+import {
+  Plus,
+  QrCode,
+  Download,
+  Trash2,
+  X,
+  Layers,
+  Move,
+  Printer,
+  Link,
+  FileText,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -62,7 +74,10 @@ export function TablesManager() {
     confirmVariant?: "danger" | "primary";
     onConfirm: () => void;
   } | null>(null);
-  const [expandedQr, setExpandedQr] = useState<{ url: string; tableNumber: string } | null>(null);
+  const [expandedQr, setExpandedQr] = useState<{
+    url: string;
+    tableNumber: string;
+  } | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -79,12 +94,16 @@ export function TablesManager() {
       setLoading(false);
 
       // Concurrent auto-generation of missing QR codes on load
-      const missing = tablesData.filter((tab: Table) => tab.isActive && !tab.qrToken);
+      const missing = tablesData.filter(
+        (tab: Table) => tab.isActive && !tab.qrToken,
+      );
       if (missing.length > 0) {
         Promise.all(
           missing.map(async (tab: Table) => {
             try {
-              const res = await fetch(`/api/tables/${tab.id}/qr`, { method: "POST" });
+              const res = await fetch(`/api/tables/${tab.id}/qr`, {
+                method: "POST",
+              });
               const resJson = await res.json();
               if (resJson.ok) {
                 setTables((prev) =>
@@ -100,9 +119,12 @@ export function TablesManager() {
                 );
               }
             } catch (err) {
-              console.error(`Failed to auto-generate QR for table ${tab.tableNumber}:`, err);
+              console.error(
+                `Failed to auto-generate QR for table ${tab.tableNumber}:`,
+                err,
+              );
             }
-          })
+          }),
         );
       }
     });
@@ -404,7 +426,9 @@ export function TablesManager() {
   // Export PDF of all QRs for current floor (4 per page)
   const handleExportPDF = () => {
     if (!selectedFloor) return;
-    const activeTables = tables.filter((t) => t.floorId === selectedFloor.id && t.isActive);
+    const activeTables = tables.filter(
+      (t) => t.floorId === selectedFloor.id && t.isActive,
+    );
     if (activeTables.length === 0) {
       toast.error("No tables in layout to export!");
       return;
@@ -413,12 +437,17 @@ export function TablesManager() {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       let content = "";
-      const sortedTables = activeTables.sort((a, b) => a.tableNumber.localeCompare(b.tableNumber, undefined, { numeric: true, sensitivity: "base" }));
-      
+      const sortedTables = activeTables.sort((a, b) =>
+        a.tableNumber.localeCompare(b.tableNumber, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
+
       for (let i = 0; i < sortedTables.length; i += 4) {
         const chunk = sortedTables.slice(i, i + 4);
         content += `<div class="page"><div class="grid">`;
-        chunk.forEach(table => {
+        chunk.forEach((table) => {
           const qrUrl = `/qrcodes/table-${table.tableNumber.replace(/\\s+/g, "-")}-${table.id}.png`;
           content += `
             <div class="qr-card">
@@ -576,40 +605,14 @@ export function TablesManager() {
     }
   };
 
-  // Deactivate/Delete table
-  const deactivateTable = async (id: string) => {
-    setConfirmDialog({
-      isOpen: true,
-      title: "Remove Table",
-      message: "Are you sure you want to remove this table? This will remove it from the active layout.",
-      confirmVariant: "danger",
-      onConfirm: async () => {
-        try {
-          const res = await fetch(`/api/tables/${id}`, { method: "DELETE" });
-          const data = await res.json();
-          if (data.ok) {
-            setTables((prev) => prev.filter((t) => t.id !== id));
-            setSelectedTable(null);
-            toast.success("Table removed from layout.");
-          } else {
-            toast.error(data.error || "Failed to remove table");
-          }
-        } catch {
-          toast.error("Failed to remove table");
-        } finally {
-          setConfirmDialog(null);
-        }
-      },
-    });
-  };
-
   // Clear layout of active floor
   const handleClearFloorLayout = async () => {
     if (!selectedFloorId) return;
     setConfirmDialog({
       isOpen: true,
       title: "Clear Floor Layout",
-      message: "Are you sure you want to clear all tables on this floor layout? This cannot be undone.",
+      message:
+        "Are you sure you want to clear all tables on this floor layout? This cannot be undone.",
       confirmVariant: "danger",
       onConfirm: async () => {
         try {
@@ -618,7 +621,9 @@ export function TablesManager() {
           });
           const data = await res.json();
           if (data.ok) {
-            setTables((prev) => prev.filter((t) => t.floorId !== selectedFloorId));
+            setTables((prev) =>
+              prev.filter((t) => t.floorId !== selectedFloorId),
+            );
             toast.success("Floor layout cleared successfully!");
           } else {
             toast.error(data.error || "Failed to clear floor layout");
@@ -1130,7 +1135,9 @@ export function TablesManager() {
                   alignItems: "center",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "16px" }}
+                >
                   <div>
                     <h2
                       style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}
@@ -1164,10 +1171,12 @@ export function TablesManager() {
                       transition: "all 0.2s",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(239, 68, 68, 0.2)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+                      e.currentTarget.style.backgroundColor =
+                        "rgba(239, 68, 68, 0.1)";
                     }}
                   >
                     <Trash2 size={13} /> Clear Layout
@@ -1495,11 +1504,25 @@ export function TablesManager() {
             }}
           >
             <div>
-              <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800", color: "var(--color-text)" }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "20px",
+                  fontWeight: "800",
+                  color: "var(--color-text)",
+                }}
+              >
                 Table QR Codes — {selectedFloor.name}
               </h2>
-              <p style={{ margin: "4px 0 0", color: "var(--color-text-muted)", fontSize: "13px" }}>
-                Scan or print these QR codes for self-ordering at each table. Only tables currently placed in the layout are shown.
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  color: "var(--color-text-muted)",
+                  fontSize: "13px",
+                }}
+              >
+                Scan or print these QR codes for self-ordering at each table.
+                Only tables currently placed in the layout are shown.
               </p>
             </div>
 
@@ -1520,19 +1543,30 @@ export function TablesManager() {
                 transition: "all 0.2s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(var(--color-primary-rgb), 0.2)";
+                e.currentTarget.style.background =
+                  "rgba(var(--color-primary-rgb), 0.2)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(var(--color-primary-rgb), 0.1)";
+                e.currentTarget.style.background =
+                  "rgba(var(--color-primary-rgb), 0.1)";
               }}
             >
               <FileText size={15} /> Export PDF (All QRs)
             </button>
           </div>
 
-          {tables.filter((t) => t.floorId === selectedFloor.id && t.isActive).length === 0 ? (
-            <div style={{ padding: "32px", textAlign: "center", color: "var(--color-text-muted)", fontSize: "14px" }}>
-              No tables placed on this floor yet. Drag templates onto the layout above to add tables.
+          {tables.filter((t) => t.floorId === selectedFloor.id && t.isActive)
+            .length === 0 ? (
+            <div
+              style={{
+                padding: "32px",
+                textAlign: "center",
+                color: "var(--color-text-muted)",
+                fontSize: "14px",
+              }}
+            >
+              No tables placed on this floor yet. Drag templates onto the layout
+              above to add tables.
             </div>
           ) : (
             <div
@@ -1544,7 +1578,12 @@ export function TablesManager() {
             >
               {tables
                 .filter((t) => t.floorId === selectedFloor.id && t.isActive)
-                .sort((a, b) => a.tableNumber.localeCompare(b.tableNumber, undefined, { numeric: true, sensitivity: "base" }))
+                .sort((a, b) =>
+                  a.tableNumber.localeCompare(b.tableNumber, undefined, {
+                    numeric: true,
+                    sensitivity: "base",
+                  }),
+                )
                 .map((table) => {
                   const qrUrl = `/qrcodes/table-${table.tableNumber.replace(/\s+/g, "-")}-${table.id}.png`;
                   return (
@@ -1568,13 +1607,17 @@ export function TablesManager() {
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "translateY(-6px)";
-                        e.currentTarget.style.boxShadow = "0 12px 30px rgba(200, 121, 65, 0.25)";
-                        e.currentTarget.style.borderColor = "var(--color-primary)";
+                        e.currentTarget.style.boxShadow =
+                          "0 12px 30px rgba(200, 121, 65, 0.25)";
+                        e.currentTarget.style.borderColor =
+                          "var(--color-primary)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.2)";
-                        e.currentTarget.style.borderColor = "rgba(200, 121, 65, 0.15)";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 15px rgba(0,0,0,0.2)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(200, 121, 65, 0.15)";
                       }}
                     >
                       {/* Top ribbon decoration */}
@@ -1585,11 +1628,19 @@ export function TablesManager() {
                           left: 0,
                           right: 0,
                           height: "4px",
-                          background: "linear-gradient(90deg, var(--color-primary), var(--color-primary-hover))",
+                          background:
+                            "linear-gradient(90deg, var(--color-primary), var(--color-primary-hover))",
                         }}
                       />
 
-                      <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
                         <div style={{ textAlign: "left" }}>
                           <span
                             style={{
@@ -1602,7 +1653,13 @@ export function TablesManager() {
                           >
                             Table {table.tableNumber}
                           </span>
-                          <span style={{ fontSize: "12px", color: "var(--color-text-muted)", fontWeight: "500" }}>
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "var(--color-text-muted)",
+                              fontWeight: "500",
+                            }}
+                          >
                             {table.seats} seats
                           </span>
                         </div>
@@ -1612,9 +1669,19 @@ export function TablesManager() {
                             fontWeight: "750",
                             padding: "2px 8px",
                             borderRadius: "999px",
-                            background: table.status === "RESERVED" ? "rgba(245, 158, 11, 0.15)" : table.status === "OCCUPIED" ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.15)",
-                            color: table.status === "RESERVED" ? "#f59e0b" : table.status === "OCCUPIED" ? "#ef4444" : "#10b981",
-                            border: `1px solid ${table.status === "RESERVED" ? "rgba(245, 158, 11, 0.3)" : table.status === "OCCUPIED" ? "rgba(239, 68, 68, 0.3)" : "rgba(16, 185, 129, 0.3)"}`
+                            background:
+                              table.status === "RESERVED"
+                                ? "rgba(245, 158, 11, 0.15)"
+                                : table.status === "OCCUPIED"
+                                  ? "rgba(239, 68, 68, 0.15)"
+                                  : "rgba(16, 185, 129, 0.15)",
+                            color:
+                              table.status === "RESERVED"
+                                ? "#f59e0b"
+                                : table.status === "OCCUPIED"
+                                  ? "#ef4444"
+                                  : "#10b981",
+                            border: `1px solid ${table.status === "RESERVED" ? "rgba(245, 158, 11, 0.3)" : table.status === "OCCUPIED" ? "rgba(239, 68, 68, 0.3)" : "rgba(16, 185, 129, 0.3)"}`,
                           }}
                         >
                           {table.status}
@@ -1640,7 +1707,12 @@ export function TablesManager() {
                           <img
                             src={qrUrl}
                             alt={`QR Code for Table ${table.tableNumber}`}
-                            onClick={() => setExpandedQr({ url: qrUrl, tableNumber: table.tableNumber })}
+                            onClick={() =>
+                              setExpandedQr({
+                                url: qrUrl,
+                                tableNumber: table.tableNumber,
+                              })
+                            }
                             style={{
                               width: "100%",
                               height: "100%",
@@ -1663,23 +1735,36 @@ export function TablesManager() {
                             }}
                           >
                             {generatingQR === table.id ? (
-                              <div style={{
-                                width: "24px",
-                                height: "24px",
-                                border: "2px solid #cbd5e1",
-                                borderTopColor: "var(--color-primary)",
-                                borderRadius: "50%",
-                                animation: "spin 1s linear infinite"
-                              }} />
+                              <div
+                                style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  border: "2px solid #cbd5e1",
+                                  borderTopColor: "var(--color-primary)",
+                                  borderRadius: "50%",
+                                  animation: "spin 1s linear infinite",
+                                }}
+                              />
                             ) : (
                               <QrCode size={24} color="#64748b" />
                             )}
-                            <span>{generatingQR === table.id ? "Generating..." : "No QR Code"}</span>
+                            <span>
+                              {generatingQR === table.id
+                                ? "Generating..."
+                                : "No QR Code"}
+                            </span>
                           </div>
                         )}
                       </div>
 
-                      <div style={{ display: "flex", width: "100%", gap: "8px", marginTop: "4px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          width: "100%",
+                          gap: "8px",
+                          marginTop: "4px",
+                        }}
+                      >
                         {table.qrToken ? (
                           <>
                             <a
@@ -1688,7 +1773,8 @@ export function TablesManager() {
                               style={{
                                 flex: 1,
                                 padding: "8px 8px",
-                                background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
+                                background:
+                                  "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
                                 border: "none",
                                 color: "#fff",
                                 borderRadius: "10px",
@@ -1699,7 +1785,8 @@ export function TablesManager() {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 gap: "6px",
-                                boxShadow: "0 2px 8px rgba(var(--color-primary-rgb), 0.2)",
+                                boxShadow:
+                                  "0 2px 8px rgba(var(--color-primary-rgb), 0.2)",
                                 transition: "all 0.2s",
                               }}
                               onMouseEnter={(e) => {
@@ -1714,7 +1801,9 @@ export function TablesManager() {
                             <button
                               type="button"
                               onClick={() => {
-                                navigator.clipboard.writeText(`${window.location.origin}/order/${table.qrToken}`);
+                                navigator.clipboard.writeText(
+                                  `${window.location.origin}/order/${table.qrToken}`,
+                                );
                                 toast.success("Ordering link copied!");
                               }}
                               style={{
@@ -1730,10 +1819,12 @@ export function TablesManager() {
                                 justifyContent: "center",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+                                e.currentTarget.style.background =
+                                  "rgba(255,255,255,0.12)";
                               }}
                               onMouseLeave={(e) => {
-                                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                                e.currentTarget.style.background =
+                                  "rgba(255,255,255,0.06)";
                               }}
                               title="Copy Ordering Link"
                             >
@@ -1741,7 +1832,9 @@ export function TablesManager() {
                             </button>
                             <button
                               type="button"
-                              onClick={() => generateQR(table.id, table.tableNumber)}
+                              onClick={() =>
+                                generateQR(table.id, table.tableNumber)
+                              }
                               disabled={generatingQR === table.id}
                               style={{
                                 padding: "8px 10px",
@@ -1755,12 +1848,16 @@ export function TablesManager() {
                                 transition: "all 0.2s",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = "var(--color-primary)";
-                                e.currentTarget.style.color = "var(--color-primary)";
+                                e.currentTarget.style.borderColor =
+                                  "var(--color-primary)";
+                                e.currentTarget.style.color =
+                                  "var(--color-primary)";
                               }}
                               onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                                e.currentTarget.style.color = "var(--color-text-muted)";
+                                e.currentTarget.style.borderColor =
+                                  "rgba(255,255,255,0.1)";
+                                e.currentTarget.style.color =
+                                  "var(--color-text-muted)";
                               }}
                             >
                               {generatingQR === table.id ? "..." : "Regen"}
@@ -1769,12 +1866,15 @@ export function TablesManager() {
                         ) : (
                           <button
                             type="button"
-                            onClick={() => generateQR(table.id, table.tableNumber)}
+                            onClick={() =>
+                              generateQR(table.id, table.tableNumber)
+                            }
                             disabled={generatingQR === table.id}
                             style={{
                               width: "100%",
                               padding: "10px 16px",
-                              background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
+                              background:
+                                "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
                               color: "#fff",
                               border: "none",
                               borderRadius: "10px",
@@ -1788,7 +1888,9 @@ export function TablesManager() {
                             }}
                           >
                             <QrCode size={14} />
-                            {generatingQR === table.id ? "Generating..." : "Generate QR"}
+                            {generatingQR === table.id
+                              ? "Generating..."
+                              : "Generate QR"}
                           </button>
                         )}
                       </div>
@@ -2131,8 +2233,6 @@ export function TablesManager() {
                 />
               </div>
 
-
-
               {/* QR Generation */}
               <div
                 style={{
@@ -2249,70 +2349,94 @@ export function TablesManager() {
               </div>
             </form>
 
-            {selectedTable.reservations && selectedTable.reservations.length > 0 && (
-              <div
-                style={{
-                  marginTop: "24px",
-                  borderTop: "1px solid var(--color-border)",
-                  paddingTop: "18px",
-                }}
-              >
-                <h4
-                  style={{
-                    margin: "0 0 12px 0",
-                    fontSize: "14px",
-                    fontWeight: "800",
-                    color: "var(--color-primary)",
-                  }}
-                >
-                  📅 Active Reservations
-                </h4>
+            {selectedTable.reservations &&
+              selectedTable.reservations.length > 0 && (
                 <div
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                    maxHeight: "180px",
-                    overflowY: "auto",
-                    paddingRight: "4px",
+                    marginTop: "24px",
+                    borderTop: "1px solid var(--color-border)",
+                    paddingTop: "18px",
                   }}
                 >
-                  {selectedTable.reservations.map((res: any) => {
-                    const resDate = new Date(res.reserveTime);
-                    return (
-                      <div
-                        key={res.id}
-                        style={{
-                          background: "var(--color-bg-overlay)",
-                          border: "1px solid var(--color-border)",
-                          borderRadius: "10px",
-                          padding: "12px",
-                          fontSize: "13px",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "6px",
-                        }}
-                      >
-                        <div style={{ fontWeight: "700", color: "var(--color-text)" }}>
-                          Customer: {res.customerName}
-                        </div>
-                        {res.phone && (
-                          <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
-                            Phone: {res.phone}
+                  <h4
+                    style={{
+                      margin: "0 0 12px 0",
+                      fontSize: "14px",
+                      fontWeight: "800",
+                      color: "var(--color-primary)",
+                    }}
+                  >
+                    📅 Active Reservations
+                  </h4>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      maxHeight: "180px",
+                      overflowY: "auto",
+                      paddingRight: "4px",
+                    }}
+                  >
+                    {selectedTable.reservations.map((res: any) => {
+                      const resDate = new Date(res.reserveTime);
+                      return (
+                        <div
+                          key={res.id}
+                          style={{
+                            background: "var(--color-bg-overlay)",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: "10px",
+                            padding: "12px",
+                            fontSize: "13px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "700",
+                              color: "var(--color-text)",
+                            }}
+                          >
+                            Customer: {res.customerName}
                           </div>
-                        )}
-                        <div style={{ color: "var(--color-text-muted)", fontSize: "12px" }}>
-                          Guests: {res.seats} seats
+                          {res.phone && (
+                            <div
+                              style={{
+                                color: "var(--color-text-muted)",
+                                fontSize: "12px",
+                              }}
+                            >
+                              Phone: {res.phone}
+                            </div>
+                          )}
+                          <div
+                            style={{
+                              color: "var(--color-text-muted)",
+                              fontSize: "12px",
+                            }}
+                          >
+                            Guests: {res.seats} seats
+                          </div>
+                          <div
+                            style={{
+                              color: "var(--color-primary)",
+                              fontWeight: "700",
+                              fontSize: "12px",
+                            }}
+                          >
+                            Time: {String(resDate.getHours()).padStart(2, "0")}:
+                            {String(resDate.getMinutes()).padStart(2, "0")} (
+                            {resDate.toLocaleDateString()})
+                          </div>
                         </div>
-                        <div style={{ color: "var(--color-primary)", fontWeight: "700", fontSize: "12px" }}>
-                          Time: {String(resDate.getHours()).padStart(2, '0')}:{String(resDate.getMinutes()).padStart(2, '0')} ({resDate.toLocaleDateString()})
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       )}
@@ -2476,7 +2600,13 @@ export function TablesManager() {
             >
               {confirmDialog.message}
             </p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setConfirmDialog(null)}
@@ -2491,8 +2621,14 @@ export function TablesManager() {
                   fontSize: "13px",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--color-bg-elevated)")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--color-bg-overlay)")}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    "var(--color-bg-elevated)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor =
+                    "var(--color-bg-overlay)")
+                }
               >
                 Cancel
               </button>
@@ -2577,15 +2713,32 @@ export function TablesManager() {
                 cursor: "pointer",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.2)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+              }
             >
               <X size={16} />
             </button>
-            <h3 style={{ margin: "0 0 24px", fontSize: "24px", fontWeight: "800", color: "var(--color-primary)" }}>
+            <h3
+              style={{
+                margin: "0 0 24px",
+                fontSize: "24px",
+                fontWeight: "800",
+                color: "var(--color-primary)",
+              }}
+            >
               Table {expandedQr.tableNumber}
             </h3>
-            <div style={{ background: "#fff", padding: "16px", borderRadius: "16px" }}>
+            <div
+              style={{
+                background: "#fff",
+                padding: "16px",
+                borderRadius: "16px",
+              }}
+            >
               <img
                 src={expandedQr.url}
                 alt={`QR for Table ${expandedQr.tableNumber}`}
@@ -2603,7 +2756,8 @@ export function TablesManager() {
               style={{
                 marginTop: "24px",
                 padding: "12px 24px",
-                background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover, #a06030))",
+                background:
+                  "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover, #a06030))",
                 color: "#fff",
                 borderRadius: "12px",
                 fontSize: "14px",
