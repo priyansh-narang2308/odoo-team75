@@ -18,7 +18,7 @@ export default async function HomePage() {
     }
   }
 
-  // Otherwise route staff to the correct dashboard (port 3000)
+  // Otherwise route staff to the correct dashboard (port 3001)
   const session = await getServerSession(authOptions);
 
   if (!session) {
