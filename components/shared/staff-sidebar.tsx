@@ -18,7 +18,6 @@ import {
   CreditCard,
   Receipt,
   Menu,
-  X,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import Image from "next/image";
@@ -74,7 +73,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // Close sidebar on route change on mobile
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
@@ -158,7 +156,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
         <ThemeToggle sidebar={false} />
       </div>
 
-      {/* Mobile Overlay */}
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
@@ -190,7 +187,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
           top: 0,
         }}
       >
-        {/* Logo */}
         <div
           className="desktop-logo-area"
           style={{
@@ -206,22 +202,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Image
-                  src="/CafePOS.png"
-                  alt="CafePOS Logo"
-                  width={44}
-                  height={44}
-                  style={{ objectFit: "contain", height: "auto" }}
-                />
-              </div>
               <div>
                 <div
                   className="font-caveat gradient-text"
@@ -245,7 +225,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
           </div>
         </div>
 
-        {/* Nav */}
         <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
           {items.map((item) => {
             const Icon = item.icon;
@@ -299,7 +278,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
           })}
         </nav>
 
-        {/* User */}
         <div
           style={{
             padding: "16px",

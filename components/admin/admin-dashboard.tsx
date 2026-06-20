@@ -32,6 +32,7 @@ import {
   Legend,
 } from "recharts";
 import { format, parseISO } from "date-fns";
+import Link from "next/link";
 
 interface KPIs {
   ordersToday: number;
@@ -466,6 +467,7 @@ export function AdminDashboard() {
             icon: ShoppingBag,
             color: "var(--color-primary)",
             subtitle: `${kpis?.totalOrdersPeriod ?? 0} in period`,
+            href: "/admin/orders",
           },
           {
             id: "kpi-revenue-today",
@@ -476,6 +478,7 @@ export function AdminDashboard() {
             subtitle: kpis
               ? `${formatCurrency(kpis.totalRevenuePeriod)} in period`
               : "",
+            href: "/admin/orders",
           },
           {
             id: "kpi-active-tables",
@@ -484,6 +487,7 @@ export function AdminDashboard() {
             icon: Table2,
             color: "#3b82f6",
             subtitle: "Currently serving",
+            href: "/admin/tables",
           },
           {
             id: "kpi-avg-order",
@@ -497,14 +501,17 @@ export function AdminDashboard() {
             icon: TrendingUp,
             color: "#8b5cf6",
             subtitle: "Per order in period",
+            href: "/admin/orders",
           },
         ].map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div
+            <Link
               key={kpi.id}
+              href={kpi.href}
               className="card"
               style={{
+                textDecoration: "none",
                 padding: "20px",
                 display: "flex",
                 flexDirection: "column",
@@ -512,6 +519,15 @@ export function AdminDashboard() {
                 border: `1px solid ${kpi.color}22`,
                 position: "relative",
                 overflow: "hidden",
+                transition: "transform 0.2s, box-shadow 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow = `0 10px 25px ${kpi.color}20`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
               <div
@@ -572,7 +588,7 @@ export function AdminDashboard() {
                   {kpi.subtitle}
                 </p>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -733,11 +749,12 @@ export function AdminDashboard() {
       >
         {/* Top Products */}
         <div className="card">
-          <h3
-            style={{ margin: "0 0 16px", fontSize: "16px", fontWeight: "700" }}
-          >
-            Top Selling Products
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>
+              Top Selling Products
+            </h3>
+            <Link href="/admin/menu" style={{ fontSize: "13px", color: "var(--color-primary)", textDecoration: "none", fontWeight: "600" }}>View Menu →</Link>
+          </div>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
           >
@@ -808,11 +825,12 @@ export function AdminDashboard() {
 
         {/* Top Categories Table */}
         <div className="card">
-          <h3
-            style={{ margin: "0 0 16px", fontSize: "16px", fontWeight: "700" }}
-          >
-            Category Performance
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>
+              Category Performance
+            </h3>
+            <Link href="/admin/categories" style={{ fontSize: "13px", color: "var(--color-primary)", textDecoration: "none", fontWeight: "600" }}>View Categories →</Link>
+          </div>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
           >
@@ -875,9 +893,12 @@ export function AdminDashboard() {
 
       {/* Top Orders Table */}
       <div className="card" style={{ padding: "20px", marginBottom: "40px" }}>
-        <h3 style={{ margin: "0 0 20px", fontSize: "18px", fontWeight: "700" }}>
-          Highest-Value Orders
-        </h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
+            Highest-Value Orders
+          </h3>
+          <Link href="/admin/orders" style={{ padding: "8px 16px", borderRadius: "8px", background: "var(--color-primary)", color: "#fff", textDecoration: "none", fontSize: "13px", fontWeight: "600" }}>View All Orders</Link>
+        </div>
         <div style={{ overflowX: "auto" }}>
           <table
             style={{
