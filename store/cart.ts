@@ -126,10 +126,16 @@ export const useCartStore = create<CartState>()(
       },
 
       taxTotal: () => {
-        return get().items.reduce(
+        const state = get();
+        const originalTax = state.items.reduce(
           (sum, i) => sum + i.price * i.quantity * (i.taxRate / 100),
           0,
         );
+        const sub = state.subtotal();
+        if (sub === 0) return 0;
+        const discount = state.discountTotal();
+        const proportion = Math.max(0, (sub - discount) / sub);
+        return originalTax * proportion;
       },
 
       discountTotal: () => {
@@ -140,8 +146,8 @@ export const useCartStore = create<CartState>()(
       grandTotal: () => {
         const state = get();
         const total =
-          state.subtotal() + state.taxTotal() - state.discountTotal();
-        return Math.max(0, total); // Ensure it doesn't go below 0
+          state.subtotal() - state.discountTotal() + state.taxTotal();
+        return Math.max(0, total);
       },
     }),
     {

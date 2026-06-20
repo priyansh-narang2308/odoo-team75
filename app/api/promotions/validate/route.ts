@@ -57,12 +57,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // Calculate discount
   let discountAmount = 0;
   if (promo.discountType === "PERCENTAGE") {
     discountAmount = (orderTotal * Number(promo.discountValue)) / 100;
   } else {
-    discountAmount = Math.min(Number(promo.discountValue), orderTotal);
+    if (Number(promo.discountValue)>orderTotal) {
+  return NextResponse.json(
+        {
+          ok: false,
+          error: `Order total must be at least ₹${Number(promo.discountValue).toFixed(2)} to use this fixed discount`,
+        },
+        { status: 400 },
+      );
+    }
+  discountAmount = Number(promo.discountValue);
   }
 
   return NextResponse.json({

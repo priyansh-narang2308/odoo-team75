@@ -42,6 +42,7 @@ export function CustomersManager() {
   );
   const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
   const [isSaving, setIsSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   const fetchCustomers = () => {
     setLoading(true);
@@ -93,7 +94,29 @@ export function CustomersManager() {
     );
   }, [filteredCustomers, currentPage]);
 
+  const validatePhone = (value: string) => {
+    if (!value.trim()) {
+      setPhoneError("");
+      return true;
+    }
+    const digits = value.replace(/\D/g, "");
+    if (digits.length < 10 || digits.length > 15) {
+      setPhoneError("Phone number must contain between 10 and 15 digits.");
+      return false;
+    }
+    const phoneRegex = /^\+?[0-9\s\-()]+$/;
+    if (!phoneRegex.test(value)) {
+      setPhoneError(
+        "Invalid characters. Use digits, spaces, hyphens, parentheses, or +.",
+      );
+      return false;
+    }
+    setPhoneError("");
+    return true;
+  };
+
   const handleOpenModal = (customer?: CustomerRecord) => {
+    setPhoneError("");
     if (customer) {
       setEditingCustomer(customer);
       setFormData({
@@ -110,6 +133,11 @@ export function CustomersManager() {
 
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validatePhone(formData.phone)) {
+      return;
+    }
+
     setIsSaving(true);
 
     try {
@@ -817,19 +845,36 @@ export function CustomersManager() {
                 <input
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData({ ...formData, phone: val });
+                    validatePhone(val);
+                  }}
                   placeholder="e.g. +91 9876543210"
                   style={{
                     width: "100%",
                     padding: "10px 12px",
                     borderRadius: "8px",
-                    border: "1px solid var(--color-border)",
+                    border: phoneError
+                      ? "1px solid #ef4444"
+                      : "1px solid var(--color-border)",
                     background: "var(--color-bg-elevated)",
                     color: "var(--color-text)",
+                    outline: "none",
                   }}
                 />
+                {phoneError && (
+                  <p
+                    style={{
+                      color: "#ef4444",
+                      fontSize: "12px",
+                      marginTop: "4px",
+                      margin: "4px 0 0",
+                    }}
+                  >
+                    {phoneError}
+                  </p>
+                )}
               </div>
 
               <div style={{ marginTop: "8px" }}>

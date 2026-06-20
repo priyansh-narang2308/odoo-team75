@@ -69,6 +69,33 @@ export async function POST(request: Request) {
       );
     }
 
+    if (phone) {
+      const cleanPhone = phone.trim();
+      if (cleanPhone) {
+        const digits = cleanPhone.replace(/\D/g, "");
+        if (digits.length < 10 || digits.length > 15) {
+          return NextResponse.json(
+            {
+       ok: false,
+    error: "Phone number must contain between 10 and 15 digits",
+            },
+      { status: 400 },
+          );
+        }
+  const phoneRegex = /^\+?[0-9\s\-()]+$/;
+    if (!phoneRegex.test(cleanPhone)) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Phone number contains invalid characters. Use digits, spaces, hyphens, parentheses, or a leading +.",
+            },
+            { status: 400 },
+          );
+        }
+      }
+    }
+
     // Check if email exists
     const existing = await prisma.customer.findUnique({
       where: { email },

@@ -135,7 +135,11 @@ export default function SessionDashboard() {
     if (activeSession.orders) {
       activeSession.orders.forEach((order) => {
         order.payments.forEach((payment) => {
-          if (payment.method.type === "CASH") {
+          if (
+            payment.method.type === "CASH" ||
+            payment.method.type === "UPI" ||
+            payment.method.type === "CARD"
+          ) {
             expected += Number(payment.amount);
           }
         });

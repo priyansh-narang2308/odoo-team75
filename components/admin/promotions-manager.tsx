@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Percent, IndianRupee } from "lucide-react";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 interface Promotion {
   id: string;
@@ -629,10 +630,35 @@ export function PromotionsManager() {
                   <input
                     id="promo-expires"
                     type="date"
-                    value={form.validUntil}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, validUntil: e.target.value }))
+                    min={
+                      new Date(
+                        new Date().getTime() -
+                          new Date().getTimezoneOffset() * 60000,
+                      )
+                        .toISOString()
+                        .split("T")[0]
                     }
+                    value={form.validUntil}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const todayStr = new Date(
+                        new Date().getTime() -
+                          new Date().getTimezoneOffset() * 60000,
+                      )
+                        .toISOString()
+                        .split("T")[0];
+                      console.log(
+                        new Date(
+                          new Date().getTime() -
+                            new Date().getTimezoneOffset() * 60000,
+                        ).toISOString(),
+                      );
+                      if (value && value < todayStr) {
+                        toast.error("Expiration date cannot be in the past");
+                        return;
+                      }
+                      setForm((f) => ({ ...f, validUntil: value }));
+                    }}
                   />
                 </div>
               </div>

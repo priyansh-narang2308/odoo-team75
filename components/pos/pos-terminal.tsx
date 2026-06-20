@@ -212,7 +212,7 @@ export function POSTerminal() {
       } else {
         setPromoError(data.error || "Invalid promo code");
       }
-    } catch (err) {
+    } catch {
       setPromoError("Failed to apply promo code");
     } finally {
       setIsApplyingPromo(false);

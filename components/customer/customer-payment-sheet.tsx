@@ -63,6 +63,7 @@ export function CustomerPaymentSheet({
   tableId,
   cart,
   grandTotal: originalGrandTotal,
+  subtotal,
   taxTotal,
   customerName,
   onSuccess,
@@ -83,10 +84,13 @@ export function CustomerPaymentSheet({
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [autoPromos, setAutoPromos] = useState<AppliedPromo[]>([]);
 
-  // Computed final total with discount
   const discountAmount = appliedPromo?.discountAmount ?? 0;
-  const grandTotal = Math.max(0, originalGrandTotal - discountAmount);
-
+  const taxProportion = Math.max(
+    0,
+    subtotal > 0 ? (subtotal - discountAmount) / subtotal : 0,
+  );
+  const effectiveTaxTotal = taxTotal * taxProportion;
+  const grandTotal = Math.max(0, subtotal - discountAmount + effectiveTaxTotal);
   const sv = {
     bg: "var(--color-bg)",
     card: "var(--color-bg-elevated)",
@@ -478,7 +482,7 @@ export function CustomerPaymentSheet({
             }}
           >
             <span>Tax</span>
-            <span>{formatCurrency(taxTotal)}</span>
+            <span>{formatCurrency(effectiveTaxTotal)}</span>
           </div>
           {discountAmount > 0 && (
             <div
