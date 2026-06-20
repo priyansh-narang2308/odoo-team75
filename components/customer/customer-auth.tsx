@@ -238,7 +238,7 @@ export function CustomerAuth({
                 <input
                   id="reg-name"
                   style={inputStyle}
-                  placeholder="e.g. Aryan"
+                  placeholder="John Doe"
                   {...registerForm.register("name")}
                 />
                 {registerForm.formState.errors.name && (

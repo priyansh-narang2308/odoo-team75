@@ -136,370 +136,519 @@ export default function LoginPage() {
       style={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background:
-          "linear-gradient(135deg, #0f0f13 0%, #1a1a24 50%, #0f0f13 100%)",
-        padding: "24px",
-        position: "relative",
-        overflow: "hidden",
+        background: "#F3F4F6",
       }}
     >
-      {/* Background accent */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "600px",
-          height: "600px",
-          background:
-            "radial-gradient(circle, rgba(200, 121, 65, 0.08) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+      <style>{`
+        .split-right {
+          display: none;
+        }
+        .split-left {
+          flex: 1;
+        }
+        @media (min-width: 800px) {
+          .split-right {
+            display: block;
+            flex: 1.2;
+            background-image: url('/right.png');
+            background-size: 75%;
+            background-position: right 25%;
+            background-repeat: no-repeat;
+          }
+          .split-left {
+            flex: 1;
+          }
+        }
+      `}</style>
 
       <div
+        className="split-left"
         style={{
-          width: "100%",
-          maxWidth: "400px",
-          animation: "fadeIn 0.4s ease both",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          paddingLeft: "10%",
+          position: "relative",
+          overflowY: "auto",
         }}
-        className="animate-fade-in"
       >
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-            }}
-          >
-            <Image
-              src="/CafePOS.png"
-              alt="CafePOS Logo"
-              width={90}
-              height={90}
-              style={{ objectFit: "contain", height: "auto" }}
-            />
-          </div>
-          <h1
-            className="font-caveat"
-            style={{
-              fontSize: "42px",
-              fontWeight: "700",
-              margin: "0 0 8px",
-              background: "linear-gradient(135deg, #f0eee8, #c87941)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Café Odoo POS
-          </h1>
-          <p style={{ color: "#8a8a9a", fontSize: "14px", margin: 0 }}>
-            Staff Portal —{" "}
-            {mode === "login" ? "Sign in to continue" : "Create your account"}
-          </p>
-        </div>
-
-        {/* Login / Signup Toggle Tabs */}
         <div
           style={{
-            display: "flex",
-            gap: "4px",
-            marginBottom: "16px",
-            background: "rgba(26, 26, 36, 0.6)",
-            borderRadius: "10px",
-            padding: "4px",
-            border: "1px solid rgba(42, 42, 58, 0.5)",
+            position: "absolute",
+            top: "20%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "600px",
+            height: "600px",
+            background:
+              "radial-gradient(circle, rgba(113, 75, 103, 0.08) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "420px",
+            marginTop: "6vh",
+            animation: "fadeIn 0.4s ease both",
           }}
         >
-          {(["login", "signup"] as const).map((tab) => (
-            <button
-              key={tab}
-              id={`tab-${tab}`}
-              type="button"
-              onClick={() => setMode(tab)}
+          <div style={{ textAlign: "center", marginBottom: "40px" }}>
+            <div
               style={{
-                flex: 1,
-                padding: "10px",
-                borderRadius: "8px",
-                border: "none",
-                background:
-                  mode === tab ? "rgba(200, 121, 65, 0.15)" : "transparent",
-                color: mode === tab ? "#c87941" : "#8a8a9a",
-                fontSize: "14px",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
+                fontSize: "32px",
+                fontWeight: "800",
+                color: "#111827",
+                letterSpacing: "-0.03em",
               }}
             >
-              {tab === "login" ? "Sign In" : "Sign Up"}
-            </button>
-          ))}
-        </div>
+              Staff Portal
+            </div>
 
-        {/* Card */}
-        <div className="card" style={{ padding: "32px" }}>
-          {mode === "login" ? (
-            /* ── LOGIN FORM ── */
-            <form
-              onSubmit={handleLoginSubmit(onLogin)}
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "16px",
+                color: "#6b7280",
+              }}
             >
-              {/* Email */}
-              <div>
-                <label htmlFor="email">Email Address</label>
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="staff@cafeodoo.com"
-                  {...loginRegister("email")}
-                />
-                {loginErrors.email && (
-                  <p
-                    style={{
-                      color: "#ef4444",
-                      fontSize: "12px",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {loginErrors.email.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  {...loginRegister("password")}
-                />
-                {loginErrors.password && (
-                  <p
-                    style={{
-                      color: "#ef4444",
-                      fontSize: "12px",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {loginErrors.password.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Submit */}
-              <button
-                id="login-submit"
-                type="submit"
-                disabled={loading}
-                style={{
-                  background: loading
-                    ? "#5a3a20"
-                    : "linear-gradient(135deg, #c87941, #a06030)",
-                  color: "#fff",
-                  padding: "12px",
-                  borderRadius: "10px",
-                  fontWeight: "600",
-                  fontSize: "15px",
-                  justifyContent: "center",
-                  boxShadow: loading
-                    ? "none"
-                    : "0 4px 16px rgba(200, 121, 65, 0.3)",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {loading ? "Signing in..." : "Sign In"}
-              </button>
-            </form>
-          ) : (
-            /* ── SIGNUP FORM ── */
-            <form
-              onSubmit={handleSignupSubmit(onSignup)}
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-            >
-              {/* Name */}
-              <div>
-                <label htmlFor="signup-name">Full Name</label>
-                <input
-                  id="signup-name"
-                  type="text"
-                  autoComplete="name"
-                  placeholder="e.g. Riya Sharma"
-                  {...signupRegister("name")}
-                />
-                {signupErrors.name && (
-                  <p
-                    style={{
-                      color: "#ef4444",
-                      fontSize: "12px",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {signupErrors.name.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="signup-email">Email Address</label>
-                <input
-                  id="signup-email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  {...signupRegister("email")}
-                />
-                {signupErrors.email && (
-                  <p
-                    style={{
-                      color: "#ef4444",
-                      fontSize: "12px",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {signupErrors.email.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="signup-password">Password</label>
-                <input
-                  id="signup-password"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="Min. 8 characters"
-                  {...signupRegister("password")}
-                />
-                {signupErrors.password && (
-                  <p
-                    style={{
-                      color: "#ef4444",
-                      fontSize: "12px",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {signupErrors.password.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Submit */}
-              <button
-                id="signup-submit"
-                type="submit"
-                disabled={loading}
-                style={{
-                  background: loading
-                    ? "#5a3a20"
-                    : "linear-gradient(135deg, #c87941, #a06030)",
-                  color: "#fff",
-                  padding: "12px",
-                  borderRadius: "10px",
-                  fontWeight: "600",
-                  fontSize: "15px",
-                  justifyContent: "center",
-                  boxShadow: loading
-                    ? "none"
-                    : "0 4px 16px rgba(200, 121, 65, 0.3)",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {loading ? "Creating Account..." : "Create Account"}
-              </button>
-            </form>
-          )}
-        </div>
-
-        {/* Demo credentials — only show in login mode */}
-        {mode === "login" && (
+              {mode === "login"
+                ? "Welcome back. Sign in to continue."
+                : "Join your team and start managing operations."}
+            </div>
+          </div>
           <div
             style={{
-              marginTop: "24px",
-              padding: "16px",
-              background: "rgba(26, 26, 36, 0.6)",
-              borderRadius: "12px",
-              border: "1px solid rgba(42, 42, 58, 0.5)",
+              background: "#ffffff",
+              border: "1px solid #e5e7eb",
+              borderRadius: "20px",
+              padding: "28px",
+              boxShadow:
+                "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
             }}
           >
-            <p
+            <div
               style={{
-                fontSize: "12px",
-                color: "#8a8a9a",
-                margin: "0 0 12px",
-                fontWeight: "600",
-                textAlign: "center",
+                display: "flex",
+                background: "#F3F4F6",
+                borderRadius: "10px",
+                padding: "4px",
+                marginBottom: "20px",
               }}
             >
-              Quick Demo Login
-            </p>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[
-                {
-                  role: "Admin",
-                  email: "admin@cafeodoo.com",
-                  pass: "admin123",
-                },
-                {
-                  role: "Cashier",
-                  email: "cashier@cafeodoo.com",
-                  pass: "cashier123",
-                },
-                {
-                  role: "Kitchen",
-                  email: "kitchen@cafeodoo.com",
-                  pass: "kitchen123",
-                },
-              ].map((cred) => (
+              {(["login", "signup"] as const).map((tab) => (
                 <button
-                  key={cred.role}
+                  key={tab}
+                  id={`tab-${tab}`}
                   type="button"
-                  id={`demo-btn-${cred.role.toLowerCase()}`}
-                  onClick={() => fillCredentials(cred.email, cred.pass)}
+                  onClick={() => setMode(tab)}
                   style={{
                     flex: 1,
-                    padding: "8px 4px",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(200, 121, 65, 0.2)",
-                    background: "rgba(200, 121, 65, 0.08)",
-                    color: "#c87941",
-                    fontSize: "12px",
+                    padding: "9px",
+                    borderRadius: "7px",
+                    border: "none",
+                    background: mode === tab ? "#ffffff" : "transparent",
+                    color: mode === tab ? "#714B67" : "#6b7280",
+                    fontSize: "14px",
                     fontWeight: "600",
                     cursor: "pointer",
-                    transition: "all 0.2s",
-                    textAlign: "center",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      "rgba(200, 121, 65, 0.15)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(200, 121, 65, 0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      "rgba(200, 121, 65, 0.08)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(200, 121, 65, 0.2)";
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow:
+                      mode === tab ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
                   }}
                 >
-                  {cred.role}
+                  {tab === "login" ? "Sign In" : "Sign Up"}
                 </button>
               ))}
             </div>
+
+            {mode === "login" ? (
+              /* ── LOGIN FORM ── */
+              <form
+                onSubmit={handleLoginSubmit(onLogin)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                {/* Email */}
+                <div>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "6px",
+                      display: "block",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="staff@cafeodoo.com"
+                    style={{
+                      background: "#F9FAFB",
+                      border: "1px solid #e5e7eb",
+                      color: "#111827",
+                      borderRadius: "10px",
+                      padding: "12px 16px",
+                      fontSize: "15px",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                    {...loginRegister("email")}
+                  />
+                  {loginErrors.email && (
+                    <p
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "12px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {loginErrors.email.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "6px",
+                      display: "block",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    style={{
+                      background: "#F9FAFB",
+                      border: "1px solid #e5e7eb",
+                      color: "#111827",
+                      borderRadius: "10px",
+                      padding: "12px 16px",
+                      fontSize: "15px",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                    {...loginRegister("password")}
+                  />
+                  {loginErrors.password && (
+                    <p
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "12px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {loginErrors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit */}
+                <button
+                  id="login-submit"
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    marginTop: "8px",
+                    background: loading ? "#9ca3af" : "#714B67",
+                    color: "#fff",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "none",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    width: "100%",
+                    boxShadow: loading
+                      ? "none"
+                      : "0 4px 12px rgba(113, 75, 103, 0.25)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {loading ? "Signing in..." : "Sign In"}
+                </button>
+              </form>
+            ) : (
+              /* ── SIGNUP FORM ── */
+              <form
+                onSubmit={handleSignupSubmit(onSignup)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                {/* Name */}
+                <div>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "6px",
+                      display: "block",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    id="signup-name"
+                    type="text"
+                    autoComplete="name"
+                    placeholder="John Doe"
+                    style={{
+                      background: "#F9FAFB",
+                      border: "1px solid #e5e7eb",
+                      color: "#111827",
+                      borderRadius: "10px",
+                      padding: "12px 16px",
+                      fontSize: "15px",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                    {...signupRegister("name")}
+                  />
+                  {signupErrors.name && (
+                    <p
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "12px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {signupErrors.name.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "6px",
+                      display: "block",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    id="signup-email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    style={{
+                      background: "#F9FAFB",
+                      border: "1px solid #e5e7eb",
+                      color: "#111827",
+                      borderRadius: "10px",
+                      padding: "12px 16px",
+                      fontSize: "15px",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                    {...signupRegister("email")}
+                  />
+                  {signupErrors.email && (
+                    <p
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "12px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {signupErrors.email.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "6px",
+                      display: "block",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Password
+                  </label>
+                  <input
+                    id="signup-password"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="Min. 8 characters"
+                    style={{
+                      background: "#F9FAFB",
+                      border: "1px solid #e5e7eb",
+                      color: "#111827",
+                      borderRadius: "10px",
+                      padding: "12px 16px",
+                      fontSize: "15px",
+                      width: "100%",
+                      outline: "none",
+                      fontFamily: "inherit",
+                    }}
+                    {...signupRegister("password")}
+                  />
+                  {signupErrors.password && (
+                    <p
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "12px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {signupErrors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit */}
+                <button
+                  id="signup-submit"
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    marginTop: "8px",
+                    background: loading ? "#9ca3af" : "#714B67",
+                    color: "#fff",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    fontWeight: "700",
+                    fontSize: "15px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "none",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    width: "100%",
+                    boxShadow: loading
+                      ? "none"
+                      : "0 4px 12px rgba(113, 75, 103, 0.25)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {loading ? "Creating Account..." : "Create Account"}
+                </button>
+              </form>
+            )}
           </div>
-        )}
+
+          {/* Demo credentials — only show in login mode */}
+          {mode === "login" && (
+            <div
+              style={{
+                marginTop: "24px",
+                padding: "20px",
+                background: "#ffffff",
+                borderRadius: "20px",
+                border: "1px solid #e5e7eb",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#6b7280",
+                  margin: "0 0 12px",
+                  fontWeight: "600",
+                  textAlign: "center",
+                }}
+              >
+                Quick Demo Login
+              </p>
+              <div style={{ display: "flex", gap: "8px" }}>
+                {[
+                  {
+                    role: "Admin",
+                    email: "admin@cafeodoo.com",
+                    pass: "admin123",
+                  },
+                  {
+                    role: "Cashier",
+                    email: "cashier@cafeodoo.com",
+                    pass: "cashier123",
+                  },
+                  {
+                    role: "Kitchen",
+                    email: "kitchen@cafeodoo.com",
+                    pass: "kitchen123",
+                  },
+                ].map((cred) => (
+                  <button
+                    key={cred.role}
+                    type="button"
+                    id={`demo-btn-${cred.role.toLowerCase()}`}
+                    onClick={() => fillCredentials(cred.email, cred.pass)}
+                    style={{
+                      flex: 1,
+                      padding: "10px 4px",
+                      borderRadius: "10px",
+                      background: "#ffffff",
+                      border: "1px solid #d1d5db",
+                      color: "#374151",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#F3F4F6";
+                      e.currentTarget.style.borderColor = "#9ca3af";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#ffffff";
+                      e.currentTarget.style.borderColor = "#d1d5db";
+                    }}
+                  >
+                    {cred.role}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Right side: Image */}
+      <div className="split-right" />
     </div>
   );
 }
