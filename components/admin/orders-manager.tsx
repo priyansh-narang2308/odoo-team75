@@ -38,6 +38,16 @@ interface Order {
 }
 
 function computeDisplayStatus(order: Order) {
+  if (order.status === "DRAFT" || order.status === "CANCELLED")
+    return order.status;
+
+  if (!order.items || order.items.length === 0) return order.status;
+
+  const statuses = order.items.map((i) => i.kdsStatus);
+  if (statuses.every((s) => s === "COMPLETED")) return "READY";
+  if (statuses.some((s) => s === "PREPARING" || s === "COMPLETED"))
+    return "PREPARING";
+
   return order.status;
 }
 

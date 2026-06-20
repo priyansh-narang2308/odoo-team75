@@ -91,8 +91,9 @@ function ElapsedBadge({ createdAt, stoppedAt }: { createdAt: string; stoppedAt?:
   const secs = useElapsed(createdAt, stoppedAt);
   const mins = Math.floor(secs / 60);
   const s = secs % 60;
-  const isUrgent = secs > 600; // 10+ min
-  const isWarning = secs > 300; // 5+ min
+  const isCompleted = !!stoppedAt;
+  const isUrgent = !isCompleted && secs > 600; // 10+ min
+  const isWarning = !isCompleted && secs > 300; // 5+ min
 
   return (
     <span
@@ -104,12 +105,16 @@ function ElapsedBadge({ createdAt, stoppedAt }: { createdAt: string; stoppedAt?:
         borderRadius: "999px",
         fontSize: "12px",
         fontWeight: "700",
-        background: isUrgent
+        background: isCompleted 
+          ? "rgba(34,197,94,0.15)"
+          : isUrgent
           ? "rgba(239,68,68,0.2)"
           : isWarning
             ? "rgba(245,158,11,0.15)"
             : "rgba(107,114,128,0.15)",
-        color: isUrgent ? "#f87171" : isWarning ? "#fbbf24" : "#9ca3af",
+        color: isCompleted
+          ? "#4ade80"
+          : isUrgent ? "#f87171" : isWarning ? "#fbbf24" : "#9ca3af",
         animation: isUrgent ? "pulse 1s infinite" : "none",
       }}
     >
@@ -185,7 +190,7 @@ export function KDSBoard() {
   // Fetch initial tickets
   const fetchTickets = useCallback(async () => {
     try {
-      const res = await fetch("/api/orders?status=SENT,PREPARING,READY&limit=50");
+      const res = await fetch("/api/orders?status=SENT,PAID,PREPARING,READY&limit=50");
       const data = await res.json();
       if (data.ok) {
         const mapped: KDSTicket[] = (data.data || []).map((o: any) => ({
