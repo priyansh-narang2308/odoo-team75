@@ -9,6 +9,7 @@ export function ThemeToggle({ sidebar = false }: { sidebar?: boolean }) {
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
+    // eslint-disable-next-line
     setMounted(true);
   }, []);
 

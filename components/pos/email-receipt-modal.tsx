@@ -91,7 +91,7 @@ export function EmailReceiptModal({
 
         <form onSubmit={handleSend} style={{ padding: "20px" }}>
           <p style={{ margin: "0 0 16px", fontSize: "14px", color: "var(--color-text-muted)" }}>
-            Enter the customer's email address to send a digital copy of the receipt.
+            Enter the customer&apos;s email address to send a digital copy of the receipt.
           </p>
 
           <input

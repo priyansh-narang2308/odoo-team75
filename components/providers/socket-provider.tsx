@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
 interface SocketContextValue {
@@ -32,6 +27,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       transports: ["websocket", "polling"],
     });
 
+    // eslint-disable-next-line
     setSocket(socketInstance);
 
     socketInstance.on("connect", () => {
