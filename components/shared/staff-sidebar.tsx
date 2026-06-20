@@ -46,16 +46,6 @@ const navItems = {
       label: "Payment Methods",
       icon: CreditCard,
     },
-    {
-      href: "/admin/mobile-order",
-      label: "Mobile Order",
-      icon: Smartphone,
-    },
-    {
-      href: "/customer-display",
-      label: "Customer Display",
-      icon: Monitor,
-    },
   ],
   CASHIER: [
     { href: "/pos", label: "POS Terminal", icon: ShoppingCart },

@@ -288,7 +288,7 @@ export function CustomerMenu({
           position: "sticky",
           top: 0,
           zIndex: 50,
-          background: "rgba(15,15,19,0.95)",
+          background: "var(--color-bg-overlay)",
           backdropFilter: "blur(12px)",
           borderBottom: `1px solid ${styleVars.border}`,
           padding: "14px 16px",

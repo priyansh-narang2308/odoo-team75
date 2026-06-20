@@ -40,7 +40,8 @@ export function CustomerOrderGate({
         if (d.ok && d.data) {
           if (d.data.menuBackgroundColor)
             setBgColor(d.data.menuBackgroundColor);
-          if (d.data.storeName) setStoreName(d.data.storeName);
+          // Always use 'The Purple Cup Cafe' regardless of DB setting
+          setStoreName("The Purple Cup Cafe");
         }
       })
       .catch(() => {});
@@ -105,7 +106,7 @@ export function CustomerOrderGate({
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(59,130,246,0.1) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 30% 20%, rgba(113,75,103,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(150,107,137,0.1) 0%, transparent 50%)",
             animation: "splashPulse 4s ease-in-out infinite alternate",
             pointerEvents: "none",
           }}
@@ -184,18 +185,27 @@ export function CustomerOrderGate({
         {/* Order Here CTA */}
         <button
           id="splash-order-btn"
-          onClick={() => setShowSplash(false)}
+          onClick={() => {
+            // Automatically start a guest session instead of forcing sign-in
+            setSession({
+              id: `guest_${Math.random().toString(36).substring(7)}`,
+              name: `Guest (Table ${tableNumber})`,
+              email: "guest@thepurplecup.com",
+              tableId: tableId,
+            });
+            setShowSplash(false);
+          }}
           style={{
             padding: "16px 60px",
             borderRadius: "14px",
-            background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
+            background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
             color: "#fff",
             fontSize: "18px",
             fontWeight: "700",
             border: "none",
             cursor: "pointer",
             boxShadow:
-              "0 8px 32px rgba(124,58,237,0.4), 0 2px 8px rgba(0,0,0,0.3)",
+              "0 8px 32px rgba(113,75,103,0.4), 0 2px 8px rgba(0,0,0,0.3)",
             letterSpacing: "0.02em",
             transition: "all 0.2s ease",
             position: "relative",
@@ -205,19 +215,6 @@ export function CustomerOrderGate({
           Order Here
         </button>
 
-        {/* Powered by */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "28px",
-            fontSize: "11px",
-            color: "rgba(255,255,255,0.15)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Powered by Odoo
-        </div>
 
         <style>{`
           @keyframes splashPulse {

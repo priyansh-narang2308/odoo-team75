@@ -184,17 +184,32 @@ export function CustomersManager() {
   };
 
   return (
-    <div style={{ padding: "28px", maxWidth: "1200px" }}>
+    <div style={{ padding: "28px", maxWidth: "1200px", margin: "0 auto" }}>
+      <style>{`
+        .responsive-grid-customers {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 14px;
+          margin-bottom: 28px;
+        }
+        @media (min-width: 640px) {
+          .responsive-grid-customers {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+      `}</style>
       {/* Header */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
+          flexWrap: "wrap",
+          gap: "16px",
           marginBottom: "28px",
         }}
       >
-        <div>
+        <div style={{ flex: "1 1 auto" }}>
           <h1 style={{ margin: 0, fontSize: "26px", fontWeight: "800" }}>
             Customer Database
           </h1>
@@ -204,6 +219,7 @@ export function CustomersManager() {
               display: "flex",
               gap: "8px",
               alignItems: "center",
+              flexWrap: "wrap",
             }}
           >
             <div style={{ position: "relative" }}>
@@ -280,14 +296,7 @@ export function CustomersManager() {
       </div>
 
       {/* Summary Stats Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "14px",
-          marginBottom: "28px",
-        }}
-      >
+      <div className="responsive-grid-customers">
         {/* Card 1: Total Customers */}
         <div
           className="card"
@@ -370,7 +379,7 @@ export function CustomersManager() {
       </div>
 
       {/* Customers Table */}
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card" style={{ padding: 0, overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
