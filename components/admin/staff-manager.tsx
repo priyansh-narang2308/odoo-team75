@@ -148,7 +148,7 @@ export function StaffManager() {
   };
 
   return (
-    <div style={{ padding: "28px", maxWidth: "1000px" }}>
+    <div style={{ padding: "28px", maxWidth: "1000px", margin: "0 auto" }}>
       {/* Header */}
       <div
         style={{

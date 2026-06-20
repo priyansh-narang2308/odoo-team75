@@ -65,31 +65,31 @@
 }
 
 .light {
-  /* Brand Colors (Light Pink/Burgundy Palette) */
-  --color-espresso: #241114;
-  --color-roast: #1a0b0d;
-  --color-caramel: #5a2d34;
-  --color-cream: #f6e1e6;
+  /* Brand Colors (Purple Palette) */
+  --color-espresso: #1e141b;
+  --color-roast: #150e12;
+  --color-caramel: #4a3042;
+  --color-cream: #f9f5f8;
   --color-foam: #ffffff;
 
   /* Semantic Light Values */
-  --color-bg: #f6e1e6; /* Light Pink */
-  --color-bg-elevated: #ffffff; /* White cards */
-  --color-bg-overlay: rgba(255, 255, 255, 0.6);
-  --color-border: rgba(180, 107, 122, 0.3);
-  --color-border-muted: rgba(180, 107, 122, 0.15);
+  --color-bg: #e3d1e6; /* Noticeably darker soft purple */
+  --color-bg-elevated: #fdfafd; /* White cards with a very faint purple tint */
+  --color-bg-overlay: rgba(253, 250, 253, 0.7);
+  --color-border: rgba(113, 75, 103, 0.2);
+  --color-border-muted: rgba(113, 75, 103, 0.08);
 
-  --color-text: #241114; /* Deep Maroon text for contrast */
-  --color-text-muted: #5a2d34; /* Burgundy */
-  --color-text-faint: #b46b7a; /* Muted Rosewood */
+  --color-text: #1e141b; /* Dark purple/black text for contrast */
+  --color-text-muted: #4a3042; /* Medium dark purple */
+  --color-text-faint: #966b89; /* Muted purple */
 
-  --color-primary: #b46b7a;
-  --color-primary-rgb: 180, 107, 122;
-  --color-primary-hover: #5a2d34;
-  --color-primary-dark: #241114;
+  --color-primary: #714b67;
+  --color-primary-rgb: 113, 75, 103;
+  --color-primary-hover: #966b89;
+  --color-primary-dark: #4a3042;
   --color-primary-text: #ffffff;
 
-  --shadow-glow: 0 0 20px rgba(180, 107, 122, 0.15);
+  --shadow-glow: 0 0 20px rgba(113, 75, 103, 0.15);
 }
 
 /* =============================================
@@ -321,9 +321,9 @@ button:disabled {
 /* Light Mode Badges (Higher Contrast) */
 .light .badge-draft,
 .light .badge-pending {
-  background: rgba(180, 107, 122, 0.12);
-  color: #9d4e5f;
-  border: 1px solid rgba(180, 107, 122, 0.3);
+  background: rgba(113, 75, 103, 0.12);
+  color: #714b67;
+  border: 1px solid rgba(113, 75, 103, 0.3);
 }
 .light .badge-sent,
 .light .badge-to-cook {

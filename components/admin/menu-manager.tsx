@@ -47,6 +47,8 @@ export function MenuManager() {
     new Set(),
   );
   const [newCatColor, setNewCatColor] = useState("#c87941");
+  const [archiveConfirm, setArchiveConfirm] = useState<{ isOpen: boolean; ids: string[] }>({ isOpen: false, ids: [] });
+  const [isArchiving, setIsArchiving] = useState(false);
   const itemsPerPage = 10;
 
   const [form, setForm] = useState({
@@ -149,19 +151,22 @@ export function MenuManager() {
     }
   };
 
-  const handleBulkArchive = async () => {
-    if (
-      !confirm(
-        `Archive ${selectedProducts.size} product(s)? They won't appear on the menu.`,
-      )
-    )
-      return;
-    const ids = Array.from(selectedProducts);
+  const handleBulkArchive = () => {
+    setArchiveConfirm({ isOpen: true, ids: Array.from(selectedProducts) });
+  };
+
+  const confirmArchive = async () => {
+    if (archiveConfirm.ids.length === 0) return;
+    setIsArchiving(true);
     await Promise.all(
-      ids.map((id) => fetch(`/api/products/${id}`, { method: "DELETE" })),
+      archiveConfirm.ids.map((id) => fetch(`/api/products/${id}`, { method: "DELETE" })),
     );
-    setProducts((prev) => prev.filter((p) => !selectedProducts.has(p.id)));
-    setSelectedProducts(new Set());
+    setProducts((prev) => prev.filter((p) => !archiveConfirm.ids.includes(p.id)));
+    if (archiveConfirm.ids.length > 1) {
+      setSelectedProducts(new Set());
+    }
+    setArchiveConfirm({ isOpen: false, ids: [] });
+    setIsArchiving(false);
   };
 
   const saveProduct = async (e: React.FormEvent) => {
@@ -204,10 +209,8 @@ export function MenuManager() {
     setProducts((prev) => prev.map((pr) => (pr.id === p.id ? data.data : pr)));
   };
 
-  const archiveProduct = async (id: string) => {
-    if (!confirm("Archive this product? It won't appear on the menu.")) return;
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const archiveProduct = (id: string) => {
+    setArchiveConfirm({ isOpen: true, ids: [id] });
   };
 
   return (
@@ -944,6 +947,78 @@ export function MenuManager() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Archive Confirmation Modal */}
+      {archiveConfirm.isOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              padding: "32px",
+              borderRadius: "20px",
+              width: "100%",
+              maxWidth: "400px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+              <div style={{ padding: "10px", background: "rgba(239,68,68,0.1)", borderRadius: "12px", color: "#ef4444" }}>
+                <Trash2 size={24} />
+              </div>
+              <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700" }}>Archive Product(s)?</h2>
+            </div>
+            <p style={{ margin: "0 0 24px", color: "var(--color-text-muted)", lineHeight: "1.5" }}>
+              Are you sure you want to archive {archiveConfirm.ids.length === 1 ? "this product" : `these ${archiveConfirm.ids.length} products`}? They will be hidden from the menu but their sales history will be preserved.
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setArchiveConfirm({ isOpen: false, ids: [] })}
+                disabled={isArchiving}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: "10px",
+                  border: "1px solid var(--color-border)",
+                  background: "transparent",
+                  fontWeight: "600",
+                  color: "var(--color-text)",
+                  cursor: isArchiving ? "not-allowed" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmArchive}
+                disabled={isArchiving}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: "#ef4444",
+                  color: "#fff",
+                  fontWeight: "600",
+                  cursor: isArchiving ? "not-allowed" : "pointer",
+                  opacity: isArchiving ? 0.7 : 1,
+                }}
+              >
+                {isArchiving ? "Archiving..." : "Yes, Archive"}
+              </button>
+            </div>
           </div>
         </div>
       )}
