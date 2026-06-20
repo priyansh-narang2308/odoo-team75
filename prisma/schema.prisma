@@ -1,0 +1,299 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==============================
+// ENUMS
+// ==============================
+
+enum Role {
+  ADMIN
+  CASHIER
+  KITCHEN
+}
+
+enum OrderStatus {
+  DRAFT      // Active, being built
+  SENT       // Sent to kitchen (customer orders start here)
+  PAID       // Payment completed
+  CANCELLED  // Voided
+}
+
+enum OrderSource {
+  CASHIER    // Created by staff at POS
+  CUSTOMER   // Created via QR table scan
+}
+
+enum KdsStatus {
+  TO_COOK
+  PREPARING
+  COMPLETED
+}
+
+enum PaymentType {
+  CASH
+  UPI
+  CARD
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum UnitOfMeasure {
+  PIECE
+  KG
+  LITRE
+}
+
+// ==============================
+// STAFF & ADMIN
+// ==============================
+
+model User {
+  id          String     @id @default(cuid())
+  name        String
+  email       String     @unique
+  password    String     // bcrypt hash
+  role        Role       @default(CASHIER)
+  isArchived  Boolean    @default(false)
+  sessions    Session[]
+  ordersTaken Order[]
+  auditLogs   AuditLog[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// ==============================
+// CUSTOMER
+// ==============================
+
+model Customer {
+  id          String    @id @default(cuid())
+  name        String
+  email       String    @unique
+  password    String    // bcrypt hash
+  phone       String?
+  isVerified  Boolean   @default(false)
+  lastOrderAt DateTime?
+  orders      Order[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ==============================
+// VENUE
+// ==============================
+
+model Floor {
+  id         String   @id @default(cuid())
+  name       String   // e.g., "Ground Floor", "Rooftop"
+  sortOrder  Int      @default(0)
+  gridWidth  Int      @default(12)
+  gridHeight Int      @default(8)
+  tables     Table[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Table {
+  id            String    @id @default(cuid())
+  tableNumber   String
+  seats         Int
+  isActive      Boolean   @default(true)
+  qrToken       String?   @unique // Signed JWT for QR URL
+  qrGeneratedAt DateTime?
+  floorId       String
+  floor         Floor     @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  orders        Order[]
+  x             Int       @default(0)
+  y             Int       @default(0)
+  width         Int       @default(1)
+  height        Int       @default(1)
+  status        String    @default("AVAILABLE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([floorId, tableNumber])
+}
+
+// ==============================
+// MENU
+// ==============================
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  color     String    @default("#E5E7EB")
+  sortOrder Int       @default(0)
+  isVisible Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal     @db.Decimal(10, 2)
+  imageUrl    String?
+  taxRate     Decimal     @default(0.00) @db.Decimal(5, 2)
+  unitOfMeasure UnitOfMeasure @default(PIECE)
+  isAvailable Boolean     @default(true)
+  showInKds   Boolean     @default(true)
+  isArchived  Boolean     @default(false)
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  promotions  Promotion[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ==============================
+// POS SESSION
+// ==============================
+
+model Session {
+  id            String    @id @default(cuid())
+  openedAt      DateTime  @default(now())
+  closedAt      DateTime?
+  openingAmount Decimal   @db.Decimal(10, 2)
+  closingAmount Decimal?  @db.Decimal(10, 2)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  orders        Order[]
+}
+
+// ==============================
+// PAYMENTS
+// ==============================
+
+model PaymentMethod {
+  id        String      @id @default(cuid())
+  name      String
+  type      PaymentType
+  isEnabled Boolean     @default(true)
+  upiId     String?     // Café UPI ID for QR display
+  payments  Payment[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model Promotion {
+  id             String       @id @default(cuid())
+  name           String
+  code           String?      @unique
+  discountType   DiscountType
+  discountValue  Decimal      @db.Decimal(10, 2)
+  minOrderAmount Decimal?     @db.Decimal(10, 2)
+  productId      String?
+  product        Product?     @relation(fields: [productId], references: [id])
+  minQuantity    Int?
+  maxUses        Int?
+  usedCount      Int          @default(0)
+  validFrom      DateTime?
+  validUntil     DateTime?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+// ==============================
+// ORDERS
+// ==============================
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   Int         @unique @default(autoincrement())
+  status        OrderStatus @default(DRAFT)
+  source        OrderSource @default(CASHIER)
+  customerNote  String?
+
+  subtotal      Decimal     @db.Decimal(10, 2)
+  taxTotal      Decimal     @db.Decimal(10, 2)
+  discountTotal Decimal     @default(0.00) @db.Decimal(10, 2)
+  grandTotal    Decimal     @db.Decimal(10, 2)
+
+  sessionId     String?
+  session       Session?    @relation(fields: [sessionId], references: [id])
+
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+
+  tableId       String?
+  table         Table?      @relation(fields: [tableId], references: [id])
+
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+
+  promotionId   String?
+
+  items         OrderItem[]
+  payments      Payment[]
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String    @id @default(cuid())
+  quantity  Int
+  unitPrice Decimal   @db.Decimal(10, 2)
+  lineTotal Decimal   @db.Decimal(10, 2)
+  notes     String?
+  kdsStatus KdsStatus @default(TO_COOK)
+  orderId   String
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product   @relation(fields: [productId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  amount         Decimal       @db.Decimal(10, 2)
+  transactionRef String?
+  notes          String?
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  methodId       String
+  method         PaymentMethod @relation(fields: [methodId], references: [id])
+  createdAt      DateTime      @default(now())
+}
+
+// ==============================
+// AUDIT & NOTIFICATIONS
+// ==============================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String   // ORDER_CREATED, PAYMENT_PROCESSED, etc.
+  entity    String   // "Order", "Product", "Table"
+  entityId  String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  meta      Json?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  type       String   // ORDER_READY, NEW_ORDER, BILL_REQUESTED, etc.
+  title      String
+  message    String
+  isRead     Boolean  @default(false)
+  targetRole Role?
+  userId     String?
+  orderId    String?
+  tableId    String?
+  createdAt  DateTime @default(now())
+}
