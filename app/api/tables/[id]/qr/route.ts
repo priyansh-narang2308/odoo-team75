@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { signQRToken } from "@/lib/qr";
-import QRCode from "qrcode";
-import fs from "fs";
-import path from "path";
+import { generateAndSaveQR } from "@/lib/qr";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -34,48 +31,40 @@ export async function POST(_req: Request, { params }: RouteParams) {
     );
   }
 
-  // Sign a new JWT token for this table
-  const token = await signQRToken({
-    tableId: table.id,
-    floorId: table.floorId,
-    tableNumber: table.tableNumber,
-  });
+  try {
+    const token = await generateAndSaveQR({
+      id: table.id,
+      floorId: table.floorId,
+      tableNumber: table.tableNumber,
+    });
 
-  // Generate QR code PNG
-  const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL}/order/${token}`;
+    // Store token in DB
+    const updatedTable = await prisma.table.update({
+      where: { id },
+      data: {
+        qrToken: token,
+        qrGeneratedAt: new Date(),
+      },
+      include: { floor: true },
+    });
 
-  // Save QR code to public/qrcodes/
-  const qrDir = path.join(process.cwd(), "public", "qrcodes");
-  if (!fs.existsSync(qrDir)) {
-    fs.mkdirSync(qrDir, { recursive: true });
+    const qrFilename = `table-${table.tableNumber.replace(/\s+/g, "-")}-${id}.png`;
+    const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/order/${token}`;
+
+    return NextResponse.json({
+      ok: true,
+      data: {
+        table: updatedTable,
+        qrUrl,
+        qrImageUrl: `/qrcodes/${qrFilename}`,
+        token,
+      },
+    });
+  } catch (error: any) {
+    console.error("Manual QR generation route failed:", error);
+    return NextResponse.json(
+      { ok: false, error: "Failed to generate QR code" },
+      { status: 500 },
+    );
   }
-
-  const qrFilename = `table-${table.tableNumber.replace(/\s+/g, "-")}-${id}.png`;
-  const qrFilePath = path.join(qrDir, qrFilename);
-
-  await QRCode.toFile(qrFilePath, qrUrl, {
-    width: 512,
-    margin: 2,
-    color: { dark: "#1a1a2e", light: "#ffffff" },
-  });
-
-  // Store token in DB
-  const updatedTable = await prisma.table.update({
-    where: { id },
-    data: {
-      qrToken: token,
-      qrGeneratedAt: new Date(),
-    },
-    include: { floor: true },
-  });
-
-  return NextResponse.json({
-    ok: true,
-    data: {
-      table: updatedTable,
-      qrUrl,
-      qrImageUrl: `/qrcodes/${qrFilename}`,
-      token,
-    },
-  });
 }
