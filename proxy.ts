@@ -6,7 +6,6 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/order/")) {
-    // Extract table token from path
     const segments = pathname.split("/");
     // /order/[tableToken]/status or /order/[tableToken]/receipt
     // Allow the root /order/[tableToken] page even without session (shows auth gate)
