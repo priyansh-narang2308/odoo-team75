@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 // GET /api/promotions — List all promotions
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (false)
+  if (!session || !["ADMIN", "CASHIER"].includes(session.user.role))
     return NextResponse.json(
       { ok: false, error: "Unauthorized" },
       { status: 403 },
@@ -22,7 +22,7 @@ export async function GET() {
 // POST /api/promotions — Create a promotion
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (false)
+  if (!session || session.user.role !== "ADMIN")
     return NextResponse.json(
       { ok: false, error: "Unauthorized" },
       { status: 403 },
