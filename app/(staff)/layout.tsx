@@ -18,6 +18,7 @@ export default async function StaffLayout({
   return (
     <SocketProvider>
       <div
+        className="staff-layout-wrapper"
         style={{
           display: "flex",
           minHeight: "100vh",
