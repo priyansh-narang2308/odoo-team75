@@ -136,7 +136,6 @@ export async function POST(request: Request) {
       sessionId,
       customerId,
       promotionId,
-      discountTotal,
     } = parsed.data;
 
     const isCashier = source === "CASHIER";
@@ -194,7 +193,7 @@ export async function POST(request: Request) {
         customerNote,
         subtotal: 0,
         taxTotal: 0,
-        discountTotal: discountTotal || 0,
+        discountTotal: 0,
         grandTotal: 0,
         tableId:
           tableId || (!isCashier ? (customerSession?.tableId ?? null) : null),

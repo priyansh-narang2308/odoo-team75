@@ -87,6 +87,17 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
   }
 
+  // Verify payment amount
+  if (amount < Number(order.grandTotal) - 0.01) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: `Payment amount (₹${amount.toFixed(2)}) is less than the required grand total (₹${Number(order.grandTotal).toFixed(2)}).`,
+      },
+      { status: 400 },
+    );
+  }
+
   // Verify payment method
   const paymentMethod = await prisma.paymentMethod.findUnique({
     where: { id: methodId, isEnabled: true },
@@ -99,22 +110,43 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
   }
 
-  // Create payment and update order status in a transaction
-  const [payment, updatedOrder] = await prisma.$transaction([
-    prisma.payment.create({
-      data: {
-        orderId: id,
-        methodId,
-        amount,
-        transactionRef,
-        notes,
-      },
-    }),
-    prisma.order.update({
-      where: { id },
-      data: { status: "PAID" },
-    }),
-  ]);
+  // Create payment and update order status in an interactive transaction to prevent TOCTOU
+  let payment, updatedOrder;
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      // Re-fetch order inside transaction
+      const txOrder = await tx.order.findUnique({ where: { id } });
+      if (!txOrder) throw new Error("Order not found");
+      if (txOrder.status === "PAID") throw new Error("Order already paid");
+      if (txOrder.status === "CANCELLED")
+        throw new Error("Cannot pay a cancelled order");
+
+      const p = await tx.payment.create({
+        data: {
+          orderId: id,
+          methodId,
+          amount,
+          transactionRef,
+          notes,
+        },
+      });
+
+      const o = await tx.order.update({
+        where: { id },
+        data: { status: "PAID" },
+      });
+
+      return { p, o };
+    });
+    payment = result.p;
+    updatedOrder = result.o;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return NextResponse.json(
+      { ok: false, error: error.message },
+      { status: 400 },
+    );
+  }
 
   // Audit log
   await prisma.auditLog.create({

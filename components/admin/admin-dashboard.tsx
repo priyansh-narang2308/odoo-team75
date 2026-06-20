@@ -749,11 +749,28 @@ export function AdminDashboard() {
       >
         {/* Top Products */}
         <div className="card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "16px",
+            }}
+          >
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>
               Top Selling Products
             </h3>
-            <Link href="/admin/menu" style={{ fontSize: "13px", color: "var(--color-primary)", textDecoration: "none", fontWeight: "600" }}>View Menu →</Link>
+            <Link
+              href="/admin/menu"
+              style={{
+                fontSize: "13px",
+                color: "var(--color-primary)",
+                textDecoration: "none",
+                fontWeight: "600",
+              }}
+            >
+              View Menu →
+            </Link>
           </div>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
@@ -825,11 +842,28 @@ export function AdminDashboard() {
 
         {/* Top Categories Table */}
         <div className="card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "16px",
+            }}
+          >
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>
               Category Performance
             </h3>
-            <Link href="/admin/categories" style={{ fontSize: "13px", color: "var(--color-primary)", textDecoration: "none", fontWeight: "600" }}>View Categories →</Link>
+            <Link
+              href="/admin/categories"
+              style={{
+                fontSize: "13px",
+                color: "var(--color-primary)",
+                textDecoration: "none",
+                fontWeight: "600",
+              }}
+            >
+              View Categories →
+            </Link>
           </div>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "12px" }}
@@ -893,11 +927,31 @@ export function AdminDashboard() {
 
       {/* Top Orders Table */}
       <div className="card" style={{ padding: "20px", marginBottom: "40px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
           <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
             Highest-Value Orders
           </h3>
-          <Link href="/admin/orders" style={{ padding: "8px 16px", borderRadius: "8px", background: "var(--color-primary)", color: "#fff", textDecoration: "none", fontSize: "13px", fontWeight: "600" }}>View All Orders</Link>
+          <Link
+            href="/admin/orders"
+            style={{
+              padding: "8px 16px",
+              borderRadius: "8px",
+              background: "var(--color-primary)",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: "600",
+            }}
+          >
+            View All Orders
+          </Link>
         </div>
         <div style={{ overflowX: "auto" }}>
           <table

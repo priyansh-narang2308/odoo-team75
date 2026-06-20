@@ -89,22 +89,32 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  const updated = await prisma.order.update({
-    where: { id },
-    data: {
-      ...(status && { status }),
-      ...(customerNote !== undefined && { customerNote }),
-    },
-    include: {
-      table: { select: { tableNumber: true } },
-      items: {
-        include: {
-          product: {
-            include: { category: { select: { name: true } } },
+  const updated = await prisma.$transaction(async (tx) => {
+    // If the order is being cancelled, decrement the promotion's usedCount
+    if (status === "CANCELLED" && order.status !== "CANCELLED" && order.promotionId) {
+      await tx.promotion.update({
+        where: { id: order.promotionId },
+        data: { usedCount: { decrement: 1 } },
+      });
+    }
+
+    return await tx.order.update({
+      where: { id },
+      data: {
+        ...(status && { status }),
+        ...(customerNote !== undefined && { customerNote }),
+      },
+      include: {
+        table: { select: { tableNumber: true } },
+        items: {
+          include: {
+            product: {
+              include: { category: { select: { name: true } } },
+            },
           },
         },
       },
-    },
+    });
   });
 
   // Emit WebSocket events
@@ -165,9 +175,26 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     );
   }
 
-  const order = await prisma.order.update({
-    where: { id },
-    data: { status: "CANCELLED" },
+  const order = await prisma.order.findUnique({ where: { id } });
+  if (!order) {
+    return NextResponse.json(
+      { ok: false, error: "Order not found" },
+      { status: 404 },
+    );
+  }
+
+  const updatedOrder = await prisma.$transaction(async (tx) => {
+    if (order.status !== "CANCELLED" && order.promotionId) {
+      await tx.promotion.update({
+        where: { id: order.promotionId },
+        data: { usedCount: { decrement: 1 } },
+      });
+    }
+
+    return await tx.order.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+    });
   });
 
   // Audit log
@@ -184,11 +211,11 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   if (io) {
     io.to("cashier").emit(SOCKET_EVENTS.ORDER_STATUS, {
       orderId: id,
-      orderNumber: order.orderNumber,
+      orderNumber: updatedOrder.orderNumber,
       status: "CANCELLED",
-      tableId: order.tableId,
+      tableId: updatedOrder.tableId,
     });
   }
 
-  return NextResponse.json({ ok: true, data: order });
+  return NextResponse.json({ ok: true, data: updatedOrder });
 }
