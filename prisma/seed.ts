@@ -9,7 +9,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Seeding CafePOS database...\n");
+  console.log("Seeding CafePOS database...\n");
 
   // =====================
   // STAFF USERS
@@ -79,7 +79,7 @@ async function main() {
     },
   });
 
-  console.log("\n✅ Floors created: Ground Floor, Rooftop");
+  console.log("\nFloors created: Ground Floor, Rooftop");
 
   // =====================
   // TABLES
@@ -117,7 +117,7 @@ async function main() {
   }
 
   console.log(
-    `✅ Tables created: ${groundTables.length} on Ground Floor, ${rooftopTables.length} on Rooftop`,
+    `Tables created: ${groundTables.length} on Ground Floor, ${rooftopTables.length} on Rooftop`,
   );
 
   // =====================
@@ -158,7 +158,7 @@ async function main() {
 
   const [coffee, coldDrinks, teas, snacks, desserts, addons] = categories;
   console.log(
-    "\n✅ Categories created:",
+    "\nCategories created:",
     categories.map((c) => c.name).join(", "),
   );
 
@@ -400,7 +400,7 @@ async function main() {
     });
   }
 
-  console.log(`\n✅ ${products.length} products created`);
+  console.log(`\n${products.length} products created`);
 
   // =====================
   // PAYMENT METHODS
@@ -439,7 +439,7 @@ async function main() {
     },
   });
 
-  console.log("\n✅ Payment methods: Cash, UPI / QR, Credit/Debit Card");
+  console.log("\nPayment methods: Cash, UPI / QR, Credit/Debit Card");
 
   // =====================
   // SAMPLE PROMOTIONS
@@ -470,7 +470,7 @@ async function main() {
     },
   });
 
-  console.log("\n✅ Promotions: WELCOME10 (10% off), FLAT50 (₹50 off)");
+  console.log("\nPromotions: WELCOME10 (10% off), FLAT50 (₹50 off)");
 
   // =====================
   // CUSTOMERS
@@ -523,12 +523,10 @@ async function main() {
       },
     });
   }
-  console.log(
-    `✅ Customers created: ${sampleCustomers.length} sample customers`,
-  );
+  console.log(`Customers created: ${sampleCustomers.length} sample customers`);
 
-  console.log("\n🎉 Seed complete! CafePOS is ready.\n");
-  console.log("📋 Login credentials:");
+  console.log("\nSeed complete! CafePOS is ready.\n");
+  console.log("Login credentials:");
   console.log("   Admin:   admin@cafeodoo.com    / admin123");
   console.log("   Cashier: cashier@cafeodoo.com  / cashier123");
   console.log("   Kitchen: kitchen@cafeodoo.com  / kitchen123");
