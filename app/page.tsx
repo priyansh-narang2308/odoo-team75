@@ -10,12 +10,16 @@ export default async function HomePage() {
 
   // If accessed via port 3001, redirect to customer interface
   if (host.includes(":3001")) {
+    // TEMPORARY FOR MENTOR SESSION: Go straight to POS
+    redirect("/pos");
+    /*
     const customerSession = await getCustomerSession();
     if (customerSession) {
       redirect("/customer/menu");
     } else {
       redirect("/customer/login");
     }
+    */
   }
 
   // Otherwise route staff to the correct dashboard (port 3001)
