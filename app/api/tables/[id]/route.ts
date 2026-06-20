@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { signQRToken } from "@/lib/qr";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -26,7 +25,10 @@ export async function GET(_req: Request, { params }: RouteParams) {
   });
 
   if (!table) {
-    return NextResponse.json({ ok: false, error: "Table not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Table not found" },
+      { status: 404 },
+    );
   }
 
   return NextResponse.json({ ok: true, data: table });
@@ -37,7 +39,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -63,7 +68,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   } catch {
     return NextResponse.json(
       { ok: false, error: "Table number already exists on this floor" },
-      { status: 409 }
+      { status: 409 },
     );
   }
 }
@@ -73,14 +78,20 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const existingTable = await prisma.table.findUnique({
     where: { id },
   });
   if (!existingTable) {
-    return NextResponse.json({ ok: false, error: "Table not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Table not found" },
+      { status: 404 },
+    );
   }
 
   const table = await prisma.table.update({

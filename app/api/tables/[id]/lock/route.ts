@@ -19,7 +19,10 @@ export async function POST(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || !["CASHIER", "ADMIN"].includes(session.user.role)) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -39,11 +42,14 @@ export async function POST(request: Request, { params }: RouteParams) {
           })
         : null;
 
-      return NextResponse.json({
-        ok: false,
-        error: `Table is being edited by ${holder?.name || "another cashier"}`,
-        lockedBy: holder?.name,
-      }, { status: 409 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Table is being edited by ${holder?.name || "another cashier"}`,
+          lockedBy: holder?.name,
+        },
+        { status: 409 },
+      );
     }
 
     const io = getIO();
@@ -75,6 +81,6 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   return NextResponse.json(
     { ok: false, error: "Invalid action. Use 'acquire' or 'release'" },
-    { status: 400 }
+    { status: 400 },
   );
 }

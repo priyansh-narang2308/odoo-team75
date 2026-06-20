@@ -9,28 +9,34 @@ function getIO() {
   return (global as any).io;
 }
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
-  
+
   if (!session) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   try {
     // Update all non-completed orders for this table to PAID
     await prisma.order.updateMany({
-      where: { 
+      where: {
         tableId: id,
-        status: { notIn: ["PAID", "CANCELLED"] }
+        status: { notIn: ["PAID", "CANCELLED"] },
       },
-      data: { status: "PAID" }
+      data: { status: "PAID" },
     });
 
     // Also update table status to AVAILABLE
     await prisma.table.update({
       where: { id },
-      data: { status: "AVAILABLE" }
+      data: { status: "AVAILABLE" },
     });
 
     const io = getIO();
@@ -41,6 +47,9 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[POST /api/tables/[id]/free]", error);
-    return NextResponse.json({ ok: false, error: "Failed to free table" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Failed to free table" },
+      { status: 500 },
+    );
   }
 }

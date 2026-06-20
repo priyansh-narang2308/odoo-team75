@@ -26,7 +26,9 @@ export async function GET(request: Request) {
       ...(floorId ? { floorId } : {}),
     },
     include: {
-      floor: { select: { id: true, name: true, gridWidth: true, gridHeight: true } },
+      floor: {
+        select: { id: true, name: true, gridWidth: true, gridHeight: true },
+      },
       orders: {
         where: { status: { in: ["DRAFT", "SENT"] } },
         select: { id: true, status: true, grandTotal: true },
@@ -42,7 +44,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: parsed.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -63,7 +68,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { ok: false, error: "Table number already exists on this floor" },
-      { status: 409 }
+      { status: 409 },
     );
   }
 }
