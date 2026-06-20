@@ -13,6 +13,10 @@
   padding-right: 1.5rem;
   position: relative;
   background-color: #ffffff;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.60), rgba(255, 255, 255, 0.60)), url('/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .blurBackground {

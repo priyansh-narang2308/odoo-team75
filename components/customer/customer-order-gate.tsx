@@ -20,12 +20,17 @@ interface CustomerSession {
   tableId: string;
 }
 
-export function CustomerOrderGate({ tableId, tableToken, tableNumber, floorName }: Props) {
+export function CustomerOrderGate({
+  tableId,
+  tableToken,
+  tableNumber,
+  floorName,
+}: Props) {
   const [session, setSession] = useState<CustomerSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [bgColor, setBgColor] = useState("#1a1a2e");
-  const [storeName, setStoreName] = useState("Café Odoo");
+  const [storeName, setStoreName] = useState("The Purple Cup Cafe");
 
   useEffect(() => {
     // Fetch store settings for background
@@ -33,7 +38,8 @@ export function CustomerOrderGate({ tableId, tableToken, tableNumber, floorName 
       .then((r) => r.json())
       .then((d) => {
         if (d.ok && d.data) {
-          if (d.data.menuBackgroundColor) setBgColor(d.data.menuBackgroundColor);
+          if (d.data.menuBackgroundColor)
+            setBgColor(d.data.menuBackgroundColor);
           if (d.data.storeName) setStoreName(d.data.storeName);
         }
       })
@@ -115,9 +121,41 @@ export function CustomerOrderGate({ tableId, tableToken, tableNumber, floorName 
         />
 
         {/* Floating circles decoration */}
-        <div style={{ position: "absolute", top: "15%", left: "10%", width: "120px", height: "120px", borderRadius: "50%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }} />
-        <div style={{ position: "absolute", bottom: "20%", right: "8%", width: "80px", height: "80px", borderRadius: "50%", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }} />
-        <div style={{ position: "absolute", top: "60%", left: "5%", width: "50px", height: "50px", borderRadius: "50%", background: "rgba(255,255,255,0.02)" }} />
+        <div
+          style={{
+            position: "absolute",
+            top: "15%",
+            left: "10%",
+            width: "120px",
+            height: "120px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.05)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "20%",
+            right: "8%",
+            width: "80px",
+            height: "80px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.04)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "60%",
+            left: "5%",
+            width: "50px",
+            height: "50px",
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.02)",
+          }}
+        />
 
         {/* Logo */}
         <div
@@ -190,7 +228,8 @@ export function CustomerOrderGate({ tableId, tableToken, tableNumber, floorName 
             fontWeight: "700",
             border: "none",
             cursor: "pointer",
-            boxShadow: "0 8px 32px rgba(124,58,237,0.4), 0 2px 8px rgba(0,0,0,0.3)",
+            boxShadow:
+              "0 8px 32px rgba(124,58,237,0.4), 0 2px 8px rgba(0,0,0,0.3)",
             letterSpacing: "0.02em",
             transition: "all 0.2s ease",
             position: "relative",

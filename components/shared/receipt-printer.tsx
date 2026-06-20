@@ -50,7 +50,7 @@ export function ReceiptPrinter({
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Receipt #${orderNumber} — Café Odoo</title>
+  <title>Receipt #${orderNumber} — The Purple Cup Cafe</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Courier New', monospace; color: #111; background: #fff; padding: 20px; max-width: 340px; margin: 0 auto; }
@@ -73,7 +73,7 @@ export function ReceiptPrinter({
 <body>
   <div class="cafe-header">
     <div style="font-size:28px;margin-bottom:6px">☕</div>
-    <div class="cafe-name">CAFÉ ODOO</div>
+    <div class="cafe-name">The Purple Cup Cafe</div>
     <div class="cafe-sub">Your Neighbourhood Café</div>
   </div>
   <hr class="divider" />
@@ -174,7 +174,7 @@ export function ReceiptPrinter({
                 letterSpacing: "0.05em",
               }}
             >
-              CAFÉ ODOO
+              The Purple Cup Cafe
             </div>
             <div style={{ fontSize: "12px", opacity: 0.7, marginTop: "4px" }}>
               Your Neighbourhood Café

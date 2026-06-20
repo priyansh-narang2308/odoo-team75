@@ -14,7 +14,7 @@ interface Props {
 export function UpiQrDisplay({
   upiId,
   amount,
-  merchantName = "Café Odoo",
+  merchantName = "The Purple Cup Cafe",
   hideOpenAppButton = false,
 }: Props) {
   const upiLink = buildUPILink(upiId, amount, merchantName);

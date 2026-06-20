@@ -149,7 +149,7 @@ export function CustomerAuth({
               WebkitTextFillColor: "transparent",
             }}
           >
-            Café Odoo
+            The Purple Cup Cafe
           </h1>
           <div
             style={{

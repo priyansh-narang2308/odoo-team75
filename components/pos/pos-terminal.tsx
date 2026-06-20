@@ -335,7 +335,7 @@ export function POSTerminal() {
         taxTotal: taxTotal(),
         discountTotal: discountTotal(),
         grandTotal: grandTotal(),
-        storeName: "Café Odoo",
+        storeName: "The Purple Cup Cafe",
       });
     } else {
       socket.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_IDLE, {});
@@ -349,7 +349,7 @@ export function POSTerminal() {
       socket.emit(SOCKET_EVENTS.CUSTOMER_DISPLAY_CHECKOUT, {
         grandTotal: grandTotal(),
         upiId: null,
-        storeName: "Café Odoo",
+        storeName: "The Purple Cup Cafe",
       });
     }
   }, [showCheckout, socket, grandTotal]);
@@ -1977,7 +1977,10 @@ export function POSTerminal() {
                 {(() => {
                   const pages = [];
                   const maxVisible = 5;
-                  let startPage = Math.max(0, menuPage - Math.floor(maxVisible / 2));
+                  let startPage = Math.max(
+                    0,
+                    menuPage - Math.floor(maxVisible / 2),
+                  );
                   let endPage = startPage + maxVisible - 1;
 
                   if (endPage >= totalMenuPages) {
@@ -2027,8 +2030,13 @@ export function POSTerminal() {
                           borderRadius: "8px",
                           border: `1px solid ${menuPage === pageIndex ? "var(--color-primary)" : "var(--color-border)"}`,
                           background:
-                            menuPage === pageIndex ? "var(--color-primary)" : "transparent",
-                          color: menuPage === pageIndex ? "#fff" : "var(--color-text-muted)",
+                            menuPage === pageIndex
+                              ? "var(--color-primary)"
+                              : "transparent",
+                          color:
+                            menuPage === pageIndex
+                              ? "#fff"
+                              : "var(--color-text-muted)",
                           fontSize: "13px",
                           fontWeight: menuPage === pageIndex ? "700" : "500",
                           cursor: "pointer",

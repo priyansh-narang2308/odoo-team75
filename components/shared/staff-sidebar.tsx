@@ -161,7 +161,7 @@ export function StaffSidebar({ userName, userRole }: Props) {
               className="font-caveat gradient-text"
               style={{ fontSize: "22px", fontWeight: "700" }}
             >
-              Café Odoo
+              The Purple Cup Cafe
             </span>
           </div>
         </div>
@@ -222,7 +222,7 @@ export function StaffSidebar({ userName, userRole }: Props) {
                     fontSize: "22px",
                   }}
                 >
-                  Café Odoo
+                  The Purple Cup Cafe
                 </div>
                 <div
                   style={{ fontSize: "11px", color: "var(--color-text-faint)" }}

@@ -182,7 +182,7 @@ RAZORPAY_WEBHOOK_SECRET="your-razorpay-webhook-secret"
 # Brevo (Sendinblue) Email SMTP
 BREVO_API_KEY="xkeysib-..."
 SMTP_FROM_EMAIL="receipt@cafeodoo.com"
-EMAIL_FROM_NAME="Café Odoo"
+EMAIL_FROM_NAME="The Purple Cup Cafe"
 ```
 
 ---

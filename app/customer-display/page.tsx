@@ -36,7 +36,7 @@ export default function CustomerDisplayPage() {
   const [displayState, setDisplayState] = useState<DisplayState>("IDLE");
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
-  const [storeName, setStoreName] = useState("Café Odoo");
+  const [storeName, setStoreName] = useState("The Purple Cup Cafe");
 
   // Fetch store name
   useEffect(() => {

@@ -19,11 +19,14 @@ const caveat = Caveat({
 
 export const metadata: Metadata = {
   title: {
-    default: "Café Odoo POS",
-    template: "%s | Café Odoo POS",
+    default: "The Purple Cup Café",
+    template: "%s | The Purple Cup Café",
+  },
+  icons: {
+    icon: "/fav.png",
   },
   description:
-    "Modern Point-of-Sale system for Café Odoo — order tracking, kitchen display, and real-time management.",
+    "Modern Point-of-Sale system for The Purple Cup Café - order tracking, kitchen display, and real-time management.",
   keywords: ["cafe", "pos", "point of sale", "restaurant", "ordering"],
 };
 

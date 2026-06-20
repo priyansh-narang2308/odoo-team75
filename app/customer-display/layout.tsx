@@ -1,7 +1,7 @@
 import { SocketProvider } from "@/components/providers/socket-provider";
 
 export const metadata = {
-  title: "Customer Display | Café Odoo POS",
+  title: "Customer Display | The Purple Cup Cafe POS",
   description: "Customer-facing display showing live order details",
 };
 

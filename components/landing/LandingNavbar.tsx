@@ -5,6 +5,9 @@ import Link from "next/link";
 import { LayoutDashboard, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import styles from "./LandingNavbar.module.css";
+import { Caveat } from "next/font/google";
+
+const caveat = Caveat({ subsets: ["latin"] });
 
 export function LandingNavbar({
   staffSession,
@@ -34,7 +37,12 @@ export function LandingNavbar({
       <div className={styles.container}>
         <div className={styles.leftSection}>
           <Link href="/" className={styles.logoLink}>
-            <span className={styles.logoText}>Cafe Odoo</span>
+            <span
+              className={`${styles.logoText} ${caveat.className} `}
+              style={{ fontSize: "50px" }}
+            >
+              The Purple Cup Café
+            </span>
           </Link>
         </div>
 

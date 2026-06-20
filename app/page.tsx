@@ -80,30 +80,6 @@ export default async function HomePage() {
                 </svg>
               </span>
             </p>
-
-            <div className={`${caveat.className} ${styles.arrowAnnotation}`}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 100 100"
-                  className={styles.arrowSvg}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M10,90 Q40,10 90,50" />
-                  <path d="M70,40 L90,50 L80,70" />
-                </svg>
-                Best POS for <br /> ALL cafes
-              </div>
-            </div>
           </div>
 
           <div className={styles.ctaButtons}>
