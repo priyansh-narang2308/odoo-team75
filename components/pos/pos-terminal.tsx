@@ -1757,7 +1757,7 @@ export function POSTerminal() {
               alt="CafePOS Logo"
               width={28}
               height={28}
-              style={{ objectFit: "contain" }}
+              style={{ objectFit: "contain", height: "auto" }}
             />
             <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
               Menu

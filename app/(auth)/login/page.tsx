@@ -183,7 +183,7 @@ export default function LoginPage() {
               alt="CafePOS Logo"
               width={90}
               height={90}
-              style={{ objectFit: "contain" }}
+              style={{ objectFit: "contain", height: "auto" }}
             />
           </div>
           <h1

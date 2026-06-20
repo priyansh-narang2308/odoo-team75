@@ -112,7 +112,7 @@ export function StaffSidebar({ userName, userRole }: Props) {
                 alt="CafePOS Logo"
                 width={44}
                 height={44}
-                style={{ objectFit: "contain" }}
+                style={{ objectFit: "contain", height: "auto" }}
               />
             </div>
             <div>
