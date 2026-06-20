@@ -56,7 +56,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       },
     });
 
-    const { password, ...sanitized } = updated;
+    const { ...sanitized } = updated;
     return NextResponse.json({ ok: true, data: sanitized });
   } catch (err) {
     console.error("Failed to update customer:", err);

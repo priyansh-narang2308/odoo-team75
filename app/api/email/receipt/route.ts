@@ -118,14 +118,17 @@ export async function POST(req: Request) {
       const errorData = await response.json().catch(() => null);
       console.error("Brevo error:", errorData || response.statusText);
       return NextResponse.json(
-        { ok: false, error: errorData?.message || "Failed to send email via Brevo" },
+        {
+          ok: false,
+          error: errorData?.message || "Failed to send email via Brevo",
+        },
         { status: 400 },
       );
     }
 
     const data = await response.json();
     return NextResponse.json({ ok: true, data });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error sending receipt:", error);
     return NextResponse.json(

@@ -14,32 +14,6 @@ function getIO() {
   return (global as any).io;
 }
 
-// Helper: recalculate order totals
-async function recalculateOrder(orderId: string) {
-  const items = await prisma.orderItem.findMany({
-    where: { orderId },
-    include: { product: true },
-  });
-
-  const subtotal = items.reduce((sum, item) => sum + Number(item.lineTotal), 0);
-  const taxTotal = items.reduce(
-    (sum, item) =>
-      sum + Number(item.lineTotal) * (Number(item.product.taxRate) / 100),
-    0,
-  );
-  const grandTotal = subtotal + taxTotal;
-
-  return prisma.order.update({
-    where: { id: orderId },
-    data: {
-      subtotal,
-      taxTotal,
-      grandTotal,
-      updatedAt: new Date(),
-    },
-  });
-}
-
 // GET /api/orders/[id]
 export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params;

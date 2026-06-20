@@ -17,7 +17,10 @@ export async function GET(request: Request) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -33,14 +36,20 @@ export async function GET(request: Request) {
       where: {
         customerId: customerSession.customerId,
         ...(history ? {} : { tableId: tableId || customerSession.tableId }),
-        ...(status ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" } : {}),
+        ...(status
+          ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" }
+          : {}),
       },
       include: {
         items: {
           include: { product: { select: { name: true, imageUrl: true } } },
         },
-        payments: { include: { method: { select: { name: true, type: true } } } },
-        table: { select: { tableNumber: true, floor: { select: { name: true } } } },
+        payments: {
+          include: { method: { select: { name: true, type: true } } },
+        },
+        table: {
+          select: { tableNumber: true, floor: { select: { name: true } } },
+        },
       },
       orderBy: { createdAt: "desc" },
       take: limit,
@@ -57,23 +66,35 @@ export async function GET(request: Request) {
     dateFilter = {
       createdAt: {
         gte: startOfToday,
-      }
+      },
     };
   }
 
   // Staff can see all orders
   const orders = await prisma.order.findMany({
     where: {
-      ...(status ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" } : {}),
+      ...(status
+        ? { status: status as "DRAFT" | "SENT" | "PAID" | "CANCELLED" }
+        : {}),
       ...(tableId ? { tableId } : {}),
       ...dateFilter,
     },
     include: {
       items: {
-        include: { product: { select: { name: true, imageUrl: true, category: { select: { name: true } } } } },
+        include: {
+          product: {
+            select: {
+              name: true,
+              imageUrl: true,
+              category: { select: { name: true } },
+            },
+          },
+        },
       },
       payments: { include: { method: true } },
-      table: { select: { tableNumber: true, floor: { select: { name: true } } } },
+      table: {
+        select: { tableNumber: true, floor: { select: { name: true } } },
+      },
       customer: { select: { id: true, name: true, email: true } },
       user: { select: { id: true, name: true } },
     },
@@ -90,7 +111,10 @@ export async function POST(request: Request) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   try {
@@ -100,37 +124,65 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { ok: false, error: parsed.error.issues[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { tableId, source, customerNote, sessionId, customerId, promotionId, discountTotal } = parsed.data;
+    const {
+      tableId,
+      source,
+      customerNote,
+      sessionId,
+      customerId,
+      promotionId,
+      discountTotal,
+    } = parsed.data;
 
     const isCashier = source === "CASHIER";
 
     // Verify correct session exists for the source
     if (isCashier && !staffSession) {
-      return NextResponse.json({ ok: false, error: "Staff session required" }, { status: 401 });
+      return NextResponse.json(
+        { ok: false, error: "Staff session required" },
+        { status: 401 },
+      );
     }
     if (!isCashier && !customerSession) {
-      return NextResponse.json({ ok: false, error: "Customer session required" }, { status: 401 });
+      return NextResponse.json(
+        { ok: false, error: "Customer session required" },
+        { status: 401 },
+      );
     }
 
     // Validate promotion if provided
     if (promotionId) {
-      const promo = await prisma.promotion.findUnique({ where: { id: promotionId } });
+      const promo = await prisma.promotion.findUnique({
+        where: { id: promotionId },
+      });
       if (!promo || !promo.isActive) {
-        return NextResponse.json({ ok: false, error: "Invalid or expired promotion" }, { status: 400 });
+        return NextResponse.json(
+          { ok: false, error: "Invalid or expired promotion" },
+          { status: 400 },
+        );
       }
       const now = new Date();
       if (promo.validFrom && now < promo.validFrom) {
-        return NextResponse.json({ ok: false, error: "Promotion not yet active" }, { status: 400 });
+        return NextResponse.json(
+          { ok: false, error: "Promotion not yet active" },
+          { status: 400 },
+        );
       }
       if (promo.validUntil && now > promo.validUntil) {
-        return NextResponse.json({ ok: false, error: "Promotion has expired" }, { status: 400 });
+        return NextResponse.json(
+          { ok: false, error: "Promotion has expired" },
+          { status: 400 },
+        );
       }
       if (promo.maxUses && promo.usedCount >= promo.maxUses) {
-        return NextResponse.json({ ok: false, error: "Promotion usage limit reached" }, { status: 400 });
+        return NextResponse.json(
+          { ok: false, error: "Promotion usage limit reached" },
+          { status: 400 },
+        );
       }
     }
 
@@ -143,9 +195,12 @@ export async function POST(request: Request) {
         taxTotal: 0,
         discountTotal: discountTotal || 0,
         grandTotal: 0,
-        tableId: tableId || (!isCashier ? customerSession?.tableId ?? null : null),
+        tableId:
+          tableId || (!isCashier ? (customerSession?.tableId ?? null) : null),
         userId: isCashier ? staffSession?.user.id || null : null,
-        customerId: isCashier ? customerId || null : customerSession?.customerId || null,
+        customerId: isCashier
+          ? customerId || null
+          : customerSession?.customerId || null,
         sessionId: sessionId || null,
         promotionId: promotionId || null,
       },
@@ -175,7 +230,7 @@ export async function POST(request: Request) {
     console.error("[POST /api/orders] Failed to create order:", error);
     return NextResponse.json(
       { ok: false, error: "Failed to create order" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

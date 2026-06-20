@@ -8,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (false)
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
 
   const promotions = await prisma.promotion.findMany({
     orderBy: { createdAt: "desc" },
@@ -20,13 +23,30 @@ export async function GET() {
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (false)
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
 
   const body = await req.json();
-  const { code, name, discountType, discountValue, minOrderAmount, maxUses, validUntil, isActive, productId, minQuantity } = body;
+  const {
+    code,
+    name,
+    discountType,
+    discountValue,
+    minOrderAmount,
+    maxUses,
+    validUntil,
+    isActive,
+    productId,
+    minQuantity,
+  } = body;
 
   if (!name || !discountType || discountValue === undefined)
-    return NextResponse.json({ ok: false, error: "name, discountType, discountValue required" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "name, discountType, discountValue required" },
+      { status: 400 },
+    );
 
   try {
     const promo = await prisma.promotion.create({
@@ -46,9 +66,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, data: promo }, { status: 201 });
   } catch (e: any) {
     if (e.code === "P2002")
-      return NextResponse.json({ ok: false, error: "Promo code already exists" }, { status: 409 });
-    return NextResponse.json({ ok: false, error: "Failed to create promotion" }, { status: 500 });
+      return NextResponse.json(
+        { ok: false, error: "Promo code already exists" },
+        { status: 409 },
+      );
+    return NextResponse.json(
+      { ok: false, error: "Failed to create promotion" },
+      { status: 500 },
+    );
   }
 }
-
-

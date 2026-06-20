@@ -17,32 +17,43 @@ export async function POST(request: Request) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const {
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature,
-    cafeOrderId,     // Our internal order ID
+    cafeOrderId, // Our internal order ID
   } = await request.json();
 
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !cafeOrderId) {
+  if (
+    !razorpay_order_id ||
+    !razorpay_payment_id ||
+    !razorpay_signature ||
+    !cafeOrderId
+  ) {
     return NextResponse.json(
       { ok: false, error: "Missing required fields" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   // Verify signature
-  const expectedSignature = createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "")
+  const expectedSignature = createHmac(
+    "sha256",
+    process.env.RAZORPAY_KEY_SECRET || "",
+  )
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
 
   if (expectedSignature !== razorpay_signature) {
     return NextResponse.json(
       { ok: false, error: "Payment verification failed — invalid signature" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -54,7 +65,7 @@ export async function POST(request: Request) {
   if (!paymentMethod) {
     return NextResponse.json(
       { ok: false, error: "Payment method not configured" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -71,11 +82,17 @@ export async function POST(request: Request) {
   });
 
   if (!cafeOrder) {
-    return NextResponse.json({ ok: false, error: "Order not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Order not found" },
+      { status: 404 },
+    );
   }
 
   if (cafeOrder.status === "PAID") {
-    return NextResponse.json({ ok: false, error: "Order already paid" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Order already paid" },
+      { status: 400 },
+    );
   }
 
   // Record payment and mark order as PAID
@@ -114,7 +131,9 @@ export async function POST(request: Request) {
   // Send email receipt
   const emailTo = cafeOrder.customer?.email;
   if (emailTo) {
-    console.log(`[Verify] Customer email found: ${emailTo}. Attempting to send receipt...`);
+    console.log(
+      `[Verify] Customer email found: ${emailTo}. Attempting to send receipt...`,
+    );
     try {
       const { sendReceiptEmail } = await import("@/lib/email");
       await sendReceiptEmail({
@@ -139,7 +158,9 @@ export async function POST(request: Request) {
       console.error("[Verify] Email receipt failed:", emailErr);
     }
   } else {
-    console.log(`[Verify] No email address attached to order ${cafeOrder.orderNumber}. Skipping receipt email.`);
+    console.log(
+      `[Verify] No email address attached to order ${cafeOrder.orderNumber}. Skipping receipt email.`,
+    );
   }
 
   // WebSocket broadcast
@@ -155,7 +176,10 @@ export async function POST(request: Request) {
     io.to("cashier").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
     io.to("admin").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
     if (cafeOrder.tableId) {
-      io.to(`table:${cafeOrder.tableId}`).emit(SOCKET_EVENTS.PAYMENT_RECEIVED, paymentPayload);
+      io.to(`table:${cafeOrder.tableId}`).emit(
+        SOCKET_EVENTS.PAYMENT_RECEIVED,
+        paymentPayload,
+      );
       io.to("cashier").emit(SOCKET_EVENTS.TABLE_STATUS, {
         tableId: cafeOrder.tableId,
         status: "available",

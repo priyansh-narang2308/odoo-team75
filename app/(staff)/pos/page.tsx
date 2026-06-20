@@ -52,7 +52,7 @@ export default function SessionDashboard() {
       if (lastData.ok && lastData.data) {
         setLastSession(lastData.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load session data");
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export default function SessionDashboard() {
       } else {
         toast.error(data.error || "Failed to open session");
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred");
     } finally {
       setSubmitting(false);
@@ -121,7 +121,7 @@ export default function SessionDashboard() {
       } else {
         toast.error(data.error || "Failed to close session");
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred");
     } finally {
       setSubmitting(false);

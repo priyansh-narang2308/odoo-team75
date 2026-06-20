@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createCategorySchema, updateCategorySchema } from "@/lib/validations/product";
+import { createCategorySchema } from "@/lib/validations/product";
 
 // GET /api/categories
 export async function GET() {
@@ -20,7 +20,10 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: parsed.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

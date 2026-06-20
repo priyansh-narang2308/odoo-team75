@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -10,21 +11,40 @@ export async function POST(request: Request) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   // Debug log — remove after confirming it works
-  console.log("[Razorpay] KEY_ID present:", !!keyId, "| length:", keyId?.length ?? 0);
-  console.log("[Razorpay] KEY_SECRET present:", !!keySecret, "| length:", keySecret?.length ?? 0);
+  console.log(
+    "[Razorpay] KEY_ID present:",
+    !!keyId,
+    "| length:",
+    keyId?.length ?? 0,
+  );
+  console.log(
+    "[Razorpay] KEY_SECRET present:",
+    !!keySecret,
+    "| length:",
+    keySecret?.length ?? 0,
+  );
 
   if (!keyId || keyId.trim() === "" || !keySecret || keySecret.trim() === "") {
-    console.error("[Razorpay] Missing or empty RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET");
+    console.error(
+      "[Razorpay] Missing or empty RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET",
+    );
     return NextResponse.json(
-      { ok: false, error: "Razorpay keys are missing. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env and restart." },
-      { status: 503 }
+      {
+        ok: false,
+        error:
+          "Razorpay keys are missing. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env and restart.",
+      },
+      { status: 503 },
     );
   }
 
@@ -33,13 +53,16 @@ export async function POST(request: Request) {
   if (!amount || amount <= 0) {
     return NextResponse.json(
       { ok: false, error: "Invalid amount" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   try {
     // Initialize inside the handler so env vars are always read at request time
-    const razorpay = new Razorpay({ key_id: keyId.trim(), key_secret: keySecret.trim() });
+    const razorpay = new Razorpay({
+      key_id: keyId.trim(),
+      key_secret: keySecret.trim(),
+    });
 
     // Razorpay expects amount in paise (1 INR = 100 paise)
     const order = await razorpay.orders.create({
@@ -66,7 +89,7 @@ export async function POST(request: Request) {
     console.error("[Razorpay] SDK error:", errMsg);
     return NextResponse.json(
       { ok: false, error: `Razorpay error: ${errMsg}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

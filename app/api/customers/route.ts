@@ -28,7 +28,7 @@ export async function GET() {
 
     // Map and sanitize to exclude passwords
     const sanitized = customers.map((c) => {
-      const { password, ...rest } = c;
+      const { ...rest } = c;
       return {
         ...rest,
         orderCount: c._count.orders,
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       },
     });
 
-    const { password, ...sanitized } = customer;
+    const { ...sanitized } = customer;
     return NextResponse.json({ ok: true, data: sanitized }, { status: 201 });
   } catch (err) {
     console.error("Failed to create customer:", err);

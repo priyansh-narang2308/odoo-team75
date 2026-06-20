@@ -17,7 +17,10 @@ export async function GET(_req: Request, { params }: RouteParams) {
   });
 
   if (!product) {
-    return NextResponse.json({ ok: false, error: "Product not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Product not found" },
+      { status: 404 },
+    );
   }
 
   return NextResponse.json({ ok: true, data: product });
@@ -28,7 +31,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -36,7 +42,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: parsed.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -54,7 +60,10 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   await prisma.product.update({

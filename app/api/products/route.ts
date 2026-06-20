@@ -37,7 +37,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   try {
@@ -47,7 +50,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { ok: false, error: parsed.error.issues[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -63,10 +66,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ ok: true, data: product }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { ok: false, error: "Failed to create product" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
