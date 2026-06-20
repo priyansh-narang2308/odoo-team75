@@ -22,7 +22,7 @@ async function main() {
     where: { email: "admin@cafeodoo.com" },
     update: {},
     create: {
-      name: "Admin User",
+      name: "Admin - Shivam",
       email: "admin@cafeodoo.com",
       password: adminPassword,
       role: "ADMIN",
@@ -33,7 +33,7 @@ async function main() {
     where: { email: "cashier@cafeodoo.com" },
     update: {},
     create: {
-      name: "John Cashier",
+      name: "Priyansh Narang",
       email: "cashier@cafeodoo.com",
       password: cashierPassword,
       role: "CASHIER",
@@ -44,14 +44,14 @@ async function main() {
     where: { email: "kitchen@cafeodoo.com" },
     update: {},
     create: {
-      name: "Chef Kitchen",
+      name: "Chef Kitchen - Kaushal",
       email: "kitchen@cafeodoo.com",
       password: kitchenPassword,
       role: "KITCHEN",
     },
   });
 
-  console.log("✅ Staff users created:");
+  console.log("Staff users created:");
   console.log(`   Admin: admin@cafeodoo.com / admin123`);
   console.log(`   Cashier: cashier@cafeodoo.com / cashier123`);
   console.log(`   Kitchen: kitchen@cafeodoo.com / kitchen123`);

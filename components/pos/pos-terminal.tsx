@@ -190,6 +190,35 @@ export function POSTerminal() {
   const { socket, isConnected } = useSocket();
   const [mounted, setMounted] = useState(false);
 
+  const [promoInput, setPromoInput] = useState("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setIsApplyingPromo(true);
+    setPromoError(null);
+    try {
+      const orderTotal = subtotal();
+      const res = await fetch("/api/promotions/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoInput.toUpperCase(), orderTotal }),
+      });
+      const data = await res.json();
+      if (data.ok && data.data) {
+        setAppliedPromotion(data.data);
+        setPromoInput("");
+      } else {
+        setPromoError(data.error || "Invalid promo code");
+      }
+    } catch (err) {
+      setPromoError("Failed to apply promo code");
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -2269,7 +2298,7 @@ export function POSTerminal() {
                 <span>Tax</span>
                 <span>{formatCurrency(taxTotal())}</span>
               </div>
-              {appliedPromotion && (
+              {appliedPromotion ? (
                 <div
                   style={{
                     display: "flex",
@@ -2279,8 +2308,85 @@ export function POSTerminal() {
                     fontWeight: "600",
                   }}
                 >
-                  <span>Discount ({appliedPromotion.name})</span>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    Discount ({appliedPromotion.name})
+                    <button
+                      onClick={() => setAppliedPromotion(null)}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "#ef4444",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        padding: 0,
+                      }}
+                      title="Remove Promotion"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
                   <span>-{formatCurrency(discountTotal())}</span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <input
+                      type="text"
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value)}
+                      placeholder="Promo Code"
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid var(--color-border)",
+                        background: "var(--color-bg)",
+                        color: "var(--color-text)",
+                        fontSize: "13px",
+                        textTransform: "uppercase",
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                    />
+                    <button
+                      onClick={handleApplyPromo}
+                      disabled={isApplyingPromo || !promoInput.trim()}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: "8px",
+                        background: "var(--color-primary)",
+                        color: "white",
+                        border: "none",
+                        fontSize: "13px",
+                        fontWeight: "600",
+                        cursor:
+                          isApplyingPromo || !promoInput.trim()
+                            ? "not-allowed"
+                            : "pointer",
+                        opacity:
+                          isApplyingPromo || !promoInput.trim() ? 0.7 : 1,
+                      }}
+                    >
+                      {isApplyingPromo ? "..." : "Apply"}
+                    </button>
+                  </div>
+                  {promoError && (
+                    <span style={{ color: "#ef4444", fontSize: "11px" }}>
+                      {promoError}
+                    </span>
+                  )}
                 </div>
               )}
               <div
