@@ -43,6 +43,10 @@ export function MenuManager() {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
+    new Set(),
+  );
+  const [newCatColor, setNewCatColor] = useState("#c87941");
   const itemsPerPage = 10;
 
   const [form, setForm] = useState({
@@ -129,7 +133,7 @@ export function MenuManager() {
     const res = await fetch("/api/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newCatName.trim(), color: "#4ade80" }),
+      body: JSON.stringify({ name: newCatName.trim(), color: newCatColor }),
     });
     const data = await res.json();
     if (data.ok) {
@@ -143,6 +147,21 @@ export function MenuManager() {
     } else {
       alert(data.error);
     }
+  };
+
+  const handleBulkArchive = async () => {
+    if (
+      !confirm(
+        `Archive ${selectedProducts.size} product(s)? They won't appear on the menu.`,
+      )
+    )
+      return;
+    const ids = Array.from(selectedProducts);
+    await Promise.all(
+      ids.map((id) => fetch(`/api/products/${id}`, { method: "DELETE" })),
+    );
+    setProducts((prev) => prev.filter((p) => !selectedProducts.has(p.id)));
+    setSelectedProducts(new Set());
   };
 
   const saveProduct = async (e: React.FormEvent) => {
@@ -300,11 +319,72 @@ export function MenuManager() {
         />
       </div>
 
+      {/* Action Bar for Multi-select */}
+      {selectedProducts.size > 0 && (
+        <div
+          style={{
+            padding: "12px 16px",
+            background: "var(--color-bg-elevated)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span
+            style={{
+              color: "var(--color-text)",
+              fontWeight: 600,
+              fontSize: "14px",
+            }}
+          >
+            {selectedProducts.size} product(s) selected
+          </span>
+          <button
+            onClick={handleBulkArchive}
+            style={{
+              background: "#ef4444",
+              color: "white",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              gap: "6px",
+              alignItems: "center",
+              fontWeight: "600",
+              fontSize: "13px",
+            }}
+          >
+            <Trash2 size={14} /> Delete / Archive Selected
+          </button>
+        </div>
+      )}
+
       {/* Products Table */}
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+              <th style={{ padding: "12px 16px", width: "40px" }}>
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (e.target.checked)
+                      setSelectedProducts(
+                        new Set(paginatedProducts.map((p) => p.id)),
+                      );
+                    else setSelectedProducts(new Set());
+                  }}
+                  style={{
+                    width: "16px",
+                    height: "16px",
+                    accentColor: "var(--color-primary)",
+                  }}
+                />
+              </th>
               {["Product", "Category", "Price", "Tax", "Status", "Actions"].map(
                 (h) => (
                   <th
@@ -353,6 +433,23 @@ export function MenuManager() {
                   (e.currentTarget.style.background = "transparent")
                 }
               >
+                <td style={{ padding: "12px 16px" }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.has(p.id)}
+                    onChange={(e) => {
+                      const next = new Set(selectedProducts);
+                      if (e.target.checked) next.add(p.id);
+                      else next.delete(p.id);
+                      setSelectedProducts(next);
+                    }}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      accentColor: "var(--color-primary)",
+                    }}
+                  />
+                </td>
                 <td style={{ padding: "12px 16px" }}>
                   <p
                     style={{
@@ -638,16 +735,26 @@ export function MenuManager() {
                 </div>
                 <div>
                   <label>Tax Rate (%)</label>
-                  <input
+                  <select
                     id="form-tax"
-                    type="number"
-                    min="0"
-                    max="28"
                     value={form.taxRate}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, taxRate: e.target.value }))
                     }
-                  />
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--color-border)",
+                      background: "var(--color-bg-overlay)",
+                      color: "var(--color-text)",
+                    }}
+                  >
+                    <option value="0">0%</option>
+                    <option value="5">5%</option>
+                    <option value="18">18%</option>
+                    <option value="28">28%</option>
+                  </select>
                 </div>
                 <div>
                   <label>Unit</label>
@@ -697,40 +804,93 @@ export function MenuManager() {
                     </button>
                   </div>
                 ) : (
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <input
-                      style={{ flex: 1 }}
-                      autoFocus
-                      placeholder="New category name"
-                      value={newCatName}
-                      onChange={(e) => setNewCatName(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCreateCategory}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                      background: "var(--color-bg-overlay)",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid var(--color-border)",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <input
+                        style={{ flex: 1 }}
+                        autoFocus
+                        placeholder="New category name"
+                        value={newCatName}
+                        onChange={(e) => setNewCatName(e.target.value)}
+                      />
+                    </div>
+                    <div
                       style={{
-                        padding: "0 12px",
-                        background: "var(--color-primary)",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontWeight: "bold",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
                       }}
                     >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddCat(false)}
-                      style={{
-                        padding: "0 12px",
-                        background: "var(--color-bg-overlay)",
-                        border: "1px solid var(--color-border)",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      Cancel
-                    </button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        {[
+                          "#10b981",
+                          "#ef4444",
+                          "#f59e0b",
+                          "#3b82f6",
+                          "#8b5cf6",
+                          "#c87941",
+                        ].map((color) => (
+                          <div
+                            key={color}
+                            onClick={() => setNewCatColor(color)}
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              background: color,
+                              border:
+                                newCatColor === color
+                                  ? "2px solid white"
+                                  : "2px solid transparent",
+                              cursor: "pointer",
+                              boxShadow:
+                                newCatColor === color
+                                  ? "0 0 0 2px var(--color-bg-elevated)"
+                                  : "none",
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCat(false)}
+                          style={{
+                            padding: "6px 12px",
+                            background: "transparent",
+                            border: "none",
+                            color: "var(--color-text-muted)",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Discard
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCreateCategory}
+                          style={{
+                            padding: "6px 12px",
+                            background: "var(--color-primary)",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
