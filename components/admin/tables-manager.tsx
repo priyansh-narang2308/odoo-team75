@@ -48,6 +48,7 @@ export function TablesManager() {
     gridHeight: 8,
   });
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  const [deleteTableId, setDeleteTableId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
     tableNumber: "",
     seats: 4,
@@ -399,13 +400,13 @@ export function TablesManager() {
   };
 
   // Deactivate/Delete table
-  const deactivateTable = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this table?")) return;
+  const confirmDeactivateTable = async () => {
+    if (!deleteTableId) return;
     try {
-      const res = await fetch(`/api/tables/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/tables/${deleteTableId}`, { method: "DELETE" });
       const data = await res.json();
       if (data.ok) {
-        setTables((prev) => prev.filter((t) => t.id !== id));
+        setTables((prev) => prev.filter((t) => t.id !== deleteTableId));
         setSelectedTable(null);
         toast.success("Table removed from layout.");
       } else {
@@ -413,7 +414,13 @@ export function TablesManager() {
       }
     } catch {
       toast.error("Failed to remove table");
+    } finally {
+      setDeleteTableId(null);
     }
+  };
+
+  const deactivateTable = (id: string) => {
+    setDeleteTableId(id);
   };
 
   const selectedFloor = floors.find((f) => f.id === selectedFloorId);
@@ -1810,6 +1817,89 @@ export function TablesManager() {
                 }}
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTableId && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(4px)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "16px",
+              padding: "24px",
+              width: "400px",
+              maxWidth: "100%",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+              <div style={{ padding: "10px", background: "rgba(239, 68, 68, 0.1)", borderRadius: "10px", color: "#ef4444" }}>
+                <Trash2 size={24} />
+              </div>
+              <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--color-text)", margin: 0 }}>
+                Remove Table
+              </h2>
+            </div>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "var(--color-text-muted)",
+                marginBottom: "24px",
+                lineHeight: "1.5",
+              }}
+            >
+              Are you sure you want to remove this table? This will permanently delete the table from the floor plan.
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setDeleteTableId(null)}
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: "8px",
+                  background: "transparent",
+                  color: "var(--color-text)",
+                  border: "1px solid var(--color-border)",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeactivateTable}
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: "8px",
+                  background: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <Trash2 size={16} /> Yes, Remove
               </button>
             </div>
           </div>
