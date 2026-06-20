@@ -69,7 +69,7 @@ export function OrdersManager() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showTodayOnly, setShowTodayOnly] = useState(true);
+  const [showTodayOnly, setShowTodayOnly] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -213,6 +213,7 @@ export function OrdersManager() {
               onChange={(e) => setShowTodayOnly(e.target.checked)}
               style={{
                 width: "16px",
+                cursor: "pointer",
                 height: "16px",
                 accentColor: "var(--color-primary)",
               }}

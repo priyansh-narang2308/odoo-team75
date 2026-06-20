@@ -77,15 +77,6 @@ export function CustomerOrderGate({
             alignItems: "center",
           }}
         >
-          <div style={{ marginBottom: "12px" }}>
-            <Image
-              src="/CafePOS.png"
-              alt="CafePOS Logo"
-              width={80}
-              height={80}
-              style={{ objectFit: "contain" }}
-            />
-          </div>
           <p>Loading...</p>
         </div>
       </div>
@@ -156,31 +147,6 @@ export function CustomerOrderGate({
             background: "rgba(255,255,255,0.02)",
           }}
         />
-
-        {/* Logo */}
-        <div
-          style={{
-            width: "100px",
-            height: "100px",
-            borderRadius: "28px",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "28px",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.3)",
-            animation: "splashFloat 3s ease-in-out infinite",
-          }}
-        >
-          <Image
-            src="/CafePOS.png"
-            alt="Logo"
-            width={64}
-            height={64}
-            style={{ objectFit: "contain" }}
-          />
-        </div>
 
         {/* Store name */}
         <h1

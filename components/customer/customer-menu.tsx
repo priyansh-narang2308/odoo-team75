@@ -15,7 +15,6 @@ import {
   User,
   LogOut,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 import Image from "next/image";
 import { CustomerPaymentSheet } from "@/components/customer/customer-payment-sheet";
 import { ReceiptPrinter } from "@/components/shared/receipt-printer";
@@ -299,13 +298,6 @@ export function CustomerMenu({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Image
-            src="/CafePOS.png"
-            alt="CafePOS Logo"
-            width={32}
-            height={32}
-            style={{ objectFit: "contain" }}
-          />
           <div>
             <div
               style={{
@@ -324,7 +316,6 @@ export function CustomerMenu({
 
         {/* View toggle */}
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-          <ThemeToggle />
           <button
             id="customer-logout-btn"
             onClick={handleLogout}
@@ -908,7 +899,6 @@ export function CustomerMenu({
             }}
           >
             {filteredProducts.map((product) => {
-              const inCart = cart.find((i) => i.productId === product.id);
               return (
                 <div
                   key={product.id}

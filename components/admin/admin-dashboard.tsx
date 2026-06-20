@@ -29,7 +29,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from "recharts";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
@@ -212,6 +211,30 @@ export function AdminDashboard() {
 
   return (
     <div style={{ padding: "28px", maxWidth: "1400px" }}>
+      <style>{`
+        .responsive-grid-charts {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          margin-bottom: 24px;
+        }
+        @media (min-width: 992px) {
+          .responsive-grid-charts {
+            grid-template-columns: 2fr 1fr;
+          }
+        }
+        .responsive-grid-tables {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          margin-bottom: 24px;
+        }
+        @media (min-width: 768px) {
+          .responsive-grid-tables {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+      `}</style>
       {/* Header */}
       <div
         style={{
@@ -310,20 +333,36 @@ export function AdminDashboard() {
       <div
         className="card"
         style={{
-          padding: "16px",
+          padding: "16px 20px",
           marginBottom: "28px",
           display: "flex",
           flexWrap: "wrap",
-          gap: "16px",
+          gap: "12px",
           alignItems: "center",
           background: "var(--color-bg-elevated)",
-          borderRadius: "12px",
+          borderRadius: "16px",
           border: "1px solid var(--color-border)",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginRight: "8px",
+          }}
+        >
           <Filter size={16} color="var(--color-primary)" />
-          <span style={{ fontWeight: "600", fontSize: "14px" }}>Filters:</span>
+          <span
+            style={{
+              fontWeight: "700",
+              fontSize: "14px",
+              color: "var(--color-text)",
+            }}
+          >
+            Filters:
+          </span>
         </div>
 
         {/* Period Filter */}
@@ -331,13 +370,20 @@ export function AdminDashboard() {
           value={period}
           onChange={(e) => setPeriod(e.target.value as any)}
           style={{
-            padding: "8px 12px",
-            borderRadius: "8px",
-            background: "var(--color-bg-overlay)",
+            padding: "8px 32px 8px 14px",
+            borderRadius: "10px",
+            background:
+              'var(--color-bg-overlay) url(\'data:image/svg+xml;utf8,<svg fill="%23714B67" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>\') no-repeat right 8px center',
+            backgroundSize: "18px",
             border: "1px solid var(--color-border)",
             color: "var(--color-text)",
             fontSize: "13px",
+            fontWeight: "600",
             outline: "none",
+            appearance: "none",
+            cursor: "pointer",
+            flex: "1 1 140px",
+            maxWidth: "200px",
           }}
         >
           <option value="today">Today</option>
@@ -357,7 +403,7 @@ export function AdminDashboard() {
               onChange={(e) => setCustomStart(e.target.value)}
               style={{
                 padding: "7px 12px",
-                borderRadius: "8px",
+                borderRadius: "10px",
                 background: "var(--color-bg-overlay)",
                 border: "1px solid var(--color-border)",
                 color: "var(--color-text)",
@@ -371,7 +417,7 @@ export function AdminDashboard() {
               onChange={(e) => setCustomEnd(e.target.value)}
               style={{
                 padding: "7px 12px",
-                borderRadius: "8px",
+                borderRadius: "10px",
                 background: "var(--color-bg-overlay)",
                 border: "1px solid var(--color-border)",
                 color: "var(--color-text)",
@@ -386,13 +432,20 @@ export function AdminDashboard() {
           value={employeeId}
           onChange={(e) => setEmployeeId(e.target.value)}
           style={{
-            padding: "8px 12px",
-            borderRadius: "8px",
-            background: "var(--color-bg-overlay)",
+            padding: "8px 32px 8px 14px",
+            borderRadius: "10px",
+            background:
+              'var(--color-bg-overlay) url(\'data:image/svg+xml;utf8,<svg fill="%23714B67" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>\') no-repeat right 8px center',
+            backgroundSize: "18px",
             border: "1px solid var(--color-border)",
             color: "var(--color-text)",
             fontSize: "13px",
+            fontWeight: "600",
             outline: "none",
+            appearance: "none",
+            cursor: "pointer",
+            flex: "1 1 140px",
+            maxWidth: "200px",
           }}
         >
           <option value="">All Employees</option>
@@ -408,13 +461,19 @@ export function AdminDashboard() {
           value={sessionId}
           onChange={(e) => setSessionId(e.target.value)}
           style={{
-            padding: "8px 12px",
-            borderRadius: "8px",
-            background: "var(--color-bg-overlay)",
+            padding: "8px 32px 8px 14px",
+            borderRadius: "10px",
+            background:
+              'var(--color-bg-overlay) url(\'data:image/svg+xml;utf8,<svg fill="%23714B67" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>\') no-repeat right 8px center',
+            backgroundSize: "18px",
             border: "1px solid var(--color-border)",
             color: "var(--color-text)",
             fontSize: "13px",
+            fontWeight: "600",
             outline: "none",
+            appearance: "none",
+            cursor: "pointer",
+            flex: "1 1 140px",
             maxWidth: "200px",
           }}
         >
@@ -431,13 +490,19 @@ export function AdminDashboard() {
           value={productId}
           onChange={(e) => setProductId(e.target.value)}
           style={{
-            padding: "8px 12px",
-            borderRadius: "8px",
-            background: "var(--color-bg-overlay)",
+            padding: "8px 32px 8px 14px",
+            borderRadius: "10px",
+            background:
+              'var(--color-bg-overlay) url(\'data:image/svg+xml;utf8,<svg fill="%23714B67" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>\') no-repeat right 8px center',
+            backgroundSize: "18px",
             border: "1px solid var(--color-border)",
             color: "var(--color-text)",
             fontSize: "13px",
+            fontWeight: "600",
             outline: "none",
+            appearance: "none",
+            cursor: "pointer",
+            flex: "1 1 140px",
             maxWidth: "200px",
           }}
         >
@@ -594,14 +659,7 @@ export function AdminDashboard() {
       </div>
 
       {/* Charts Row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "20px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="responsive-grid-charts">
         {/* Revenue Chart */}
         <div className="card">
           <div
@@ -725,28 +783,13 @@ export function AdminDashboard() {
                   borderRadius: "12px",
                 }}
               />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                wrapperStyle={{
-                  fontSize: "12px",
-                  color: "var(--color-text-muted)",
-                }}
-              />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Tables Row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "20px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="responsive-grid-tables">
         {/* Top Products */}
         <div className="card">
           <div

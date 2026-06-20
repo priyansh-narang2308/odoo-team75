@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import Image from "next/image";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 interface Props {
   userName: string;
@@ -150,13 +149,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
             <Menu size={24} />
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Image
-              src="/CafePOS.png"
-              alt="Logo"
-              width={28}
-              height={28}
-              style={{ objectFit: "contain" }}
-            />
             <span
               className="font-caveat gradient-text"
               style={{ fontSize: "22px", fontWeight: "700" }}
@@ -165,7 +157,6 @@ export function StaffSidebar({ userName, userRole }: Props) {
             </span>
           </div>
         </div>
-        <ThemeToggle sidebar={false} />
       </div>
 
       {isOpen && (
@@ -224,15 +215,7 @@ export function StaffSidebar({ userName, userRole }: Props) {
                 >
                   The Purple Cup Cafe
                 </div>
-                <div
-                  style={{ fontSize: "11px", color: "var(--color-text-faint)" }}
-                >
-                  POS System
-                </div>
               </div>
-            </div>
-            <div>
-              <ThemeToggle sidebar={false} />
             </div>
           </div>
         </div>

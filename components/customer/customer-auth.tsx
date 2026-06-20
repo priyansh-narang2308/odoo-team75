@@ -123,21 +123,6 @@ export function CustomerAuth({
       >
         {/* Table badge */}
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div
-            style={{
-              marginBottom: "12px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Image
-              src="/CafePOS.png"
-              alt="CafePOS Logo"
-              width={80}
-              height={80}
-              style={{ objectFit: "contain" }}
-            />
-          </div>
           <h1
             style={{
               margin: "0 0 6px",

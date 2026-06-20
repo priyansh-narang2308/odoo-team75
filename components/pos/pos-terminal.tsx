@@ -1562,7 +1562,7 @@ export function POSTerminal() {
                 gap: "10px",
               }}
             >
-              ☕ <span className="gradient-text">CafePOS Terminal</span>
+              ☕ <span className="gradient-text">The Purple Cup Cafe Terminal</span>
             </h1>
             <p
               style={{
@@ -1919,13 +1919,7 @@ export function POSTerminal() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Image
-              src="/CafePOS.png"
-              alt="CafePOS Logo"
-              width={28}
-              height={28}
-              style={{ objectFit: "contain", height: "auto" }}
-            />
+
             <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
               Menu
             </h2>
