@@ -491,8 +491,8 @@ export function AdminDashboard() {
             value:
               kpis && kpis.totalOrdersPeriod > 0
                 ? formatCurrency(
-                  kpis.totalRevenuePeriod / kpis.totalOrdersPeriod,
-                )
+                    kpis.totalRevenuePeriod / kpis.totalOrdersPeriod,
+                  )
                 : "—",
             icon: TrendingUp,
             color: "#8b5cf6",
