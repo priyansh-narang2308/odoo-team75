@@ -409,9 +409,7 @@ export function StaffManager() {
                     </span>
                   </td>
                   <td style={{ padding: "12px 16px" }}>
-                    <button
-                      id={`toggle-staff-${m.id}`}
-                      onClick={() => toggleActive(m)}
+                    <span
                       style={{
                         padding: "3px 10px",
                         borderRadius: "999px",
@@ -421,12 +419,11 @@ export function StaffManager() {
                           ? "rgba(34,197,94,0.12)"
                           : "rgba(239,68,68,0.1)",
                         color: m.isActive ? "#4ade80" : "#f87171",
-                        border: "none",
-                        cursor: "pointer",
+                        display: "inline-block",
                       }}
                     >
-                      {m.isActive ? "Active" : "Inactive"}
-                    </button>
+                      {m.isActive ? "Active" : "Archived"}
+                    </span>
                   </td>
                   <td
                     style={{
@@ -442,25 +439,44 @@ export function StaffManager() {
                       <button
                         id={`edit-staff-${m.id}`}
                         onClick={() => openEdit(m)}
+                        title="Edit & Change Password"
                         style={{
                           padding: "6px 10px",
                           borderRadius: "7px",
                           background: "var(--color-bg-overlay)",
                           border: "1px solid var(--color-border)",
                           color: "var(--color-text-muted)",
+                          cursor: "pointer",
                         }}
                       >
                         <Pencil size={13} />
                       </button>
                       <button
+                        id={`archive-staff-${m.id}`}
+                        onClick={() => toggleActive(m)}
+                        title={m.isActive ? "Archive" : "Unarchive"}
+                        style={{
+                          padding: "6px 10px",
+                          borderRadius: "7px",
+                          background: "var(--color-bg-overlay)",
+                          border: "1px solid var(--color-border)",
+                          color: m.isActive ? "#fbbf24" : "#4ade80",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {m.isActive ? "Archive" : "Unarchive"}
+                      </button>
+                      <button
                         id={`del-staff-${m.id}`}
                         onClick={() => deleteStaff(m.id)}
+                        title="Delete"
                         style={{
                           padding: "6px 10px",
                           borderRadius: "7px",
                           background: "rgba(239,68,68,0.1)",
                           border: "1px solid rgba(239,68,68,0.2)",
                           color: "#f87171",
+                          cursor: "pointer",
                         }}
                       >
                         <Trash2 size={13} />

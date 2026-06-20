@@ -136,13 +136,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         tableNumber: updated.table?.tableNumber,
         source: updated.source,
         createdAt: updated.createdAt.toISOString(),
-        items: updated.items.map((item) => ({
-          id: item.id,
-          productName: item.product.name,
-          quantity: item.quantity,
-          notes: item.notes,
-          kdsStatus: item.kdsStatus,
-        })),
+        items: updated.items
+          .filter((item) => item.product.showInKds !== false)
+          .map((item) => ({
+            id: item.id,
+            productName: item.product.name,
+            quantity: item.quantity,
+            notes: item.notes,
+            kdsStatus: item.kdsStatus,
+          })),
       };
 
       io.to("kitchen").emit(SOCKET_EVENTS.KDS_NEW_TICKET, kdsPayload);

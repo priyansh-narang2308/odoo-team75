@@ -191,14 +191,16 @@ export function KDSBoard() {
           tableNumber: o.table?.tableNumber ?? null,
           source: o.source,
           createdAt: o.createdAt,
-          items: o.items.map((i: any) => ({
-            id: i.id,
-            productName: i.product.name,
-            categoryName: i.product.category?.name,
-            quantity: i.quantity,
-            notes: i.notes,
-            kdsStatus: i.kdsStatus,
-          })),
+          items: o.items
+            .filter((i: any) => i.product.showInKds !== false)
+            .map((i: any) => ({
+              id: i.id,
+              productName: i.product.name,
+              categoryName: i.product.category?.name,
+              quantity: i.quantity,
+              notes: i.notes,
+              kdsStatus: i.kdsStatus,
+            })),
         }));
         setTickets(mapped);
       }

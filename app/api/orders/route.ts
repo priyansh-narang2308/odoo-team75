@@ -86,6 +86,7 @@ export async function GET(request: Request) {
             select: {
               name: true,
               imageUrl: true,
+              showInKds: true,
               category: { select: { name: true } },
             },
           },
