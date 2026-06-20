@@ -8,7 +8,6 @@ export default async function HomePage() {
   const headersList = await headers();
   const host = headersList.get("host") || "";
 
-  // If accessed via port 3001, redirect to customer interface
   if (host.includes(":3001")) {
     const customerSession = await getCustomerSession();
     if (customerSession) {
@@ -18,7 +17,6 @@ export default async function HomePage() {
     }
   }
 
-  // Otherwise route staff to the correct dashboard (port 3001)
   const session = await getServerSession(authOptions);
 
   if (!session) {

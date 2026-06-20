@@ -20,7 +20,7 @@ interface CustomerSession {
   tableId: string;
 }
 
-export function CustomerOrderGate({ tableId, tableToken, tableNumber, floorName }: Props) {
+export function CustomerOrderGate({ tableId, tableNumber, floorName }: Props) {
   const [session, setSession] = useState<CustomerSession | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,9 +47,23 @@ export function CustomerOrderGate({ tableId, tableToken, tableNumber, floorName 
           background: "#241114",
         }}
       >
-        <div style={{ textAlign: "center", color: "#E6A8B7", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            textAlign: "center",
+            color: "#E6A8B7",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <div style={{ marginBottom: "12px" }}>
-            <Image src="/CafePOS.png" alt="CafePOS Logo" width={80} height={80} style={{ objectFit: "contain" }} />
+            <Image
+              src="/CafePOS.png"
+              alt="CafePOS Logo"
+              width={80}
+              height={80}
+              style={{ objectFit: "contain" }}
+            />
           </div>
           <p>Loading...</p>
         </div>

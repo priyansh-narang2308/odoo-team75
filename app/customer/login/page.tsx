@@ -78,7 +78,11 @@ export default function CustomerLoginPage() {
       const res = await fetch("/api/customer/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: data.name, email: data.email, password: data.password }),
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
       });
       const json = await res.json();
       setLoading(false);
@@ -145,7 +149,8 @@ export default function CustomerLoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #0f0f13 0%, #1a1a24 50%, #0f0f13 100%)",
+        background:
+          "linear-gradient(135deg, #0f0f13 0%, #1a1a24 50%, #0f0f13 100%)",
         padding: "24px",
         position: "relative",
         overflow: "hidden",
@@ -160,12 +165,19 @@ export default function CustomerLoginPage() {
           transform: "translateX(-50%)",
           width: "600px",
           height: "600px",
-          background: "radial-gradient(circle, rgba(200, 121, 65, 0.08) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(200, 121, 65, 0.08) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
 
-      <div style={{ width: "100%", maxWidth: "420px", animation: "fadeIn 0.4s ease both" }}>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+          animation: "fadeIn 0.4s ease both",
+        }}
+      >
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <div
@@ -234,7 +246,10 @@ export default function CustomerLoginPage() {
                   flex: 1,
                   padding: "9px",
                   borderRadius: "7px",
-                  background: mode === m ? "linear-gradient(135deg, #c87941, #a06030)" : "transparent",
+                  background:
+                    mode === m
+                      ? "linear-gradient(135deg, #c87941, #a06030)"
+                      : "transparent",
                   color: mode === m ? "#fff" : "#8a8a9a",
                   fontWeight: "600",
                   fontSize: "14px",
@@ -285,7 +300,9 @@ export default function CustomerLoginPage() {
                   {...loginForm.register("email")}
                 />
                 {loginForm.formState.errors.email && (
-                  <p style={errorTextStyle}>{loginForm.formState.errors.email.message}</p>
+                  <p style={errorTextStyle}>
+                    {loginForm.formState.errors.email.message}
+                  </p>
                 )}
               </div>
               <div>
@@ -299,7 +316,9 @@ export default function CustomerLoginPage() {
                   {...loginForm.register("password")}
                 />
                 {loginForm.formState.errors.password && (
-                  <p style={errorTextStyle}>{loginForm.formState.errors.password.message}</p>
+                  <p style={errorTextStyle}>
+                    {loginForm.formState.errors.password.message}
+                  </p>
                 )}
               </div>
               <button
@@ -308,13 +327,17 @@ export default function CustomerLoginPage() {
                 disabled={loading}
                 style={{
                   marginTop: "8px",
-                  background: loading ? "#5a3a20" : "linear-gradient(135deg, #c87941, #a06030)",
+                  background: loading
+                    ? "#5a3a20"
+                    : "linear-gradient(135deg, #c87941, #a06030)",
                   color: "#fff",
                   padding: "14px",
                   borderRadius: "10px",
                   fontWeight: "700",
                   fontSize: "15px",
-                  boxShadow: loading ? "none" : "0 4px 16px rgba(200,121,65,0.25)",
+                  boxShadow: loading
+                    ? "none"
+                    : "0 4px 16px rgba(200,121,65,0.25)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -344,7 +367,9 @@ export default function CustomerLoginPage() {
                   {...registerForm.register("name")}
                 />
                 {registerForm.formState.errors.name && (
-                  <p style={errorTextStyle}>{registerForm.formState.errors.name.message}</p>
+                  <p style={errorTextStyle}>
+                    {registerForm.formState.errors.name.message}
+                  </p>
                 )}
               </div>
               <div>
@@ -358,7 +383,9 @@ export default function CustomerLoginPage() {
                   {...registerForm.register("email")}
                 />
                 {registerForm.formState.errors.email && (
-                  <p style={errorTextStyle}>{registerForm.formState.errors.email.message}</p>
+                  <p style={errorTextStyle}>
+                    {registerForm.formState.errors.email.message}
+                  </p>
                 )}
               </div>
               <div>
@@ -372,7 +399,9 @@ export default function CustomerLoginPage() {
                   {...registerForm.register("password")}
                 />
                 {registerForm.formState.errors.password && (
-                  <p style={errorTextStyle}>{registerForm.formState.errors.password.message}</p>
+                  <p style={errorTextStyle}>
+                    {registerForm.formState.errors.password.message}
+                  </p>
                 )}
               </div>
               <button
@@ -381,13 +410,17 @@ export default function CustomerLoginPage() {
                 disabled={loading}
                 style={{
                   marginTop: "8px",
-                  background: loading ? "#5a3a20" : "linear-gradient(135deg, #c87941, #a06030)",
+                  background: loading
+                    ? "#5a3a20"
+                    : "linear-gradient(135deg, #c87941, #a06030)",
                   color: "#fff",
                   padding: "14px",
                   borderRadius: "10px",
                   fontWeight: "700",
                   fontSize: "15px",
-                  boxShadow: loading ? "none" : "0 4px 16px rgba(200,121,65,0.25)",
+                  boxShadow: loading
+                    ? "none"
+                    : "0 4px 16px rgba(200,121,65,0.25)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

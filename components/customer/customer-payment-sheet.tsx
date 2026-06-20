@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { formatCurrency, generateRef } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { UpiQrDisplay } from "@/components/shared/upi-qr-display";
 import {
   QrCode,
@@ -20,7 +20,6 @@ import {
 
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Razorpay: any;
   }
 }

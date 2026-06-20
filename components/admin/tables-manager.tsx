@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Plus, QrCode, Download, Trash2, Edit, Check, X, Users, Layers, Move } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, QrCode, Download, Trash2, X, Layers, Move } from "lucide-react";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 interface Floor {
   id: string;
@@ -35,11 +36,23 @@ export function TablesManager() {
   const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingQR, setGeneratingQR] = useState<string | null>(null);
-  const [qrResult, setQrResult] = useState<{ url: string; imgUrl: string; tableNumber: string } | null>(null);
+  const [qrResult, setQrResult] = useState<{
+    url: string;
+    imgUrl: string;
+    tableNumber: string;
+  } | null>(null);
   const [showAddFloor, setShowAddFloor] = useState(false);
-  const [floorForm, setFloorForm] = useState({ name: "", gridWidth: 12, gridHeight: 8 });
+  const [floorForm, setFloorForm] = useState({
+    name: "",
+    gridWidth: 12,
+    gridHeight: 8,
+  });
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
-  const [editForm, setEditForm] = useState({ tableNumber: "", seats: 4, status: "AVAILABLE" });
+  const [editForm, setEditForm] = useState({
+    tableNumber: "",
+    seats: 4,
+    status: "AVAILABLE",
+  });
 
   useEffect(() => {
     Promise.all([
@@ -63,7 +76,7 @@ export function TablesManager() {
     y: number,
     w: number,
     h: number,
-    floorId: string
+    floorId: string,
   ) => {
     const floor = floors.find((f) => f.id === floorId);
     if (!floor) return true;
@@ -74,7 +87,9 @@ export function TablesManager() {
     }
 
     // Overlap check
-    const floorTables = tables.filter((t) => t.floorId === floorId && t.isActive && t.id !== tableId);
+    const floorTables = tables.filter(
+      (t) => t.floorId === floorId && t.isActive && t.id !== tableId,
+    );
     for (const t of floorTables) {
       if (
         x < t.x + t.width &&
@@ -128,6 +143,7 @@ export function TablesManager() {
   };
 
   // HTML5 Drag Start (Template & Existing)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragStart = (e: React.DragEvent, data: any) => {
     e.dataTransfer.setData("application/json", JSON.stringify(data));
   };
@@ -148,10 +164,12 @@ export function TablesManager() {
 
       if (dragData.type === "template") {
         const { seats, w, h } = dragData;
-        
+
         // Collision check
         if (checkCollision(null, x, y, w, h, selectedFloorId)) {
-          toast.error("Placement overlaps another table or goes out of bounds!");
+          toast.error(
+            "Placement overlaps another table or goes out of bounds!",
+          );
           return;
         }
 
@@ -187,14 +205,23 @@ export function TablesManager() {
         if (!targetTable) return;
 
         // Collision check
-        if (checkCollision(tableId, x, y, targetTable.width, targetTable.height, selectedFloorId)) {
+        if (
+          checkCollision(
+            tableId,
+            x,
+            y,
+            targetTable.width,
+            targetTable.height,
+            selectedFloorId,
+          )
+        ) {
           toast.error("Cannot move table: overlap or out of bounds!");
           return;
         }
 
         // Optimistic update
         setTables((prev) =>
-          prev.map((t) => (t.id === tableId ? { ...t, x, y } : t))
+          prev.map((t) => (t.id === tableId ? { ...t, x, y } : t)),
         );
 
         const res = await fetch(`/api/tables/${tableId}`, {
@@ -205,7 +232,9 @@ export function TablesManager() {
         const respData = await res.json();
         if (!respData.ok) {
           toast.error(respData.error || "Failed to save table position");
-          fetch("/api/tables").then((r) => r.json()).then((t) => setTables(t.data || []));
+          fetch("/api/tables")
+            .then((r) => r.json())
+            .then((t) => setTables(t.data || []));
         }
       }
     } catch (err) {
@@ -249,11 +278,24 @@ export function TablesManager() {
       const calculatedH = Math.max(1, Math.round(startH + deltaY / cellHeight));
 
       if (calculatedW !== lastW || calculatedH !== lastH) {
-        if (!checkCollision(tableId, tableX, tableY, calculatedW, calculatedH, floorId)) {
+        if (
+          !checkCollision(
+            tableId,
+            tableX,
+            tableY,
+            calculatedW,
+            calculatedH,
+            floorId,
+          )
+        ) {
           lastW = calculatedW;
           lastH = calculatedH;
           setTables((prev) =>
-            prev.map((t) => (t.id === tableId ? { ...t, width: calculatedW, height: calculatedH } : t))
+            prev.map((t) =>
+              t.id === tableId
+                ? { ...t, width: calculatedW, height: calculatedH }
+                : t,
+            ),
           );
         }
       }
@@ -273,7 +315,9 @@ export function TablesManager() {
         toast.success(`Table resized to ${lastW}x${lastH} cells`);
       } else {
         toast.error(respData.error || "Failed to save table size");
-        fetch("/api/tables").then((r) => r.json()).then((t) => setTables(t.data || []));
+        fetch("/api/tables")
+          .then((r) => r.json())
+          .then((t) => setTables(t.data || []));
       }
     };
 
@@ -288,13 +332,21 @@ export function TablesManager() {
       const res = await fetch(`/api/tables/${tableId}/qr`, { method: "POST" });
       const data = await res.json();
       if (data.ok) {
-        setQrResult({ url: data.data.qrUrl, imgUrl: data.data.qrImageUrl, tableNumber });
+        setQrResult({
+          url: data.data.qrUrl,
+          imgUrl: data.data.qrImageUrl,
+          tableNumber,
+        });
         setTables((prev) =>
           prev.map((t) =>
             t.id === tableId
-              ? { ...t, qrToken: data.data.token, qrGeneratedAt: new Date().toISOString() }
-              : t
-          )
+              ? {
+                  ...t,
+                  qrToken: data.data.token,
+                  qrGeneratedAt: new Date().toISOString(),
+                }
+              : t,
+          ),
         );
         toast.success("QR code generated!");
       } else {
@@ -327,9 +379,14 @@ export function TablesManager() {
         setTables((prev) =>
           prev.map((t) =>
             t.id === selectedTable.id
-              ? { ...t, tableNumber: editForm.tableNumber, seats: editForm.seats, status: editForm.status }
-              : t
-          )
+              ? {
+                  ...t,
+                  tableNumber: editForm.tableNumber,
+                  seats: editForm.seats,
+                  status: editForm.status,
+                }
+              : t,
+          ),
         );
         setSelectedTable(null);
         toast.success("Table settings updated!");
@@ -360,42 +417,132 @@ export function TablesManager() {
   };
 
   const selectedFloor = floors.find((f) => f.id === selectedFloorId);
-  const floorTables = tables.filter((t) => t.floorId === selectedFloorId && t.isActive);
+  const floorTables = tables.filter(
+    (t) => t.floorId === selectedFloorId && t.isActive,
+  );
 
   // Render seats visually around the tables absolutely
   const renderChairsAroundTable = (seats: number, statusColor: string) => {
     const chairs = [];
     const radius = 6; // chair dot radius
-    
+
     if (seats <= 2) {
       chairs.push(
-        <div key="L" style={{ position: "absolute", left: `-${radius * 1.5}px`, top: `calc(50% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+        <div
+          key="L"
+          style={{
+            position: "absolute",
+            left: `-${radius * 1.5}px`,
+            top: `calc(50% - ${radius}px)`,
+            width: `${radius * 2}px`,
+            height: `${radius * 2}px`,
+            borderRadius: "50%",
+            background: statusColor,
+          }}
+        />,
       );
       chairs.push(
-        <div key="R" style={{ position: "absolute", right: `-${radius * 1.5}px`, top: `calc(50% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+        <div
+          key="R"
+          style={{
+            position: "absolute",
+            right: `-${radius * 1.5}px`,
+            top: `calc(50% - ${radius}px)`,
+            width: `${radius * 2}px`,
+            height: `${radius * 2}px`,
+            borderRadius: "50%",
+            background: statusColor,
+          }}
+        />,
       );
     } else if (seats <= 4) {
       chairs.push(
-        <div key="L" style={{ position: "absolute", left: `-${radius * 1.5}px`, top: `calc(50% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+        <div
+          key="L"
+          style={{
+            position: "absolute",
+            left: `-${radius * 1.5}px`,
+            top: `calc(50% - ${radius}px)`,
+            width: `${radius * 2}px`,
+            height: `${radius * 2}px`,
+            borderRadius: "50%",
+            background: statusColor,
+          }}
+        />,
       );
       chairs.push(
-        <div key="R" style={{ position: "absolute", right: `-${radius * 1.5}px`, top: `calc(50% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+        <div
+          key="R"
+          style={{
+            position: "absolute",
+            right: `-${radius * 1.5}px`,
+            top: `calc(50% - ${radius}px)`,
+            width: `${radius * 2}px`,
+            height: `${radius * 2}px`,
+            borderRadius: "50%",
+            background: statusColor,
+          }}
+        />,
       );
       chairs.push(
-        <div key="T" style={{ position: "absolute", top: `-${radius * 1.5}px`, left: `calc(50% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+        <div
+          key="T"
+          style={{
+            position: "absolute",
+            top: `-${radius * 1.5}px`,
+            left: `calc(50% - ${radius}px)`,
+            width: `${radius * 2}px`,
+            height: `${radius * 2}px`,
+            borderRadius: "50%",
+            background: statusColor,
+          }}
+        />,
       );
       chairs.push(
-        <div key="B" style={{ position: "absolute", bottom: `-${radius * 1.5}px`, left: `calc(50% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+        <div
+          key="B"
+          style={{
+            position: "absolute",
+            bottom: `-${radius * 1.5}px`,
+            left: `calc(50% - ${radius}px)`,
+            width: `${radius * 2}px`,
+            height: `${radius * 2}px`,
+            borderRadius: "50%",
+            background: statusColor,
+          }}
+        />,
       );
     } else {
       const sideCount = Math.ceil(seats / 2);
       for (let i = 0; i < sideCount; i++) {
         const offsetPct = ((i + 1) / (sideCount + 1)) * 100;
         chairs.push(
-          <div key={`T-${i}`} style={{ position: "absolute", top: `-${radius * 1.5}px`, left: `calc(${offsetPct}% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+          <div
+            key={`T-${i}`}
+            style={{
+              position: "absolute",
+              top: `-${radius * 1.5}px`,
+              left: `calc(${offsetPct}% - ${radius}px)`,
+              width: `${radius * 2}px`,
+              height: `${radius * 2}px`,
+              borderRadius: "50%",
+              background: statusColor,
+            }}
+          />,
         );
         chairs.push(
-          <div key={`B-${i}`} style={{ position: "absolute", bottom: `-${radius * 1.5}px`, left: `calc(${offsetPct}% - ${radius}px)`, width: `${radius*2}px`, height: `${radius*2}px`, borderRadius: "50%", background: statusColor }} />
+          <div
+            key={`B-${i}`}
+            style={{
+              position: "absolute",
+              bottom: `-${radius * 1.5}px`,
+              left: `calc(${offsetPct}% - ${radius}px)`,
+              width: `${radius * 2}px`,
+              height: `${radius * 2}px`,
+              borderRadius: "50%",
+              background: statusColor,
+            }}
+          />,
         );
       }
     }
@@ -404,28 +551,58 @@ export function TablesManager() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh", color: "var(--color-text-muted)" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "60vh",
+          color: "var(--color-text-muted)",
+        }}
+      >
         Loading Layout Editor...
       </div>
     );
   }
 
   return (
-    <div style={{ padding: "28px", maxWidth: "1600px", margin: "0 auto", color: "var(--color-text)" }}>
+    <div
+      style={{
+        padding: "28px",
+        maxWidth: "1600px",
+        margin: "0 auto",
+        color: "var(--color-text)",
+      }}
+    >
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+        }}
+      >
         <div>
           <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "800" }}>
             Floor & Table Layout Editor
           </h1>
-          <p style={{ margin: "4px 0 0", color: "var(--color-text-muted)", fontSize: "14px" }}>
-            Design floor plans using grid snapping, drag tables onto the grid, and configure layout sizes.
+          <p
+            style={{
+              margin: "4px 0 0",
+              color: "var(--color-text-muted)",
+              fontSize: "14px",
+            }}
+          >
+            Design floor plans using grid snapping, drag tables onto the grid,
+            and configure layout sizes.
           </p>
         </div>
         <button
           onClick={() => setShowAddFloor(true)}
           style={{
-            background: "linear-gradient(135deg, var(--color-primary), #a06030)",
+            background:
+              "linear-gradient(135deg, var(--color-primary), #a06030)",
             color: "#fff",
             padding: "10px 20px",
             borderRadius: "10px",
@@ -442,17 +619,39 @@ export function TablesManager() {
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: "24px" }}>
-        
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "300px 1fr",
+          gap: "24px",
+        }}
+      >
         {/* === LEFT PALETTE COLUMN === */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          
           {/* Floor selector */}
-          <div style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "18px" }}>
-            <h3 style={{ margin: "0 0 12px", fontSize: "15px", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" }}>
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "16px",
+              padding: "18px",
+            }}
+          >
+            <h3
+              style={{
+                margin: "0 0 12px",
+                fontSize: "15px",
+                fontWeight: "700",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
               <Layers size={15} color="var(--color-primary)" /> Floor Plan Views
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            >
               {floors.map((f) => (
                 <button
                   key={f.id}
@@ -462,9 +661,18 @@ export function TablesManager() {
                     borderRadius: "8px",
                     textAlign: "left",
                     fontWeight: "600",
-                    border: selectedFloorId === f.id ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
-                    background: selectedFloorId === f.id ? "rgba(var(--color-primary-rgb),0.1)" : "var(--color-bg-overlay)",
-                    color: selectedFloorId === f.id ? "var(--color-primary)" : "var(--color-text-muted)",
+                    border:
+                      selectedFloorId === f.id
+                        ? "2px solid var(--color-primary)"
+                        : "1px solid var(--color-border)",
+                    background:
+                      selectedFloorId === f.id
+                        ? "rgba(var(--color-primary-rgb),0.1)"
+                        : "var(--color-bg-overlay)",
+                    color:
+                      selectedFloorId === f.id
+                        ? "var(--color-primary)"
+                        : "var(--color-text-muted)",
                     cursor: "pointer",
                     transition: "all 0.2s",
                     display: "flex",
@@ -483,19 +691,38 @@ export function TablesManager() {
           </div>
 
           {/* Table Templates */}
-          <div style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)", borderRadius: "16px", padding: "18px" }}>
-            <h3 style={{ margin: "0 0 4px", fontSize: "15px", fontWeight: "700" }}>
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "16px",
+              padding: "18px",
+            }}
+          >
+            <h3
+              style={{ margin: "0 0 4px", fontSize: "15px", fontWeight: "700" }}
+            >
               Templates
             </h3>
-            <p style={{ margin: "0 0 14px", fontSize: "11px", color: "var(--color-text-muted)" }}>
+            <p
+              style={{
+                margin: "0 0 14px",
+                fontSize: "11px",
+                color: "var(--color-text-muted)",
+              }}
+            >
               Drag templates onto the grid cells on the right.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            >
               {/* Template: 2 Seats */}
               <div
                 draggable
-                onDragStart={(e) => handleDragStart(e, { type: "template", seats: 2, w: 1, h: 1 })}
+                onDragStart={(e) =>
+                  handleDragStart(e, { type: "template", seats: 2, w: 1, h: 1 })
+                }
                 style={{
                   padding: "12px",
                   background: "var(--color-bg-overlay)",
@@ -507,14 +734,41 @@ export function TablesManager() {
                   justifyContent: "space-between",
                   transition: "border-color 0.2s",
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--color-primary)"}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--color-border)"}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.borderColor = "var(--color-primary)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.borderColor = "var(--color-border)")
+                }
               >
                 <div>
-                  <div style={{ fontWeight: "700", fontSize: "13px" }}>2-Seats Square</div>
-                  <div style={{ fontSize: "10px", color: "var(--color-text-muted)", marginTop: "2px" }}>Size: 1x1 Cell</div>
+                  <div style={{ fontWeight: "700", fontSize: "13px" }}>
+                    2-Seats Square
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      color: "var(--color-text-muted)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    Size: 1x1 Cell
+                  </div>
                 </div>
-                <div style={{ width: "28px", height: "28px", background: "var(--color-primary)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: "bold", fontSize: "11px" }}>
+                <div
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    background: "var(--color-primary)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: "11px",
+                  }}
+                >
                   2P
                 </div>
               </div>
@@ -522,7 +776,9 @@ export function TablesManager() {
               {/* Template: 4 Seats */}
               <div
                 draggable
-                onDragStart={(e) => handleDragStart(e, { type: "template", seats: 4, w: 2, h: 2 })}
+                onDragStart={(e) =>
+                  handleDragStart(e, { type: "template", seats: 4, w: 2, h: 2 })
+                }
                 style={{
                   padding: "12px",
                   background: "var(--color-bg-overlay)",
@@ -534,14 +790,41 @@ export function TablesManager() {
                   justifyContent: "space-between",
                   transition: "border-color 0.2s",
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--color-primary)"}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--color-border)"}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.borderColor = "var(--color-primary)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.borderColor = "var(--color-border)")
+                }
               >
                 <div>
-                  <div style={{ fontWeight: "700", fontSize: "13px" }}>4-Seats Square</div>
-                  <div style={{ fontSize: "10px", color: "var(--color-text-muted)", marginTop: "2px" }}>Size: 2x2 Cells</div>
+                  <div style={{ fontWeight: "700", fontSize: "13px" }}>
+                    4-Seats Square
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      color: "var(--color-text-muted)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    Size: 2x2 Cells
+                  </div>
                 </div>
-                <div style={{ width: "32px", height: "32px", background: "var(--color-primary)", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: "bold", fontSize: "12px" }}>
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    background: "var(--color-primary)",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: "12px",
+                  }}
+                >
                   4P
                 </div>
               </div>
@@ -549,7 +832,9 @@ export function TablesManager() {
               {/* Template: 6 Seats */}
               <div
                 draggable
-                onDragStart={(e) => handleDragStart(e, { type: "template", seats: 6, w: 3, h: 2 })}
+                onDragStart={(e) =>
+                  handleDragStart(e, { type: "template", seats: 6, w: 3, h: 2 })
+                }
                 style={{
                   padding: "12px",
                   background: "var(--color-bg-overlay)",
@@ -561,14 +846,41 @@ export function TablesManager() {
                   justifyContent: "space-between",
                   transition: "border-color 0.2s",
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--color-primary)"}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--color-border)"}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.borderColor = "var(--color-primary)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.borderColor = "var(--color-border)")
+                }
               >
                 <div>
-                  <div style={{ fontWeight: "700", fontSize: "13px" }}>6-Seats Rectangle</div>
-                  <div style={{ fontSize: "10px", color: "var(--color-text-muted)", marginTop: "2px" }}>Size: 3x2 Cells</div>
+                  <div style={{ fontWeight: "700", fontSize: "13px" }}>
+                    6-Seats Rectangle
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      color: "var(--color-text-muted)",
+                      marginTop: "2px",
+                    }}
+                  >
+                    Size: 3x2 Cells
+                  </div>
                 </div>
-                <div style={{ width: "40px", height: "28px", background: "var(--color-primary)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: "bold", fontSize: "12px" }}>
+                <div
+                  style={{
+                    width: "40px",
+                    height: "28px",
+                    background: "var(--color-primary)",
+                    borderRadius: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    fontSize: "12px",
+                  }}
+                >
                   6P
                 </div>
               </div>
@@ -591,26 +903,89 @@ export function TablesManager() {
                 position: "relative",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <div>
-                  <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}>
+                  <h2
+                    style={{ margin: 0, fontSize: "18px", fontWeight: "700" }}
+                  >
                     🏗️ {selectedFloor.name} Map Layout
                   </h2>
-                  <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
-                    Grid Dimensions: {selectedFloor.gridWidth} Columns x {selectedFloor.gridHeight} Rows
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    Grid Dimensions: {selectedFloor.gridWidth} Columns x{" "}
+                    {selectedFloor.gridHeight} Rows
                   </span>
                 </div>
-                <div style={{ display: "flex", gap: "16px", fontSize: "13px", fontWeight: "600" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "50%", background: "#10b981" }}></span>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "16px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        background: "#10b981",
+                      }}
+                    ></span>
                     Available
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "50%", background: "#ef4444" }}></span>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        background: "#ef4444",
+                      }}
+                    ></span>
                     Occupied
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ display: "inline-block", width: "10px", height: "10px", borderRadius: "50%", background: "#f59e0b" }}></span>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        background: "#f59e0b",
+                      }}
+                    ></span>
                     Reserved
                   </div>
                 </div>
@@ -645,30 +1020,40 @@ export function TablesManager() {
                   }}
                 >
                   {/* Grid cells guides backdrop & dropzones */}
-                  {Array.from({ length: selectedFloor.gridHeight }).map((_, r) =>
-                    Array.from({ length: selectedFloor.gridWidth }).map((_, c) => (
-                      <div
-                        key={`${r}-${c}`}
-                        onDragOver={handleCellDragOver}
-                        onDrop={(e) => handleCellDrop(e, c, r)}
-                        style={{
-                          background: "rgba(255, 255, 255, 0.015)",
-                          border: "1px dashed rgba(255, 255, 255, 0.04)",
-                          borderRadius: "6px",
-                          gridColumnStart: c + 1,
-                          gridRowStart: r + 1,
-                          transition: "background-color 0.2s",
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(var(--color-primary-rgb), 0.04)"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.015)"}
-                      />
-                    ))
+                  {Array.from({ length: selectedFloor.gridHeight }).map(
+                    (_, r) =>
+                      Array.from({ length: selectedFloor.gridWidth }).map(
+                        (_, c) => (
+                          <div
+                            key={`${r}-${c}`}
+                            onDragOver={handleCellDragOver}
+                            onDrop={(e) => handleCellDrop(e, c, r)}
+                            style={{
+                              background: "rgba(255, 255, 255, 0.015)",
+                              border: "1px dashed rgba(255, 255, 255, 0.04)",
+                              borderRadius: "6px",
+                              gridColumnStart: c + 1,
+                              gridRowStart: r + 1,
+                              transition: "background-color 0.2s",
+                            }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                "rgba(var(--color-primary-rgb), 0.04)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 0.015)")
+                            }
+                          />
+                        ),
+                      ),
                   )}
 
                   {/* Render Tables */}
                   {floorTables.map((table) => {
-                    const hasActiveOrder = table.orders && table.orders.length > 0;
-                    
+                    const hasActiveOrder =
+                      table.orders && table.orders.length > 0;
+
                     let statusColor = "#10b981"; // green
                     let statusBg = "rgba(16, 185, 129, 0.12)";
                     let statusGlow = "0 0 10px rgba(16, 185, 129, 0.4)";
@@ -690,7 +1075,12 @@ export function TablesManager() {
                       <div
                         key={table.id}
                         draggable
-                        onDragStart={(e) => handleDragStart(e, { type: "existing", tableId: table.id })}
+                        onDragStart={(e) =>
+                          handleDragStart(e, {
+                            type: "existing",
+                            tableId: table.id,
+                          })
+                        }
                         onClick={() => {
                           setSelectedTable(table);
                           setEditForm({
@@ -739,12 +1129,25 @@ export function TablesManager() {
                         />
 
                         {/* Move Indicator Icon */}
-                        <div style={{ position: "absolute", top: "6px", left: "6px", opacity: 0.4 }}>
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "6px",
+                            left: "6px",
+                            opacity: 0.4,
+                          }}
+                        >
                           <Move size={9} color="#94a3b8" />
                         </div>
 
                         {/* Label */}
-                        <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--color-primary)" }}>
+                        <span
+                          style={{
+                            fontSize: "15px",
+                            fontWeight: "800",
+                            color: "var(--color-primary)",
+                          }}
+                        >
                           {table.tableNumber}
                         </span>
 
@@ -759,7 +1162,11 @@ export function TablesManager() {
                             background: statusBg,
                           }}
                         >
-                          {hasActiveOrder || table.status === "OCCUPIED" ? "Occupied" : table.status === "RESERVED" ? "Reserved" : "Free"}
+                          {hasActiveOrder || table.status === "OCCUPIED"
+                            ? "Occupied"
+                            : table.status === "RESERVED"
+                              ? "Reserved"
+                              : "Free"}
                         </span>
                       </div>
                     );
@@ -768,13 +1175,36 @@ export function TablesManager() {
               </div>
 
               {/* Canvas Help tips */}
-              <div style={{ fontSize: "11px", color: "var(--color-text-muted)", display: "flex", gap: "16px", marginTop: "2px" }}>
-                <span>💡 Drag templates or tables onto grid cell locations to place them</span>
-                <span>📏 Grab and drag the top-right corner handle of any table to Resize</span>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "var(--color-text-muted)",
+                  display: "flex",
+                  gap: "16px",
+                  marginTop: "2px",
+                }}
+              >
+                <span>
+                  💡 Drag templates or tables onto grid cell locations to place
+                  them
+                </span>
+                <span>
+                  📏 Grab and drag the top-right corner handle of any table to
+                  Resize
+                </span>
               </div>
             </div>
           ) : (
-            <div style={{ padding: "40px", textAlign: "center", background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)", borderRadius: "16px", color: "var(--color-text-muted)" }}>
+            <div
+              style={{
+                padding: "40px",
+                textAlign: "center",
+                background: "var(--color-bg-elevated)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "16px",
+                color: "var(--color-text-muted)",
+              }}
+            >
               No floor plan view loaded. Please select or add a floor plan.
             </div>
           )}
@@ -785,21 +1215,76 @@ export function TablesManager() {
 
       {/* Add Floor Modal */}
       {showAddFloor && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }}>
-          <div style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)", borderRadius: "20px", padding: "28px", maxWidth: "420px", width: "100%", animation: "fadeIn 0.2s ease" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h3 style={{ margin: "0", fontSize: "18px", fontWeight: "700" }}>Create Restaurant Floor</h3>
-              <button onClick={() => setShowAddFloor(false)} style={{ background: "transparent", border: "none", color: "var(--color-text-muted)", cursor: "pointer" }}><X size={20} /></button>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "20px",
+              padding: "28px",
+              maxWidth: "420px",
+              width: "100%",
+              animation: "fadeIn 0.2s ease",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: "0", fontSize: "18px", fontWeight: "700" }}>
+                Create Restaurant Floor
+              </h3>
+              <button
+                onClick={() => setShowAddFloor(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--color-text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={20} />
+              </button>
             </div>
-            
-            <form onSubmit={handleAddFloor} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+            <form
+              onSubmit={handleAddFloor}
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
               <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>Floor Plan Name *</label>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Floor Plan Name *
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. Ground Floor, Terrace, garden patio"
                   value={floorForm.name}
-                  onChange={(e) => setFloorForm({ ...floorForm, name: e.target.value })}
+                  onChange={(e) =>
+                    setFloorForm({ ...floorForm, name: e.target.value })
+                  }
                   style={{
                     width: "100%",
                     padding: "10px 12px",
@@ -812,15 +1297,35 @@ export function TablesManager() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                }}
+              >
                 <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>Grid Width (Columns) *</label>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Grid Width (Columns) *
+                  </label>
                   <input
                     type="number"
                     min="4"
                     max="30"
                     value={floorForm.gridWidth}
-                    onChange={(e) => setFloorForm({ ...floorForm, gridWidth: parseInt(e.target.value) || 12 })}
+                    onChange={(e) =>
+                      setFloorForm({
+                        ...floorForm,
+                        gridWidth: parseInt(e.target.value) || 12,
+                      })
+                    }
                     style={{
                       width: "100%",
                       padding: "10px 12px",
@@ -833,13 +1338,27 @@ export function TablesManager() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>Grid Height (Rows) *</label>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    Grid Height (Rows) *
+                  </label>
                   <input
                     type="number"
                     min="4"
                     max="30"
                     value={floorForm.gridHeight}
-                    onChange={(e) => setFloorForm({ ...floorForm, gridHeight: parseInt(e.target.value) || 8 })}
+                    onChange={(e) =>
+                      setFloorForm({
+                        ...floorForm,
+                        gridHeight: parseInt(e.target.value) || 8,
+                      })
+                    }
                     style={{
                       width: "100%",
                       padding: "10px 12px",
@@ -854,8 +1373,38 @@ export function TablesManager() {
               </div>
 
               <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                <button type="button" onClick={() => setShowAddFloor(false)} style={{ flex: 1, padding: "12px", background: "var(--color-bg-overlay)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}>Cancel</button>
-                <button type="submit" style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, var(--color-primary), #a06030)", border: "none", color: "#fff", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}>Create Floor</button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddFloor(false)}
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    background: "var(--color-bg-overlay)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-text-muted)",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    background:
+                      "linear-gradient(135deg, var(--color-primary), #a06030)",
+                    border: "none",
+                    color: "#fff",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Create Floor
+                </button>
               </div>
             </form>
           </div>
@@ -864,23 +1413,89 @@ export function TablesManager() {
 
       {/* Edit Table settings Popup */}
       {selectedTable && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }}>
-          <div style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)", borderRadius: "20px", padding: "28px", maxWidth: "440px", width: "100%", animation: "fadeIn 0.2s ease" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "20px",
+              padding: "28px",
+              maxWidth: "440px",
+              width: "100%",
+              animation: "fadeIn 0.2s ease",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
               <div>
-                <h3 style={{ margin: "0", fontSize: "18px", fontWeight: "800", color: "var(--color-primary)" }}>Configure Table {selectedTable.tableNumber}</h3>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>Size: {selectedTable.width}x{selectedTable.height} grid cells</span>
+                <h3
+                  style={{
+                    margin: "0",
+                    fontSize: "18px",
+                    fontWeight: "800",
+                    color: "var(--color-primary)",
+                  }}
+                >
+                  Configure Table {selectedTable.tableNumber}
+                </h3>
+                <span
+                  style={{ fontSize: "11px", color: "var(--color-text-muted)" }}
+                >
+                  Size: {selectedTable.width}x{selectedTable.height} grid cells
+                </span>
               </div>
-              <button onClick={() => setSelectedTable(null)} style={{ background: "transparent", border: "none", color: "var(--color-text-muted)", cursor: "pointer" }}><X size={20} /></button>
+              <button
+                onClick={() => setSelectedTable(null)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "var(--color-text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <form onSubmit={saveTableEdit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <form
+              onSubmit={saveTableEdit}
+              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+            >
               <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>Table Name/Number</label>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Table Name/Number
+                </label>
                 <input
                   type="text"
                   value={editForm.tableNumber}
-                  onChange={(e) => setEditForm({ ...editForm, tableNumber: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, tableNumber: e.target.value })
+                  }
                   style={{
                     width: "100%",
                     padding: "10px 12px",
@@ -894,13 +1509,27 @@ export function TablesManager() {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px" }}>Seats Count (Chairs)</label>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Seats Count (Chairs)
+                </label>
                 <input
                   type="number"
                   min="1"
                   max="20"
                   value={editForm.seats}
-                  onChange={(e) => setEditForm({ ...editForm, seats: parseInt(e.target.value) || 2 })}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      seats: parseInt(e.target.value) || 2,
+                    })
+                  }
                   style={{
                     width: "100%",
                     padding: "10px 12px",
@@ -914,7 +1543,16 @@ export function TablesManager() {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "8px" }}>Status Setting</label>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Status Setting
+                </label>
                 <div style={{ display: "flex", gap: "8px" }}>
                   {["AVAILABLE", "RESERVED"].map((status) => (
                     <button
@@ -925,9 +1563,18 @@ export function TablesManager() {
                         flex: 1,
                         padding: "10px",
                         borderRadius: "8px",
-                        border: editForm.status === status ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
-                        background: editForm.status === status ? "rgba(var(--color-primary-rgb),0.08)" : "var(--color-bg-overlay)",
-                        color: editForm.status === status ? "var(--color-primary)" : "var(--color-text-muted)",
+                        border:
+                          editForm.status === status
+                            ? "2px solid var(--color-primary)"
+                            : "1px solid var(--color-border)",
+                        background:
+                          editForm.status === status
+                            ? "rgba(var(--color-primary-rgb),0.08)"
+                            : "var(--color-bg-overlay)",
+                        color:
+                          editForm.status === status
+                            ? "var(--color-primary)"
+                            : "var(--color-text-muted)",
                         fontWeight: "600",
                         cursor: "pointer",
                       }}
@@ -939,17 +1586,42 @@ export function TablesManager() {
               </div>
 
               {/* QR Generation */}
-              <div style={{ background: "var(--color-bg-overlay)", padding: "14px", borderRadius: "10px", border: "1px solid var(--color-border)", display: "flex", gap: "10px", flexDirection: "column" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "600" }}>Self-Order QR Code</span>
-                  <span style={{ fontSize: "11px", color: "var(--color-text-faint)" }}>
+              <div
+                style={{
+                  background: "var(--color-bg-overlay)",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  border: "1px solid var(--color-border)",
+                  display: "flex",
+                  gap: "10px",
+                  flexDirection: "column",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ fontSize: "13px", fontWeight: "600" }}>
+                    Self-Order QR Code
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "var(--color-text-faint)",
+                    }}
+                  >
                     {selectedTable.qrToken ? "Active ✅" : "Not Generated ⚠️"}
                   </span>
                 </div>
                 <button
                   type="button"
                   id={`gen-qr-${selectedTable.id}`}
-                  onClick={() => generateQR(selectedTable.id, selectedTable.tableNumber)}
+                  onClick={() =>
+                    generateQR(selectedTable.id, selectedTable.tableNumber)
+                  }
                   disabled={generatingQR === selectedTable.id}
                   style={{
                     padding: "10px",
@@ -967,7 +1639,11 @@ export function TablesManager() {
                   }}
                 >
                   <QrCode size={14} />
-                  {generatingQR === selectedTable.id ? "Generating..." : selectedTable.qrToken ? "Regenerate QR" : "Generate QR Code"}
+                  {generatingQR === selectedTable.id
+                    ? "Generating..."
+                    : selectedTable.qrToken
+                      ? "Regenerate QR"
+                      : "Generate QR Code"}
                 </button>
               </div>
 
@@ -990,8 +1666,38 @@ export function TablesManager() {
                 >
                   <Trash2 size={15} /> Remove
                 </button>
-                <button type="button" onClick={() => setSelectedTable(null)} style={{ flex: 1, padding: "12px", background: "var(--color-bg-overlay)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}>Cancel</button>
-                <button type="submit" style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, var(--color-primary), #a06030)", border: "none", color: "#fff", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}>Save</button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTable(null)}
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    background: "var(--color-bg-overlay)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-text-muted)",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    padding: "12px",
+                    background:
+                      "linear-gradient(135deg, var(--color-primary), #a06030)",
+                    border: "none",
+                    color: "#fff",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                  }}
+                >
+                  Save
+                </button>
               </div>
             </form>
           </div>
@@ -1000,16 +1706,74 @@ export function TablesManager() {
 
       {/* QR Code Result popup */}
       {qrResult && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001, padding: "20px" }} onClick={() => setQrResult(null)}>
-          <div style={{ background: "var(--color-bg-elevated)", border: "1px solid var(--color-border)", borderRadius: "20px", padding: "32px", maxWidth: "380px", width: "100%", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: "0 0 8px", fontSize: "20px", fontWeight: "800" }}>Table {qrResult.tableNumber} QR</h3>
-            <p style={{ margin: "0 0 24px", fontSize: "14px", color: "var(--color-text-muted)" }}>Customers can scan this to order directly from their table.</p>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1001,
+            padding: "20px",
+          }}
+          onClick={() => setQrResult(null)}
+        >
+          <div
+            style={{
+              background: "var(--color-bg-elevated)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "20px",
+              padding: "32px",
+              maxWidth: "380px",
+              width: "100%",
+              textAlign: "center",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3
+              style={{ margin: "0 0 8px", fontSize: "20px", fontWeight: "800" }}
+            >
+              Table {qrResult.tableNumber} QR
+            </h3>
+            <p
+              style={{
+                margin: "0 0 24px",
+                fontSize: "14px",
+                color: "var(--color-text-muted)",
+              }}
+            >
+              Customers can scan this to order directly from their table.
+            </p>
 
-            <div style={{ background: "#fff", borderRadius: "12px", padding: "16px", display: "inline-block", marginBottom: "20px" }}>
-              <img src={qrResult.imgUrl} alt={`QR for ${qrResult.tableNumber}`} width={200} height={200} style={{ display: "block" }} />
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: "12px",
+                padding: "16px",
+                display: "inline-block",
+                marginBottom: "20px",
+              }}
+            >
+              <Image
+                src={qrResult.imgUrl}
+                alt={`QR for ${qrResult.tableNumber}`}
+                width={200}
+                height={200}
+                style={{ display: "block" }}
+              />
             </div>
 
-            <p style={{ fontSize: "12px", color: "var(--color-text-faint)", marginBottom: "20px", wordBreak: "break-all" }}>{qrResult.url}</p>
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--color-text-faint)",
+                marginBottom: "20px",
+                wordBreak: "break-all",
+              }}
+            >
+              {qrResult.url}
+            </p>
 
             <div style={{ display: "flex", gap: "10px" }}>
               <a
@@ -1019,7 +1783,8 @@ export function TablesManager() {
                   flex: 1,
                   padding: "11px",
                   borderRadius: "10px",
-                  background: "linear-gradient(135deg, var(--color-primary), #a06030)",
+                  background:
+                    "linear-gradient(135deg, var(--color-primary), #a06030)",
                   color: "#fff",
                   fontSize: "14px",
                   fontWeight: "600",
@@ -1032,7 +1797,20 @@ export function TablesManager() {
               >
                 <Download size={15} /> Download
               </a>
-              <button onClick={() => setQrResult(null)} style={{ flex: 1, padding: "11px", borderRadius: "10px", background: "var(--color-bg-overlay)", border: "1px solid var(--color-border)", color: "var(--color-text-muted)", cursor: "pointer" }}>Close</button>
+              <button
+                onClick={() => setQrResult(null)}
+                style={{
+                  flex: 1,
+                  padding: "11px",
+                  borderRadius: "10px",
+                  background: "var(--color-bg-overlay)",
+                  border: "1px solid var(--color-border)",
+                  color: "var(--color-text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

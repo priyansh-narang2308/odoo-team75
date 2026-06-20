@@ -9,9 +9,9 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const table = await prisma.table.findFirst({
-    where: { tableNumber: "T1" }
+    where: { tableNumber: "T1" },
   });
-  
+
   if (!table) {
     console.error("Table T1 not found");
     return;
@@ -22,14 +22,16 @@ async function main() {
     data: {
       status: "DRAFT",
       source: "CUSTOMER",
-      subtotal: 150.00,
-      taxTotal: 7.50,
-      grandTotal: 157.50,
+      subtotal: 150.0,
+      taxTotal: 7.5,
+      grandTotal: 157.5,
       tableId: table.id,
-    }
+    },
   });
 
-  console.log(`Successfully occupied table T1 (ID: ${table.id}) with active Order ID: ${order.id}`);
+  console.log(
+    `Successfully occupied table T1 (ID: ${table.id}) with active Order ID: ${order.id}`,
+  );
 }
 
 main()

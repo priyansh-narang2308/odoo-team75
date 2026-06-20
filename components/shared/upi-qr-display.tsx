@@ -11,7 +11,12 @@ interface Props {
   hideOpenAppButton?: boolean;
 }
 
-export function UpiQrDisplay({ upiId, amount, merchantName = "Café Odoo", hideOpenAppButton = false }: Props) {
+export function UpiQrDisplay({
+  upiId,
+  amount,
+  merchantName = "Café Odoo",
+  hideOpenAppButton = false,
+}: Props) {
   const upiLink = buildUPILink(upiId, amount, merchantName);
 
   return (
@@ -38,7 +43,9 @@ export function UpiQrDisplay({ upiId, amount, merchantName = "Café Odoo", hideO
 
       {/* UPI ID */}
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: "11px", color: "#E6A8B7", marginBottom: "4px" }}>
+        <div
+          style={{ fontSize: "11px", color: "#E6A8B7", marginBottom: "4px" }}
+        >
           UPI ID
         </div>
         <div

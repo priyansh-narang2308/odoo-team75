@@ -33,9 +33,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${caveat.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${caveat.variable} h-full`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col antialiased">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
           <SessionProvider>
             {children}
             <Toaster position="top-center" />

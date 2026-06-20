@@ -7,7 +7,10 @@ export async function GET() {
   const staffSession = await getServerSession(authOptions);
 
   if (!staffSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   try {
@@ -25,6 +28,9 @@ export async function GET() {
     return NextResponse.json({ ok: true, data: session });
   } catch (error) {
     console.error("Failed to fetch last session", error);
-    return NextResponse.json({ ok: false, error: "Failed to fetch session" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Failed to fetch session" },
+      { status: 500 },
+    );
   }
 }

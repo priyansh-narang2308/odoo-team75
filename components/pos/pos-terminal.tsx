@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/immutability */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/set-state-in-effect */
@@ -13,11 +14,9 @@ import {
   Plus,
   Minus,
   Trash2,
-  Send,
   CreditCard,
   Wifi,
   WifiOff,
-  ChevronDown,
   ChevronRight,
   ChevronLeft,
   X,
@@ -75,202 +74,6 @@ interface Table {
   status: string;
 }
 
-function CollapsibleFloor({
-  floor,
-  tables,
-  isOpen,
-  onToggle,
-  onSelectTable,
-  selectedTableId,
-  handleFreeTable,
-  isFreeing,
-}: {
-  floor: Floor;
-  tables: Table[];
-  isOpen: boolean;
-  onToggle: () => void;
-  onSelectTable: (tableId: string) => void;
-  selectedTableId: string;
-  handleFreeTable: (tableId: string) => void;
-  isFreeing: boolean;
-}) {
-  return (
-    <div
-      style={{
-        borderBottom: "1px solid var(--color-border)",
-        marginBottom: "8px",
-      }}
-    >
-      <button
-        onClick={onToggle}
-        style={{
-          width: "100%",
-          padding: "12px 16px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          background: "var(--color-bg-overlay)",
-          border: "none",
-          textAlign: "left",
-          borderRadius: "8px",
-          color: "var(--color-text)",
-          cursor: "pointer",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Layers size={16} color="var(--color-primary)" />
-          <span style={{ fontWeight: "600", fontSize: "15px" }}>
-            {floor.name}
-          </span>
-          <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
-            ({tables.length} tables)
-          </span>
-        </div>
-        <div>
-          {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-        </div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            style={{ overflow: "hidden" }}
-          >
-            <div
-              style={{
-                padding: "16px 8px",
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-                gap: "10px",
-              }}
-            >
-              {tables.map((table) => {
-                const hasActiveOrder = !!(
-                  table.orders && table.orders.length > 0
-                );
-                const activeOrder = table.orders?.[0] || null;
-                const isSelected = selectedTableId === table.id;
-
-                return (
-                  <div
-                    key={table.id}
-                    onClick={() => onSelectTable(table.id)}
-                    style={{
-                      padding: "12px 10px",
-                      borderRadius: "8px",
-                      border: isSelected
-                        ? "2px solid var(--color-primary)"
-                        : "1px solid var(--color-border)",
-                      background: isSelected
-                        ? "rgba(var(--color-primary-rgb), 0.1)"
-                        : "var(--color-bg-elevated)",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: "4px",
-                      position: "relative",
-                      transition: "all 0.15s ease",
-                      textAlign: "center",
-                      cursor: "pointer",
-                      width: "100%",
-                    }}
-                  >
-                    <span style={{ fontSize: "14px", fontWeight: "700" }}>
-                      T-{table.tableNumber}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--color-text-muted)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "2px",
-                      }}
-                    >
-                      <Users size={10} /> {table.seats} seats
-                    </span>
-
-                    {/* Status Badge */}
-                    <span
-                      style={{
-                        marginTop: "6px",
-                        fontSize: "10px",
-                        padding: "2px 6px",
-                        borderRadius: "999px",
-                        fontWeight: "600",
-                        background: hasActiveOrder
-                          ? "rgba(245, 158, 11, 0.15)"
-                          : "rgba(34, 197, 94, 0.15)",
-                        color: hasActiveOrder ? "#f59e0b" : "#4ade80",
-                      }}
-                    >
-                      {hasActiveOrder ? "Occupied" : "Available"}
-                    </span>
-
-                    {hasActiveOrder && activeOrder && (
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          color: "var(--color-primary)",
-                          fontWeight: "600",
-                          marginTop: "2px",
-                        }}
-                      >
-                        {formatCurrency(Number(activeOrder.grandTotal))}
-                      </span>
-                    )}
-
-                    {hasActiveOrder && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isFreeing) return;
-                          handleFreeTable(table.id);
-                        }}
-                        style={{
-                          marginTop: "8px",
-                          fontSize: "10px",
-                          fontWeight: "600",
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          background: "rgba(239, 68, 68, 0.1)",
-                          color: "#ef4444",
-                          border: "1px solid rgba(239, 68, 68, 0.3)",
-                          cursor: "pointer",
-                          width: "100%",
-                        }}
-                      >
-                        Free Table
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-              {tables.length === 0 && (
-                <div
-                  style={{
-                    gridColumn: "1 / -1",
-                    textAlign: "center",
-                    padding: "20px",
-                    color: "var(--color-text-faint)",
-                    fontSize: "13px",
-                  }}
-                >
-                  No active tables on this floor
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 export function POSTerminal() {
   const router = useRouter();
   const [step, setStep] = useState<"TABLE_SELECTION" | "MENU">(
@@ -281,10 +84,8 @@ export function POSTerminal() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const [showPayment, setShowPayment] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
 
-  // Load order for editing if ?editOrderId is present
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const editOrderId = searchParams.get("editOrderId");
@@ -345,7 +146,6 @@ export function POSTerminal() {
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
   const [selectedTableId, setSelectedTableId] = useState<string>("");
   const [actionTableId, setActionTableId] = useState<string | null>(null);
-  const [sendingToKitchen, setSendingToKitchen] = useState(false);
 
   // Session Management
   const [activeSession, setActiveSession] = useState<{
@@ -603,7 +403,7 @@ export function POSTerminal() {
       } else {
         toast.error(data.error || "Failed to free table");
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to free table");
     } finally {
       setIsFreeing(false);
@@ -620,9 +420,6 @@ export function POSTerminal() {
   };
 
   const selectedTable = tables.find((t) => t.id === selectedTableId);
-  const hasActiveOrders =
-    selectedTable && selectedTable.orders && selectedTable.orders.length > 0;
-
   const renderChairsAroundTable = (seats: number, statusColor: string) => {
     const chairs = [];
     const radius = 5; // dot radius
@@ -2508,8 +2305,6 @@ export function POSTerminal() {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "8px" }}
             >
-
-
               {/* Checkout (pay-first for counter customers) */}
               <button
                 id="checkout-pay-btn"

@@ -2,12 +2,22 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { startOfDay, endOfDay, subDays, format, startOfWeek, startOfMonth } from "date-fns";
+import {
+  startOfDay,
+  endOfDay,
+  subDays,
+  format,
+  startOfWeek,
+  startOfMonth,
+} from "date-fns";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -98,8 +108,20 @@ export async function GET(request: Request) {
     prisma.order.findMany({
       where: orderWhere,
       include: {
-        payments: { include: { method: { select: { type: true, name: true } } } },
-        items: { include: { product: { select: { name: true, categoryId: true, category: { select: { name: true, color: true } } } } } },
+        payments: {
+          include: { method: { select: { type: true, name: true } } },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                categoryId: true,
+                category: { select: { name: true, color: true } },
+              },
+            },
+          },
+        },
       },
     }),
 
@@ -138,7 +160,7 @@ export async function GET(request: Request) {
       include: {
         user: { select: { name: true } },
         customer: { select: { name: true } },
-      }
+      },
     }),
   ]);
 
@@ -157,10 +179,19 @@ export async function GET(request: Request) {
   }));
 
   // Process Top Categories
-  const categoryMap: Record<string, { id: string, name: string, color: string, totalQty: number, totalRevenue: number }> = {};
-  
-  paidOrders.forEach(order => {
-    order.items.forEach(item => {
+  const categoryMap: Record<
+    string,
+    {
+      id: string;
+      name: string;
+      color: string;
+      totalQty: number;
+      totalRevenue: number;
+    }
+  > = {};
+
+  paidOrders.forEach((order) => {
+    order.items.forEach((item) => {
       const cat = item.product?.category;
       if (cat) {
         if (!categoryMap[item.product.categoryId!]) {
@@ -173,16 +204,20 @@ export async function GET(request: Request) {
           };
         }
         categoryMap[item.product.categoryId!].totalQty += item.quantity;
-        categoryMap[item.product.categoryId!].totalRevenue += Number(item.lineTotal);
+        categoryMap[item.product.categoryId!].totalRevenue += Number(
+          item.lineTotal,
+        );
       }
     });
   });
 
-  const topCategories = Object.values(categoryMap).sort((a, b) => b.totalRevenue - a.totalRevenue);
+  const topCategories = Object.values(categoryMap).sort(
+    (a, b) => b.totalRevenue - a.totalRevenue,
+  );
 
   // Process revenue by day
   const dayMap: Record<string, number> = {};
-  
+
   // If period is custom or this_month etc, we just group by the actual days we have, or generate the sequence.
   // For simplicity, just populate the days that have revenue, and sort them.
   revenueByDayQuery.forEach((o) => {
@@ -209,7 +244,7 @@ export async function GET(request: Request) {
   }));
 
   // Process Top Orders
-  const topOrders = topOrdersRaw.map(o => ({
+  const topOrders = topOrdersRaw.map((o) => ({
     id: o.id,
     orderNumber: o.id.slice(-6).toUpperCase(),
     date: o.createdAt.toISOString(),
@@ -226,7 +261,10 @@ export async function GET(request: Request) {
         revenueToday: Number(totalRevenueTodayAgg._sum.grandTotal || 0),
         activeTables: activeTablesCount,
         totalOrdersPeriod: paidOrders.length,
-        totalRevenuePeriod: paidOrders.reduce((sum, o) => sum + Number(o.grandTotal), 0),
+        totalRevenuePeriod: paidOrders.reduce(
+          (sum, o) => sum + Number(o.grandTotal),
+          0,
+        ),
       },
       revenueChart,
       topProducts,

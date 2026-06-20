@@ -1,7 +1,11 @@
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { signCustomerToken, verifyCustomerToken, CustomerJWTPayload } from "./jwt";
+import {
+  signCustomerToken,
+  verifyCustomerToken,
+  CustomerJWTPayload,
+} from "./jwt";
 
 export { signCustomerToken, verifyCustomerToken };
 export type { CustomerJWTPayload };
@@ -22,7 +26,7 @@ export async function hashPassword(password: string): Promise<string> {
 // Compare password with hash
 export async function verifyPassword(
   password: string,
-  hash: string
+  hash: string,
 ): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
@@ -55,10 +59,7 @@ export async function registerCustomer(data: {
 }
 
 // Login a customer
-export async function loginCustomer(data: {
-  email: string;
-  password: string;
-}) {
+export async function loginCustomer(data: { email: string; password: string }) {
   const customer = await prisma.customer.findUnique({
     where: { email: data.email },
   });

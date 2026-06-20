@@ -15,7 +15,7 @@ interface RateLimitResult {
 export async function rateLimit(
   key: string,
   limit: number,
-  windowMs: number
+  windowMs: number,
 ): Promise<RateLimitResult> {
   const now = Date.now();
   const windowStart = now - windowMs;
@@ -35,7 +35,7 @@ export async function rateLimit(
       remaining: Math.max(0, limit - count),
       reset: now + windowMs,
     };
-  } catch (err) {
+  } catch {
     console.warn(`[RateLimit] Redis failed for ${key}, allowing request.`);
     return {
       success: true,

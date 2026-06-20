@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { formatCurrency, calculateChange, generateRef } from "@/lib/utils";
 import { UpiQrDisplay } from "@/components/shared/upi-qr-display";
 import {
@@ -11,16 +11,10 @@ import {
   CreditCard,
   CheckCircle2,
   Loader2,
-  Tag,
-  Sparkles,
-  ChevronDown,
-  ChevronUp,
-  AlertCircle,
 } from "lucide-react";
 
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Razorpay: any;
   }
 }
@@ -32,15 +26,6 @@ interface CartItem {
   taxRate: number;
   quantity: number;
   notes?: string;
-}
-
-interface AppliedPromo {
-  id: string;
-  name: string;
-  code: string | null;
-  discountType: string;
-  discountValue: number;
-  discountAmount: number;
 }
 
 interface PaymentDialogProps {
@@ -126,7 +111,7 @@ export function PaymentDialog({
 
   // ── Create order + items helper ──
   async function createCafeOrder(): Promise<string> {
-    const body: Record<string, unknown> = { 
+    const body: Record<string, unknown> = {
       source: "CASHIER",
       items,
       subtotal,
@@ -648,7 +633,11 @@ export function PaymentDialog({
                 }}
               >
                 {upiId ? (
-                  <UpiQrDisplay upiId={upiId} amount={grandTotal} hideOpenAppButton={true} />
+                  <UpiQrDisplay
+                    upiId={upiId}
+                    amount={grandTotal}
+                    hideOpenAppButton={true}
+                  />
                 ) : (
                   <div style={{ color: sv.muted, fontSize: "14px" }}>
                     No UPI ID configured. Set it in Payment Methods settings.

@@ -15,17 +15,17 @@ export function ThemeToggle({ sidebar = false }: { sidebar?: boolean }) {
 
   if (!mounted) {
     return (
-      <button 
-        style={{ 
-          background: "transparent", 
-          border: "none", 
-          padding: sidebar ? "12px 0" : "8px", 
+      <button
+        style={{
+          background: "transparent",
+          border: "none",
+          padding: sidebar ? "12px 0" : "8px",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: sidebar ? "center" : "flex-start",
           width: "100%",
-          opacity: 0
+          opacity: 0,
         }}
       >
         <div style={{ width: 24, height: 24 }} />
@@ -47,7 +47,7 @@ export function ThemeToggle({ sidebar = false }: { sidebar?: boolean }) {
         justifyContent: sidebar ? "center" : "flex-start",
         width: sidebar ? "100%" : "auto",
         color: "var(--color-text-muted)",
-        transition: "color var(--transition-fast)"
+        transition: "color var(--transition-fast)",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color = "var(--color-primary)";
@@ -56,11 +56,11 @@ export function ThemeToggle({ sidebar = false }: { sidebar?: boolean }) {
         e.currentTarget.style.color = "var(--color-text-muted)";
       }}
     >
-      {theme === "dark" ? <Sun size={sidebar ? 24 : 20} /> : <Moon size={sidebar ? 24 : 20} />}
+      {theme === "dark" ? (
+        <Sun size={sidebar ? 24 : 20} />
+      ) : (
+        <Moon size={sidebar ? 24 : 20} />
+      )}
     </button>
   );
 }
-
-
-
-

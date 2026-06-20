@@ -59,14 +59,14 @@ export const useCartStore = create<CartState>()(
       addItem: (item) => {
         set((state) => {
           const existing = state.items.find(
-            (i) => i.productId === item.productId
+            (i) => i.productId === item.productId,
           );
           if (existing) {
             return {
               items: state.items.map((i) =>
                 i.productId === item.productId
                   ? { ...i, quantity: i.quantity + 1 }
-                  : i
+                  : i,
               ),
             };
           }
@@ -89,7 +89,7 @@ export const useCartStore = create<CartState>()(
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i
+            i.productId === productId ? { ...i, quantity } : i,
           ),
         }));
       },
@@ -97,7 +97,7 @@ export const useCartStore = create<CartState>()(
       updateNotes: (productId, notes) => {
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId ? { ...i, notes } : i
+            i.productId === productId ? { ...i, notes } : i,
           ),
         }));
       },
@@ -122,16 +122,13 @@ export const useCartStore = create<CartState>()(
       },
 
       subtotal: () => {
-        return get().items.reduce(
-          (sum, i) => sum + i.price * i.quantity,
-          0
-        );
+        return get().items.reduce((sum, i) => sum + i.price * i.quantity, 0);
       },
 
       taxTotal: () => {
         return get().items.reduce(
           (sum, i) => sum + i.price * i.quantity * (i.taxRate / 100),
-          0
+          0,
         );
       },
 
@@ -142,7 +139,8 @@ export const useCartStore = create<CartState>()(
 
       grandTotal: () => {
         const state = get();
-        const total = state.subtotal() + state.taxTotal() - state.discountTotal();
+        const total =
+          state.subtotal() + state.taxTotal() - state.discountTotal();
         return Math.max(0, total); // Ensure it doesn't go below 0
       },
     }),
@@ -155,6 +153,6 @@ export const useCartStore = create<CartState>()(
         customerId: state.customerId,
         customerName: state.customerName,
       }),
-    }
-  )
+    },
+  ),
 );

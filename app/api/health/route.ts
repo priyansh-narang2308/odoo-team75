@@ -28,7 +28,7 @@ export async function GET() {
         error: "Health check failed",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 503 }
+      { status: 503 },
     );
   }
 }

@@ -6,7 +6,10 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   try {
@@ -34,7 +37,7 @@ export async function GET() {
     // Format sessions to display date and user
     const formattedSessions = sessions.map((s) => ({
       id: s.id,
-      name: `${s.user.name} - ${new Date(s.openedAt).toLocaleDateString()} ${new Date(s.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+      name: `${s.user.name} - ${new Date(s.openedAt).toLocaleDateString()} ${new Date(s.openedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
     }));
 
     return NextResponse.json({
@@ -45,7 +48,10 @@ export async function GET() {
         products,
       },
     });
-  } catch (error) {
-    return NextResponse.json({ ok: false, error: "Failed to fetch filters" }, { status: 500 });
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Failed to fetch filters" },
+      { status: 500 },
+    );
   }
 }

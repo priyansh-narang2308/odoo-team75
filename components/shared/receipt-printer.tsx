@@ -510,8 +510,8 @@ export function ReceiptPrinter({
                 color: "var(--color-text-muted)",
               }}
             >
-              Enter the customer&apos;s email address to send them a digital copy of
-              their receipt.
+              Enter the customer&apos;s email address to send them a digital
+              copy of their receipt.
             </p>
 
             <input

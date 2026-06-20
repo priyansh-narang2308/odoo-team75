@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   if (!code) {
     return NextResponse.json(
       { ok: false, error: "Promo code required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   if (!promo || !promo.isActive) {
     return NextResponse.json(
       { ok: false, error: "Invalid or expired promo code" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -29,21 +29,21 @@ export async function POST(request: Request) {
   if (promo.validFrom && now < promo.validFrom) {
     return NextResponse.json(
       { ok: false, error: "Promo code not yet active" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (promo.validUntil && now > promo.validUntil) {
     return NextResponse.json(
       { ok: false, error: "Promo code has expired" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (promo.maxUses && promo.usedCount >= promo.maxUses) {
     return NextResponse.json(
       { ok: false, error: "Promo code has reached its usage limit" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         ok: false,
         error: `Minimum order amount of ₹${Number(promo.minOrderAmount).toFixed(2)} required`,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

@@ -8,12 +8,12 @@ const ORDER_CACHE_TTL = 300; // 5 minutes
  */
 export async function cacheOrder(
   orderId: string,
-  data: unknown
+  data: unknown,
 ): Promise<void> {
   await redis.setex(
     `${ORDER_CACHE_PREFIX}${orderId}`,
     ORDER_CACHE_TTL,
-    JSON.stringify(data)
+    JSON.stringify(data),
   );
 }
 
@@ -38,14 +38,12 @@ export async function invalidateOrderCache(orderId: string): Promise<void> {
  */
 export async function setTableSession(
   tableId: string,
-  customerId: string
+  customerId: string,
 ): Promise<void> {
   await redis.setex(`table:session:${tableId}`, 86400, customerId); // 24h
 }
 
-export async function getTableSession(
-  tableId: string
-): Promise<string | null> {
+export async function getTableSession(tableId: string): Promise<string | null> {
   return redis.get(`table:session:${tableId}`);
 }
 

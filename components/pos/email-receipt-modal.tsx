@@ -71,7 +71,14 @@ export function EmailReceiptModal({
             borderBottom: "1px solid var(--color-border-muted)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontWeight: "700",
+            }}
+          >
             <Mail size={18} color="var(--color-primary)" />
             Email Receipt
           </div>
@@ -90,8 +97,15 @@ export function EmailReceiptModal({
         </div>
 
         <form onSubmit={handleSend} style={{ padding: "20px" }}>
-          <p style={{ margin: "0 0 16px", fontSize: "14px", color: "var(--color-text-muted)" }}>
-            Enter the customer&apos;s email address to send a digital copy of the receipt.
+          <p
+            style={{
+              margin: "0 0 16px",
+              fontSize: "14px",
+              color: "var(--color-text-muted)",
+            }}
+          >
+            Enter the customer&apos;s email address to send a digital copy of
+            the receipt.
           </p>
 
           <input
@@ -146,8 +160,12 @@ export function EmailReceiptModal({
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                cursor: (isSending || !email.trim() || !email.includes("@")) ? "not-allowed" : "pointer",
-                opacity: (isSending || !email.trim() || !email.includes("@")) ? 0.6 : 1,
+                cursor:
+                  isSending || !email.trim() || !email.includes("@")
+                    ? "not-allowed"
+                    : "pointer",
+                opacity:
+                  isSending || !email.trim() || !email.includes("@") ? 0.6 : 1,
               }}
             >
               {isSending ? "Sending..." : "Send"}

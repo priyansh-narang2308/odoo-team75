@@ -2,7 +2,7 @@
 // CafePOS — Socket.IO Event Payload Types
 // =============================================
 
-import type { KdsStatus, OrderStatus, OrderSource, Role } from "@prisma/client";
+import type { KdsStatus, OrderStatus, OrderSource } from "@prisma/client";
 
 // ---- JOIN events ----
 export interface JoinTablePayload {

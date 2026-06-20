@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
-import { ShoppingCart, Plus, Minus, Send, X, LogOut, User } from "lucide-react";
+import { ShoppingCart, Plus, Minus, X, LogOut, User } from "lucide-react";
 
 interface Product {
   id: string;

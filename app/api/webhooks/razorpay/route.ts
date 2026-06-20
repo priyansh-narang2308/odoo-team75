@@ -9,7 +9,8 @@ export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
     const signature = req.headers.get("x-razorpay-signature");
-    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || "fallback_webhook_secret";
+    const secret =
+      process.env.RAZORPAY_WEBHOOK_SECRET || "fallback_webhook_secret";
 
     if (!signature) {
       return NextResponse.json({ error: "Missing signature" }, { status: 400 });
@@ -84,10 +85,13 @@ export async function POST(req: Request) {
         if (io) {
           // Notify table
           if (updatedOrder.tableId) {
-            io.to(`table:${updatedOrder.tableId}`).emit(SOCKET_EVENTS.PAYMENT_RECEIVED, {
-              orderId: updatedOrder.id,
-              method: "UPI/QR",
-            });
+            io.to(`table:${updatedOrder.tableId}`).emit(
+              SOCKET_EVENTS.PAYMENT_RECEIVED,
+              {
+                orderId: updatedOrder.id,
+                method: "UPI/QR",
+              },
+            );
           }
           // Notify cashier
           io.to("cashier").emit(SOCKET_EVENTS.PAYMENT_RECEIVED, {
@@ -100,9 +104,12 @@ export async function POST(req: Request) {
             "socket_events",
             JSON.stringify({
               event: SOCKET_EVENTS.PAYMENT_RECEIVED,
-              room: ["cashier", updatedOrder.tableId ? `table:${updatedOrder.tableId}` : null].filter(Boolean),
-              payload: { orderId: updatedOrder.id, method: "UPI/QR" }
-            })
+              room: [
+                "cashier",
+                updatedOrder.tableId ? `table:${updatedOrder.tableId}` : null,
+              ].filter(Boolean),
+              payload: { orderId: updatedOrder.id, method: "UPI/QR" },
+            }),
           );
         }
       }
@@ -111,6 +118,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: "ok" });
   } catch (error) {
     console.error("Razorpay webhook error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

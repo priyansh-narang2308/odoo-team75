@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSocket } from "@/components/providers/socket-provider";
 import { SOCKET_EVENTS } from "@/lib/socket-events";
 import { formatCurrency } from "@/lib/utils";
@@ -9,17 +9,12 @@ import {
   ShoppingCart,
   Plus,
   Minus,
-  Trash2,
   Send,
-  Clock,
-  CheckCircle2,
   ChefHat,
-  CreditCard,
   X,
   User,
   LogOut,
 } from "lucide-react";
-import toast from "react-hot-toast";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import Image from "next/image";
 import { CustomerPaymentSheet } from "@/components/customer/customer-payment-sheet";

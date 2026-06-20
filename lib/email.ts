@@ -1,4 +1,7 @@
-const FROM_EMAIL = process.env.SMTP_FROM_EMAIL || process.env.EMAIL_FROM || "receipt@cafeodoo.com";
+const FROM_EMAIL =
+  process.env.SMTP_FROM_EMAIL ||
+  process.env.EMAIL_FROM ||
+  "receipt@cafeodoo.com";
 const FROM_NAME = process.env.EMAIL_FROM_NAME || "Café Odoo";
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
 
@@ -32,7 +35,7 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
       <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; text-align: center;">${item.quantity}</td>
       <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">₹${item.unitPrice.toFixed(2)}</td>
       <td style="padding: 8px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">₹${item.lineTotal.toFixed(2)}</td>
-    </tr>`
+    </tr>`,
     )
     .join("");
 
@@ -99,10 +102,11 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
           <td>Tax</td>
           <td>₹${opts.taxTotal.toFixed(2)}</td>
         </tr>
-        ${opts.discountTotal > 0
-      ? `<tr><td>Discount</td><td>-₹${opts.discountTotal.toFixed(2)}</td></tr>`
-      : ""
-    }
+        ${
+          opts.discountTotal > 0
+            ? `<tr><td>Discount</td><td>-₹${opts.discountTotal.toFixed(2)}</td></tr>`
+            : ""
+        }
         <tr class="grand-total">
           <td>Grand Total</td>
           <td>₹${opts.grandTotal.toFixed(2)}</td>
@@ -123,7 +127,7 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
-        "accept": "application/json",
+        accept: "application/json",
       },
       body: JSON.stringify({
         sender: {
@@ -143,12 +147,17 @@ export async function sendReceiptEmail(opts: SendReceiptOptions) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.error("[Email] Brevo API error:", errorData || response.statusText);
+      console.error(
+        "[Email] Brevo API error:",
+        errorData || response.statusText,
+      );
       throw new Error(`Brevo API failed with status ${response.status}`);
     }
 
     const data = await response.json();
-    console.log(`[Email] Successfully sent receipt to ${opts.to}. Message ID: ${data.messageId}`);
+    console.log(
+      `[Email] Successfully sent receipt to ${opts.to}. Message ID: ${data.messageId}`,
+    );
     return data;
   } catch (error) {
     console.error("[Email] Failed to send receipt:", error);

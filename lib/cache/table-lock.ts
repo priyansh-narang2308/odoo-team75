@@ -9,7 +9,7 @@ const LOCK_PREFIX = "table:lock:";
  */
 export async function acquireTableLock(
   tableId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> {
   const key = `${LOCK_PREFIX}${tableId}`;
   const result = await redis.set(key, userId, "EX", LOCK_TTL_SECONDS, "NX");
@@ -22,7 +22,7 @@ export async function acquireTableLock(
  */
 export async function releaseTableLock(
   tableId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> {
   const key = `${LOCK_PREFIX}${tableId}`;
   const current = await redis.get(key);
@@ -36,7 +36,7 @@ export async function releaseTableLock(
  */
 export async function refreshTableLock(
   tableId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> {
   const key = `${LOCK_PREFIX}${tableId}`;
   const current = await redis.get(key);
@@ -50,7 +50,7 @@ export async function refreshTableLock(
  * Returns userId if locked, null if free.
  */
 export async function getTableLockHolder(
-  tableId: string
+  tableId: string,
 ): Promise<string | null> {
   const key = `${LOCK_PREFIX}${tableId}`;
   return redis.get(key);

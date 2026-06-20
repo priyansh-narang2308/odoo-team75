@@ -13,7 +13,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session || !["CASHIER", "ADMIN"].includes(session.user.role)) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -21,19 +24,22 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   if (!parsed.success) {
     return NextResponse.json(
       { ok: false, error: parsed.error.issues[0].message },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   const posSession = await prisma.session.findUnique({ where: { id } });
   if (!posSession || posSession.userId !== session.user.id) {
-    return NextResponse.json({ ok: false, error: "Session not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Session not found" },
+      { status: 404 },
+    );
   }
 
   if (posSession.closedAt) {
     return NextResponse.json(
       { ok: false, error: "Session already closed" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -53,7 +59,10 @@ export async function GET(_req: Request, { params }: RouteParams) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const posSession = await prisma.session.findUnique({
@@ -76,22 +85,28 @@ export async function GET(_req: Request, { params }: RouteParams) {
   });
 
   if (!posSession) {
-    return NextResponse.json({ ok: false, error: "Session not found" }, { status: 404 });
+    return NextResponse.json(
+      { ok: false, error: "Session not found" },
+      { status: 404 },
+    );
   }
 
   // Compute Z-report summary
   const totalRevenue = posSession.orders.reduce(
     (sum, o) => sum + Number(o.grandTotal),
-    0
+    0,
   );
 
   const byMethod = posSession.orders
     .flatMap((o) => o.payments)
-    .reduce((acc, p) => {
-      const key = p.method.type;
-      acc[key] = (acc[key] || 0) + Number(p.amount);
-      return acc;
-    }, {} as Record<string, number>);
+    .reduce(
+      (acc, p) => {
+        const key = p.method.type;
+        acc[key] = (acc[key] || 0) + Number(p.amount);
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
   return NextResponse.json({
     ok: true,
