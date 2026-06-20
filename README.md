@@ -30,9 +30,9 @@ A dark-first, premium café management ecosystem and Point-of-Sale (POS) applica
 
 ---
 
-## ✨ Features
+## Features
 
-### 🏗️ Drag-and-Drop Floor & Table Layout Manager
+### Drag-and-Drop Floor & Table Layout Manager
 
 - **Multi-Floor Support:** Manage different dining spaces like the Ground Floor, Rooftop, or Patio.
 - **Canvas Layout Grid:** Drag template shapes (2-Person, 4-Person, 6-Person configurations) onto a Snapping 2D Grid.
@@ -41,33 +41,33 @@ A dark-first, premium café management ecosystem and Point-of-Sale (POS) applica
 - **Sequential Table Numbering:** Auto-generates table designations (e.g. `T1`, `T2`, etc.) sequentially.
 - **QR Code Generator:** Signs a JWT for table IDs and converts the route link to downloadable QR codes for guest self-ordering.
 
-### 💰 Cashier POS Terminal
+### Cashier POS Terminal
 
 - **Interactive Floor Maps:** Color-coded tables indicate whether they are _Available (Green)_, _Occupied (Red)_, or _Reserved (Amber)_.
 - **Dynamic Ticket Drafting:** Build customer checkouts, choose custom notes per item, and select payment types.
 - **Staff Session Tracker:** Keep track of drawers, inputting opening cash and finalizing closing drawer figures.
 - **Instant Invoices:** Receipt generation with immediate option to print or email directly to the customer.
 
-### 📱 Customer QR Self-Ordering Portal
+### Customer QR Self-Ordering Portal
 
 - **Table Scans:** Scan a table QR, sign in, and access the menu on a mobile-responsive interface.
 - **Real-time Cart Management:** Add items, view running taxes, apply promo codes, and customize kitchen notes.
 - **Razorpay Checkout:** Pay online using Net Banking, UPI, Cards, or digital wallets.
 - **Paging Services:** Request the bill with a dedicated button that immediately notifies the cashier's station.
 
-### 🍳 Kitchen Display System (KDS)
+### Kitchen Display System (KDS)
 
 - **Live Ticket Board:** New customer orders automatically push into the kitchen monitor without page refreshes.
 - **Granular Item Tracking:** Transition items individually or as entire tickets through processing phases (_Pending_ ➔ _Preparing_ ➔ _Ready_ ➔ _Done_).
 - **Cashier Notification:** Triggers real-time alerts to the cashier and customer once orders are cooked and ready.
 
-### 🏷️ Promotions & Coupon System
+### Promotions & Coupon System
 
 - **Flex Discount Rules:** Generate coupons supporting Percentage discounts (`% OFF`) or Fixed Price discounts (`₹ OFF`).
 - **Advanced Rulesets:** Set coupon minimum order values, active time ranges, and total usage limits.
 - **Progress Gauges:** Visually track coupon consumption rates.
 
-### 📊 Admin Panel & Analytics
+### Admin Panel & Analytics
 
 - **Insights Center:** Bar charts and statistics displaying revenue counts, popular items, transactional volume, and active cashier logs.
 - **Menus & Categories:** Create product categories with custom tags, assign product images, set tax rates, and route specific foods to the KDS.
@@ -75,7 +75,7 @@ A dark-first, premium café management ecosystem and Point-of-Sale (POS) applica
 
 ---
 
-## ⚡ Challenging Tech Highlights
+## Challenging Tech Highlights
 
 ### 1. Real-Time Event Syncing (Socket.IO + Redis Pub/Sub)
 
@@ -128,7 +128,7 @@ To avoid client-side payment forgery, the transaction status is never accepted f
 
 ---
 
-## 🚀 How to Run and Use
+## How to Run and Use
 
 ### Prerequisites
 
