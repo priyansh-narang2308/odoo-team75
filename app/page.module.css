@@ -268,6 +268,236 @@
   color: #714B67;
 }
 
+/* ===== FEATURES SECTION ===== */
+
+.featuresSection {
+  padding: 7rem 1.5rem;
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.featuresSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+}
+
+.featuresInner {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.featuresHeader {
+  text-align: center;
+  margin-bottom: 5rem;
+  position: relative;
+}
+
+.featuresTitle {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #212529;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+}
+
+.featuresTitleHighlight {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.3rem;
+}
+
+.featuresTitleHighlightSvg {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 120%;
+  height: 130%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.featuresTitleHighlightText {
+  position: relative;
+  z-index: 1;
+}
+
+.featuresSubtitle {
+  font-size: 1.25rem;
+  color: #6b7280;
+  font-weight: 400;
+  max-width: 40rem;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .featuresGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.featureCard {
+  background-color: #f8f9fa;
+  border-radius: 1rem;
+  padding: 2.25rem 2rem;
+  border: 1px solid #f0f0f0;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.featureCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.featureCard:hover::before {
+  height: 100%;
+}
+
+.featureCard:nth-child(1)::before { background-color: #FF8D6F; }
+.featureCard:nth-child(2)::before { background-color: #6AD1C1; }
+.featureCard:nth-child(3)::before { background-color: #4CA5FF; }
+.featureCard:nth-child(4)::before { background-color: #9C8CF0; }
+.featureCard:nth-child(5)::before { background-color: #FFB833; }
+.featureCard:nth-child(6)::before { background-color: #E85D75; }
+
+.featureCard:hover {
+  background-color: #ffffff;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+  border-color: #e8e8e8;
+}
+
+.featureCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 0.875rem;
+}
+
+.featureCardIcon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.featureCardTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.featureCardDesc {
+  font-size: 0.94rem;
+  color: #6b7280;
+  line-height: 1.7;
+  margin: 0 0 1.25rem;
+}
+
+.featureCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.featureCardTag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  color: #714B67;
+  background-color: rgba(113, 75, 103, 0.08);
+  letter-spacing: 0.01em;
+}
+
+/* ===== TECH STRIP SECTION ===== */
+
+.techStrip {
+  padding: 4rem 1.5rem;
+  background-color: #F9FAFB;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.techStripInner {
+  max-width: 72rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.techStripLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 2rem;
+}
+
+.techLogos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem 3rem;
+}
+
+.techBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.techBadge:hover {
+  border-color: #714B67;
+  color: #714B67;
+  box-shadow: 0 2px 8px rgba(113, 75, 103, 0.1);
+}
+
+.techDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== FOOTER ===== */
+
 .footer {
   padding-top: 3rem;
   padding-bottom: 3rem;
@@ -282,4 +512,20 @@
   color: #9ca3af;
   font-weight: 500;
   font-size: 0.875rem;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .featuresTitle {
+    font-size: 2.5rem;
+  }
+
+  .featuresSubtitle {
+    font-size: 1.05rem;
+  }
+
+  .featureCard {
+    padding: 1.75rem 1.5rem;
+  }
 }

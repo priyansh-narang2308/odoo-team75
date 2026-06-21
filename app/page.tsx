@@ -62,9 +62,9 @@ export default async function HomePage() {
 
           <div className={styles.subTitleWrapper}>
             <p className={`${caveat.className} ${styles.subTitle}`}>
-              Simple, efficient,{" "}
+              Smart, fast,{" "}
               <span className={styles.underlineWrapper}>
-                yet affordable!
+                and economical!
                 <svg
                   className={styles.underlineSvg}
                   preserveAspectRatio="none"
@@ -142,6 +142,239 @@ export default async function HomePage() {
               icon={<LayoutDashboard size={32} color="#4CAF50" />}
               label="Dashboard"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* ===== FEATURES SECTION ===== */}
+      <section className={styles.featuresSection}>
+        <div className={styles.featuresInner}>
+          <div className={styles.featuresHeader}>
+            <h2 className={`${caveat.className} ${styles.featuresTitle}`}>
+              Everything your café{" "}
+              <span className={styles.featuresTitleHighlight}>
+                <span className={styles.featuresTitleHighlightText}>needs</span>
+                <svg
+                  className={styles.featuresTitleHighlightSvg}
+                  viewBox="0 0 200 100"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <ellipse
+                    cx="100"
+                    cy="50"
+                    rx="90"
+                    ry="42"
+                    stroke="#6AD1C1"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="4 6"
+                    opacity="0.7"
+                  />
+                </svg>
+              </span>
+              ,<br />done right.
+            </h2>
+            <p className={styles.featuresSubtitle}>
+              From the first QR scan to the final receipt — every touchpoint is
+              connected in real-time. No plugins, no patchwork. One unified
+              system.
+            </p>
+          </div>
+
+          <div className={styles.featuresGrid}>
+            {/* Card 1 — POS Terminal */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureCardHeader}>
+                <div
+                  className={styles.featureCardIcon}
+                  style={{ backgroundColor: "rgba(255,141,111,0.12)" }}
+                >
+                  <MonitorPlay size={22} color="#FF8D6F" />
+                </div>
+                <h3 className={styles.featureCardTitle}>
+                  Point of Sale Terminal
+                </h3>
+              </div>
+              <p className={styles.featureCardDesc}>
+                A full cashier workstation with visual floor maps, interactive
+                table selection, product search, cart management with promo
+                codes, multi-payment processing, and instant receipt
+                generation — printable or emailed directly to the customer.
+              </p>
+              <div className={styles.featureCardTags}>
+                <span className={styles.featureCardTag}>Session Tracking</span>
+                <span className={styles.featureCardTag}>Cash Variance</span>
+                <span className={styles.featureCardTag}>Print / Email</span>
+              </div>
+            </div>
+
+            {/* Card 2 — QR Self-Ordering */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureCardHeader}>
+                <div
+                  className={styles.featureCardIcon}
+                  style={{ backgroundColor: "rgba(106,209,193,0.12)" }}
+                >
+                  <CreditCard size={22} color="#6AD1C1" />
+                </div>
+                <h3 className={styles.featureCardTitle}>
+                  QR Self-Ordering &amp; Payments
+                </h3>
+              </div>
+              <p className={styles.featureCardDesc}>
+                Customers scan a table QR code and get instant access to the
+                full menu on their phone — no app download needed. They can add
+                items, apply coupons, and pay online via Razorpay with secure
+                HMAC-SHA256 backend verification.
+              </p>
+              <div className={styles.featureCardTags}>
+                <span className={styles.featureCardTag}>Signed JWT QR</span>
+                <span className={styles.featureCardTag}>Razorpay</span>
+                <span className={styles.featureCardTag}>Live Tracking</span>
+              </div>
+            </div>
+
+            {/* Card 3 — KDS */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureCardHeader}>
+                <div
+                  className={styles.featureCardIcon}
+                  style={{ backgroundColor: "rgba(76,165,255,0.12)" }}
+                >
+                  <ChefHat size={22} color="#4CA5FF" />
+                </div>
+                <h3 className={styles.featureCardTitle}>
+                  Kitchen Display System
+                </h3>
+              </div>
+              <p className={styles.featureCardDesc}>
+                Orders push to the kitchen display in real-time via WebSockets.
+                Kitchen staff can track and advance individual items through To
+                Cook → Preparing → Completed stages with live elapsed timers and
+                sound notifications.
+              </p>
+              <div className={styles.featureCardTags}>
+                <span className={styles.featureCardTag}>Socket.IO</span>
+                <span className={styles.featureCardTag}>Item-Level Tracking</span>
+                <span className={styles.featureCardTag}>Sound Alerts</span>
+              </div>
+            </div>
+
+            {/* Card 4 — Floor & Table Manager */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureCardHeader}>
+                <div
+                  className={styles.featureCardIcon}
+                  style={{ backgroundColor: "rgba(156,140,240,0.12)" }}
+                >
+                  <Store size={22} color="#9C8CF0" />
+                </div>
+                <h3 className={styles.featureCardTitle}>
+                  Drag &amp; Drop Floor Manager
+                </h3>
+              </div>
+              <p className={styles.featureCardDesc}>
+                Design your café layout with a custom-built 2D grid editor.
+                Drag tables onto floors, resize them, detect collisions, and
+                generate signed QR codes — all without any third-party grid
+                library. Pure HTML5 drag APIs.
+              </p>
+              <div className={styles.featureCardTags}>
+                <span className={styles.featureCardTag}>Multi-Floor</span>
+                <span className={styles.featureCardTag}>Collision Detection</span>
+                <span className={styles.featureCardTag}>QR Generator</span>
+              </div>
+            </div>
+
+            {/* Card 5 — Promotions */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureCardHeader}>
+                <div
+                  className={styles.featureCardIcon}
+                  style={{ backgroundColor: "rgba(255,184,51,0.12)" }}
+                >
+                  <PieChart size={22} color="#FFB833" />
+                </div>
+                <h3 className={styles.featureCardTitle}>
+                  Promotions &amp; Reservations
+                </h3>
+              </div>
+              <p className={styles.featureCardDesc}>
+                Create percentage or flat-value coupons with minimum order
+                rules, usage limits, expiration dates, and product-specific
+                targeting. Plus a visual clock-picker reservation system for
+                call-in bookings with table availability checks.
+              </p>
+              <div className={styles.featureCardTags}>
+                <span className={styles.featureCardTag}>Auto-Apply</span>
+                <span className={styles.featureCardTag}>Usage Gauges</span>
+                <span className={styles.featureCardTag}>Clock Picker</span>
+              </div>
+            </div>
+
+            {/* Card 6 — Analytics & Dashboard */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureCardHeader}>
+                <div
+                  className={styles.featureCardIcon}
+                  style={{ backgroundColor: "rgba(232,93,117,0.12)" }}
+                >
+                  <LayoutDashboard size={22} color="#E85D75" />
+                </div>
+                <h3 className={styles.featureCardTitle}>
+                  Analytics &amp; Real-Time Dashboard
+                </h3>
+              </div>
+              <p className={styles.featureCardDesc}>
+                Revenue trend charts, category breakdowns, top-selling products,
+                payment method distribution, and advanced multi-filter
+                reports — all updating in real-time via WebSocket events. Export
+                any report as CSV with one click.
+              </p>
+              <div className={styles.featureCardTags}>
+                <span className={styles.featureCardTag}>Recharts</span>
+                <span className={styles.featureCardTag}>CSV Export</span>
+                <span className={styles.featureCardTag}>Live Updates</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== TECH STACK STRIP ===== */}
+      <section className={styles.techStrip}>
+        <div className={styles.techStripInner}>
+          <p className={styles.techStripLabel}>Built with</p>
+          <div className={styles.techLogos}>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#61DAFB" }} />
+              React 19
+            </span>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#000000" }} />
+              Next.js 16
+            </span>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#336791" }} />
+              PostgreSQL
+            </span>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#DC382D" }} />
+              Redis
+            </span>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#010101" }} />
+              Socket.IO
+            </span>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#2684FF" }} />
+              Razorpay
+            </span>
+            <span className={styles.techBadge}>
+              <span className={styles.techDot} style={{ backgroundColor: "#2D3748" }} />
+              Prisma
+            </span>
           </div>
         </div>
       </section>
