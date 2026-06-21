@@ -159,16 +159,27 @@ export function AdminDashboard() {
     const handleRefresh = () => fetchDataRef.current?.();
     socket.on(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
     socket.on(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
+    socket.on(SOCKET_EVENTS.ORDER_UPDATED, handleRefresh);
     socket.on(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
     socket.on(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleRefresh);
 
     return () => {
       socket.off(SOCKET_EVENTS.ORDER_STATUS, handleRefresh);
       socket.off(SOCKET_EVENTS.ORDER_PLACED, handleRefresh);
+      socket.off(SOCKET_EVENTS.ORDER_UPDATED, handleRefresh);
       socket.off(SOCKET_EVENTS.PAYMENT_RECEIVED, handleRefresh);
       socket.off(SOCKET_EVENTS.KDS_ORDER_COMPLETE, handleRefresh);
     };
   }, [socket]);
+
+  // Polling fallback — refresh every 30 seconds to catch any missed socket events
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchDataRef.current?.();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
 
   const handleExportCSV = () => {
     if (!data) return;

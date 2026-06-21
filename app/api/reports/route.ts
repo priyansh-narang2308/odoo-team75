@@ -45,66 +45,53 @@ export async function GET(request: Request) {
     startDate = startOfDay(subDays(new Date(), days - 1));
   }
 
-  // Base query conditions
+  // Orders that have at least one payment record = actually paid (cash/UPI/card)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orderWhere: any = {
-    status: "PAID",
+    payments: { some: {} },
     createdAt: { gte: startDate, lte: endDate },
+    status: { not: "CANCELLED" },
   };
 
-  if (employeeId) {
-    orderWhere.userId = employeeId;
-  }
-  if (sessionId) {
-    orderWhere.sessionId = sessionId;
-  }
-  if (productId) {
-    orderWhere.items = { some: { productId } };
-  }
+  if (employeeId) orderWhere.userId = employeeId;
+  if (sessionId) orderWhere.sessionId = sessionId;
+  if (productId) orderWhere.items = { some: { productId } };
 
-  // Active tables don't need all filters, just a count
+  // Today's base filter (same logic but scoped to today)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const todayWhere: any = {
+    ...orderWhere,
+    createdAt: {
+      gte: startOfDay(new Date()),
+      lte: endOfDay(new Date()),
+    },
+  };
+
+  // Active tables = tables with orders not yet paid
   const activeTablesPromise = prisma.table.count({
     where: {
-      orders: { some: { status: { in: ["DRAFT", "SENT"] } } },
+      orders: {
+        some: { status: { in: ["DRAFT", "SENT", "PREPARING", "READY"] } },
+      },
     },
   });
 
   const [
     totalOrdersToday,
-    totalRevenueTodayAgg,
     activeTablesCount,
     paidOrders,
     topProductsAgg,
     revenueByDayQuery,
     paymentMethodBreakdown,
     topOrdersRaw,
+    todayPaymentsAgg,
   ] = await Promise.all([
-    // Today's order count (filtered by employee/session if applicable)
-    prisma.order.count({
-      where: {
-        ...orderWhere,
-        createdAt: {
-          gte: startOfDay(new Date()),
-          lte: endOfDay(new Date()),
-        },
-      },
-    }),
-
-    // Today's revenue
-    prisma.order.aggregate({
-      where: {
-        ...orderWhere,
-        createdAt: {
-          gte: startOfDay(new Date()),
-          lte: endOfDay(new Date()),
-        },
-      },
-      _sum: { grandTotal: true },
-    }),
+    // Today's count — orders with at least one payment today
+    prisma.order.count({ where: todayWhere }),
 
     activeTablesPromise,
 
-    // All paid orders in period
+    // All orders with payments in the period
     prisma.order.findMany({
       where: orderWhere,
       include: {
@@ -125,34 +112,33 @@ export async function GET(request: Request) {
       },
     }),
 
-    // Top selling products (requires items where order matches)
+    // Top selling products
     prisma.orderItem.groupBy({
       by: ["productId"],
-      where: {
-        order: orderWhere,
-      },
+      where: { order: orderWhere },
       _sum: { quantity: true, lineTotal: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: 10,
     }),
 
-    // Revenue by day (last N days or custom)
-    prisma.order.findMany({
-      where: orderWhere,
-      select: { grandTotal: true, createdAt: true },
+    // Revenue by day — from actual payment records
+    prisma.payment.findMany({
+      where: {
+        order: orderWhere,
+        createdAt: { gte: startDate, lte: endDate },
+      },
+      select: { amount: true, createdAt: true },
     }),
 
     // Payment method breakdown
     prisma.payment.groupBy({
       by: ["methodId"],
-      where: {
-        order: orderWhere,
-      },
+      where: { order: orderWhere },
       _sum: { amount: true },
       _count: true,
     }),
 
-    // Top Orders
+    // Top orders by grand total
     prisma.order.findMany({
       where: orderWhere,
       orderBy: { grandTotal: "desc" },
@@ -162,9 +148,21 @@ export async function GET(request: Request) {
         customer: { select: { name: true } },
       },
     }),
+
+    // Today's revenue from actual payment records
+    prisma.payment.aggregate({
+      where: {
+        order: todayWhere,
+        createdAt: {
+          gte: startOfDay(new Date()),
+          lte: endOfDay(new Date()),
+        },
+      },
+      _sum: { amount: true },
+    }),
   ]);
 
-  // Process top products (get names)
+  // Process top products
   const productIds = topProductsAgg.map((p) => p.productId);
   const productNames = await prisma.product.findMany({
     where: { id: { in: productIds } },
@@ -181,13 +179,7 @@ export async function GET(request: Request) {
   // Process Top Categories
   const categoryMap: Record<
     string,
-    {
-      id: string;
-      name: string;
-      color: string;
-      totalQty: number;
-      totalRevenue: number;
-    }
+    { id: string; name: string; color: string; totalQty: number; totalRevenue: number }
   > = {};
 
   paidOrders.forEach((order) => {
@@ -204,9 +196,7 @@ export async function GET(request: Request) {
           };
         }
         categoryMap[item.product.categoryId!].totalQty += item.quantity;
-        categoryMap[item.product.categoryId!].totalRevenue += Number(
-          item.lineTotal,
-        );
+        categoryMap[item.product.categoryId!].totalRevenue += Number(item.lineTotal);
       }
     });
   });
@@ -215,21 +205,18 @@ export async function GET(request: Request) {
     (a, b) => b.totalRevenue - a.totalRevenue,
   );
 
-  // Process revenue by day
+  // Revenue chart — grouped by day from actual payment records
   const dayMap: Record<string, number> = {};
-
-  // If period is custom or this_month etc, we just group by the actual days we have, or generate the sequence.
-  // For simplicity, just populate the days that have revenue, and sort them.
-  revenueByDayQuery.forEach((o) => {
-    const day = format(o.createdAt, "yyyy-MM-dd");
-    dayMap[day] = (dayMap[day] || 0) + Number(o.grandTotal);
+  revenueByDayQuery.forEach((p) => {
+    const day = format(p.createdAt, "yyyy-MM-dd");
+    dayMap[day] = (dayMap[day] || 0) + Number(p.amount);
   });
 
   const revenueChart = Object.entries(dayMap)
     .map(([date, revenue]) => ({ date, revenue }))
-    .sort((a, b) => a.date.localeCompare(b.date)); // Sort chronologically
+    .sort((a, b) => a.date.localeCompare(b.date));
 
-  // Process payment methods
+  // Payment method breakdown
   const methodIds = paymentMethodBreakdown.map((p) => p.methodId);
   const methods = await prisma.paymentMethod.findMany({
     where: { id: { in: methodIds } },
@@ -243,10 +230,16 @@ export async function GET(request: Request) {
     count: p._count,
   }));
 
-  // Process Top Orders
+  // Total revenue = sum of all payment amounts in period
+  const totalRevenuePeriod = paidOrders.reduce(
+    (sum, o) => sum + o.payments.reduce((s, p) => s + Number(p.amount), 0),
+    0,
+  );
+
+  // Top orders
   const topOrders = topOrdersRaw.map((o) => ({
     id: o.id,
-    orderNumber: o.id.slice(-6).toUpperCase(),
+    orderNumber: o.orderNumber?.toString() || o.id.slice(-6).toUpperCase(),
     date: o.createdAt.toISOString(),
     customerName: o.customer?.name || "Walk-in",
     employeeName: o.user?.name || "Unknown",
@@ -258,13 +251,10 @@ export async function GET(request: Request) {
     data: {
       kpis: {
         ordersToday: totalOrdersToday,
-        revenueToday: Number(totalRevenueTodayAgg._sum.grandTotal || 0),
+        revenueToday: Number(todayPaymentsAgg._sum.amount || 0),
         activeTables: activeTablesCount,
         totalOrdersPeriod: paidOrders.length,
-        totalRevenuePeriod: paidOrders.reduce(
-          (sum, o) => sum + Number(o.grandTotal),
-          0,
-        ),
+        totalRevenuePeriod,
       },
       revenueChart,
       topProducts,
