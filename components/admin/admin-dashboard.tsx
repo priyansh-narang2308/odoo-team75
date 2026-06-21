@@ -135,11 +135,21 @@ export function AdminDashboard() {
       if (productId) params.append("productId", productId);
 
       const res = await fetch(`/api/reports?${params.toString()}`);
-      const json = await res.json();
-      if (json.ok) {
-        setData(json.data);
-        setLastUpdated(new Date());
+      if (!res.ok) {
+        console.error("Failed to fetch reports, status:", res.status);
+        return;
       }
+      try {
+        const json = await res.json();
+        if (json.ok) {
+          setData(json.data);
+          setLastUpdated(new Date());
+        }
+      } catch (err) {
+        console.error("Failed to parse reports response:", err);
+      }
+    } catch (err) {
+      console.error("Fetch reports network error:", err);
     } finally {
       setLoading(false);
     }
