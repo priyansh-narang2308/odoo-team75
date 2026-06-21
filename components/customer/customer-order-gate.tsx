@@ -66,20 +66,36 @@ export function CustomerOrderGate({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: bgColor,
+          background: "#0f081d",
+          color: "rgba(255,255,255,0.6)",
+          fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif",
         }}
       >
         <div
           style={{
             textAlign: "center",
-            color: "rgba(255,255,255,0.6)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
           }}
         >
-          <p>Loading...</p>
+          <div style={{ animation: "splashFloat 2s ease-in-out infinite", marginBottom: "16px" }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+              <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+              <line x1="6" y1="2" x2="6" y2="4" />
+              <line x1="10" y1="2" x2="10" y2="4" />
+              <line x1="14" y1="2" x2="14" y2="4" />
+            </svg>
+          </div>
+          <p style={{ letterSpacing: "0.05em", color: "rgba(255,255,255,0.7)", fontWeight: "500" }}>Preparing Your Experience...</p>
         </div>
+        <style>{`
+          @keyframes splashFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+          }
+        `}</style>
       </div>
     );
   }
@@ -90,140 +106,180 @@ export function CustomerOrderGate({
       <div
         style={{
           minHeight: "100vh",
-          background: bgColor,
+          background: "#0f081d", // Deep elegant midnight black-purple
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           position: "relative",
           overflow: "hidden",
-          fontFamily: "inherit",
+          fontFamily: "'Outfit', 'Inter', -apple-system, sans-serif",
+          padding: "24px",
         }}
       >
-        {/* Animated gradient overlay */}
+        {/* Elegant ambient glow backlights */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse at 30% 20%, rgba(113,75,103,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(150,107,137,0.1) 0%, transparent 50%)",
-            animation: "splashPulse 4s ease-in-out infinite alternate",
+            top: "20%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "600px",
+            height: "600px",
+            background: "radial-gradient(circle, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0) 70%)",
+            filter: "blur(60px)",
             pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "10%",
+            width: "400px",
+            height: "400px",
+            background: "radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%)",
+            filter: "blur(50px)",
+            pointerEvents: "none",
+            zIndex: 0,
           }}
         />
 
-        {/* Floating circles decoration */}
+        {/* Elegant central card */}
         <div
           style={{
-            position: "absolute",
-            top: "15%",
-            left: "10%",
-            width: "120px",
-            height: "120px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.05)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: "20%",
-            right: "8%",
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.04)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "60%",
-            left: "5%",
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.02)",
-          }}
-        />
-
-        {/* Store name */}
-        <h1
-          style={{
-            fontSize: "38px",
-            fontWeight: "800",
-            color: "#fff",
-            margin: "0 0 8px",
+            width: "100%",
+            maxWidth: "420px",
+            background: "rgba(255, 255, 255, 0.03)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "28px",
+            padding: "48px 32px",
             textAlign: "center",
-            letterSpacing: "-0.02em",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
+            zIndex: 1,
+            animation: "splashFloat 6s ease-in-out infinite",
           }}
         >
-          {storeName}
-        </h1>
-        <p
-          style={{
-            fontSize: "15px",
-            color: "rgba(255,255,255,0.4)",
-            margin: "0 0 6px",
-            fontWeight: "400",
-          }}
-        >
-          {floorName} · Table {tableNumber}
-        </p>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "rgba(255,255,255,0.25)",
-            margin: "0 0 48px",
-          }}
-        >
-          Scan, Order & Enjoy
-        </p>
+          {/* Splash Hero Image */}
+          <div
+            style={{
+              width: "100%",
+              height: "220px",
+              borderRadius: "18px",
+              overflow: "hidden",
+              marginBottom: "28px",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+              position: "relative",
+            }}
+          >
+            <Image
+              src="/purple_cup_splash.png"
+              alt="The Purple Cup Café"
+              fill
+              style={{ objectFit: "cover" }}
+              priority
+            />
+          </div>
 
-        {/* Order Here CTA */}
-        <button
-          id="splash-order-btn"
-          onClick={() => {
-            // Automatically start a guest session instead of forcing sign-in
-            setSession({
-              id: `guest_${Math.random().toString(36).substring(7)}`,
-              name: `Guest (Table ${tableNumber})`,
-              email: "guest@thepurplecup.com",
-              tableId: tableId,
-            });
-            setShowSplash(false);
-          }}
-          style={{
-            padding: "16px 60px",
-            borderRadius: "14px",
-            background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))",
-            color: "#fff",
-            fontSize: "18px",
-            fontWeight: "700",
-            border: "none",
-            cursor: "pointer",
-            boxShadow:
-              "0 8px 32px rgba(113,75,103,0.4), 0 2px 8px rgba(0,0,0,0.3)",
-            letterSpacing: "0.02em",
-            transition: "all 0.2s ease",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          Order Here
-        </button>
+          {/* Store name */}
+          <h1
+            style={{
+              fontSize: "32px",
+              fontWeight: "800",
+              color: "#ffffff",
+              margin: "0 0 16px",
+              letterSpacing: "-0.03em",
+              lineHeight: "1.2",
+            }}
+          >
+            {storeName}
+          </h1>
 
+          {/* Table Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "999px",
+              padding: "6px 16px",
+              margin: "0 auto 12px",
+            }}
+          >
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#a78bfa", display: "inline-block" }} />
+            <span style={{ fontSize: "14px", fontWeight: "600", color: "#e8e5ef", letterSpacing: "0.02em" }}>
+              {floorName} · Table {tableNumber}
+            </span>
+          </div>
+
+          <p
+            style={{
+              fontSize: "14px",
+              color: "rgba(255, 255, 255, 0.4)",
+              margin: "0 0 40px",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              fontWeight: "600",
+            }}
+          >
+            Scan, Order & Enjoy
+          </p>
+
+          {/* Order Here CTA */}
+          <button
+            id="splash-order-btn"
+            onClick={() => {
+              // Automatically start a guest session instead of forcing sign-in
+              setSession({
+                id: `guest_${Math.random().toString(36).substring(7)}`,
+                name: `Guest (Table ${tableNumber})`,
+                email: "guest@thepurplecup.com",
+                tableId: tableId,
+              });
+              setShowSplash(false);
+            }}
+            style={{
+              width: "100%",
+              padding: "16px 0",
+              borderRadius: "16px",
+              background: "#ffffff",
+              color: "#1e0b36",
+              fontSize: "17px",
+              fontWeight: "750",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "0 10px 30px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2)",
+              letterSpacing: "0.02em",
+              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+              position: "relative",
+              overflow: "hidden",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              textAlign: "center",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 15px 35px rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 10px 30px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2)";
+            }}
+          >
+            Order Here
+          </button>
+        </div>
 
         <style>{`
-          @keyframes splashPulse {
-            0% { opacity: 0.7; }
-            100% { opacity: 1; }
-          }
           @keyframes splashFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-10px); }
           }
         `}</style>
       </div>
