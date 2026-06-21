@@ -137,6 +137,7 @@ model Category {
   sortOrder Int       @default(0)
   isVisible Boolean   @default(true)
   products  Product[]
+  promotions Promotion[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -199,6 +200,8 @@ model Promotion {
   minOrderAmount Decimal?     @db.Decimal(10, 2)
   productId      String?
   product        Product?     @relation(fields: [productId], references: [id])
+  categoryId     String?
+  category       Category?    @relation(fields: [categoryId], references: [id])
   minQuantity    Int?
   maxUses        Int?
   usedCount      Int          @default(0)

@@ -474,8 +474,8 @@ export function CustomerMenu({
   });
 
   const styleVars = {
-    bg: "var(--color-bg)",
-    card: "var(--color-bg-elevated)",
+    bg: "#ffffff",
+    card: "#ffffff",
     border: "var(--color-border)",
     primary: "var(--color-primary)",
     text: "var(--color-text)",
@@ -2015,10 +2015,10 @@ export function CustomerMenu({
               left: 0,
               right: 0,
               padding: "16px",
-              background: "rgba(15,15,19,0.98)",
+              background: "rgba(255,255,255,0.98)",
               backdropFilter: "blur(12px)",
               borderTop: `1px solid ${styleVars.border}`,
-              zIndex: 90,
+              zIndex: 9999,
             }}
           >
             <button
@@ -2053,7 +2053,7 @@ export function CustomerMenu({
 
       {/* Cart sheet */}
       {showCart && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 100 }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 10000 }}>
           <div
             style={{
               position: "absolute",

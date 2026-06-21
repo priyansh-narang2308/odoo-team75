@@ -42,8 +42,11 @@ export async function GET(request: Request) {
         return true;
       }
 
-      // Product-level promotion
-      const item = items.find((i) => i.productId === p.productId);
+      // Product-level or Category-level promotion
+      const item = items.find((i) => 
+        (p.productId && i.productId === p.productId) || 
+        (p.categoryId && i.categoryId === p.categoryId)
+      );
       if (!item) return false;
       if (p.minQuantity && item.quantity < p.minQuantity) return false;
       return true;
@@ -52,13 +55,12 @@ export async function GET(request: Request) {
       let discountAmount = 0;
       let applicableTotal = orderTotal;
 
-      if (p.productId) {
-        const item = items.find((i) => i.productId === p.productId);
-        if (item) {
-          applicableTotal = item.price * item.quantity;
-        } else {
-          applicableTotal = 0;
-        }
+      if (p.productId || p.categoryId) {
+        const matchingItems = items.filter((i) => 
+          (p.productId && i.productId === p.productId) || 
+          (p.categoryId && i.categoryId === p.categoryId)
+        );
+        applicableTotal = matchingItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
       }
 
       if (p.discountType === "PERCENTAGE") {

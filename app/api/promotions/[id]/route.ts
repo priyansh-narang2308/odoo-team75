@@ -19,22 +19,37 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   const { id } = await params;
   const body = await req.json();
 
-  const data: Record<string, unknown> = {};
-  if (body.code !== undefined) data.code = body.code || null;
-  if (body.name !== undefined) data.name = body.name;
-  if (body.discountType !== undefined) data.discountType = body.discountType;
-  if (body.discountValue !== undefined) data.discountValue = body.discountValue;
-  if (body.minOrderAmount !== undefined)
-    data.minOrderAmount = body.minOrderAmount || null;
-  if (body.maxUses !== undefined) data.maxUses = body.maxUses || null;
-  if (body.validUntil !== undefined)
-    data.validUntil = body.validUntil ? new Date(body.validUntil) : null;
-  if (body.isActive !== undefined) data.isActive = body.isActive;
-  if (body.productId !== undefined) data.productId = body.productId || null;
-  if (body.minQuantity !== undefined)
-    data.minQuantity = body.minQuantity || null;
+  const {
+    code,
+    name,
+    discountType,
+    discountValue,
+    minOrderAmount,
+    maxUses,
+    validUntil,
+    isActive,
+    productId,
+    categoryId,
+    minQuantity,
+  } = body;
 
-  const promo = await prisma.promotion.update({ where: { id }, data });
+  const promo = await prisma.promotion.update({
+    where: { id },
+    data: {
+      ...(code !== undefined && { code: code || null }),
+      ...(name !== undefined && { name }),
+      ...(discountType !== undefined && { discountType }),
+      ...(discountValue !== undefined && { discountValue }),
+      ...(minOrderAmount !== undefined && { minOrderAmount: minOrderAmount || null }),
+      ...(productId !== undefined && { productId: productId || null }),
+      ...(categoryId !== undefined && { categoryId: categoryId || null }),
+      ...(minQuantity !== undefined && { minQuantity: minQuantity || null }),
+      ...(maxUses !== undefined && { maxUses: maxUses || null }),
+      ...(validUntil !== undefined && { validUntil: validUntil ? new Date(validUntil) : null }),
+      ...(isActive !== undefined && { isActive }),
+    },
+  });
+
   return NextResponse.json({ ok: true, data: promo });
 }
 

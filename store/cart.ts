@@ -139,8 +139,47 @@ export const useCartStore = create<CartState>()(
       },
 
       discountTotal: () => {
-        const promo = get().appliedPromotion;
-        return promo ? promo.discountAmount : 0;
+        const state = get();
+        const items = state.items;
+        let itemDiscountsTotal = 0;
+        let initialSubtotal = 0;
+
+        for (const item of items) {
+          const lineTotal = item.price * item.quantity;
+          initialSubtotal += lineTotal;
+          let currentItemDiscount = 0;
+
+          // 1. Automatic Dish-level discount
+          if (item.quantity >= 3) {
+            currentItemDiscount += lineTotal * 0.15;
+          }
+
+          // 2. Applied Promotion (item level fallback in case we wanted to implement category here, but frontend only has single promo for now)
+          const promo = state.appliedPromotion;
+          // We don't have category info in the cart item, so we rely on the backend for accurate promo simulation if needed,
+          // OR we just use the frontend's applied promo if it matched. But the frontend appliedPromo already has `discountAmount` computed for fixed/percent order-level!
+          // Actually, if we just want to add the automatic ones:
+
+          if (currentItemDiscount > lineTotal) currentItemDiscount = lineTotal;
+          itemDiscountsTotal += currentItemDiscount;
+        }
+
+        let remainingSubtotal = initialSubtotal - itemDiscountsTotal;
+        let autoOrderDiscount = 0;
+
+        // 3. Automatic Order-level discount
+        if (remainingSubtotal > 1000) {
+          autoOrderDiscount = remainingSubtotal * 0.10;
+          remainingSubtotal -= autoOrderDiscount;
+        }
+
+        // 4. Manual promo code
+        const promo = state.appliedPromotion;
+        const promoDiscount = promo ? promo.discountAmount : 0;
+
+        let total = itemDiscountsTotal + autoOrderDiscount + promoDiscount;
+        if (total > initialSubtotal) total = initialSubtotal;
+        return total;
       },
 
       grandTotal: () => {

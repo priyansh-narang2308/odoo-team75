@@ -89,13 +89,52 @@ export function CustomerPaymentSheet({
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [autoPromos, setAutoPromos] = useState<AppliedPromo[]>([]);
 
-  const discountAmount = appliedPromo?.discountAmount ?? 0;
-  const taxProportion = Math.max(
-    0,
-    subtotal > 0 ? (subtotal - discountAmount) / subtotal : 0,
-  );
-  const effectiveTaxTotal = taxTotal * taxProportion;
-  const grandTotal = Math.max(0, subtotal - discountAmount + effectiveTaxTotal);
+  const [simulatedTotals, setSimulatedTotals] = useState({
+    subtotal,
+    taxTotal,
+    discountTotal: appliedPromo?.discountAmount ?? 0,
+    grandTotal: originalGrandTotal,
+  });
+
+  useEffect(() => {
+    // If settling an existing order, fetch actual totals from the order itself
+    if (existingOrderId) {
+      fetch(`/api/orders/${existingOrderId}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.ok && d.data) {
+            const o = d.data;
+            setSimulatedTotals({
+              subtotal: Number(o.subtotal),
+              taxTotal: Number(o.taxTotal),
+              discountTotal: Number(o.discountTotal || 0),
+              grandTotal: Number(o.grandTotal),
+            });
+          }
+        });
+      return; // Don't run simulate when settling bill
+    }
+
+    // For new orders, simulate from cart items
+    if (cart.length === 0) return;
+    fetch("/api/orders/simulate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: cart.map((i) => ({ productId: i.productId, quantity: i.quantity, price: i.price })),
+        promotionId: appliedPromo ? appliedPromo.id : null,
+      }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok) setSimulatedTotals(d.data);
+      });
+  }, [cart, appliedPromo, existingOrderId]);
+
+
+  const discountAmount = simulatedTotals.discountTotal;
+  const effectiveTaxTotal = simulatedTotals.taxTotal;
+  const grandTotal = simulatedTotals.grandTotal;
   const sv = {
     bg: "var(--color-bg)",
     card: "var(--color-bg-elevated)",

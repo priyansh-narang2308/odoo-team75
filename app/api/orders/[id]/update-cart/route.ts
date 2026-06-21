@@ -85,60 +85,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
       });
     }
 
-    // 2. Validate Promotion if requested
-    let finalPromotionId = requestedPromotionId || null;
-    let computedDiscount = 0;
-
-    if (finalPromotionId) {
-      const promo = await prisma.promotion.findUnique({
-        where: { id: finalPromotionId },
-      });
-      const now = new Date();
-
-      let isValidPromo = true;
-      if (!promo || !promo.isActive) isValidPromo = false;
-      else if (promo.validFrom && now < promo.validFrom) isValidPromo = false;
-      else if (promo.validUntil && now > promo.validUntil) isValidPromo = false;
-      else if (promo.maxUses && promo.usedCount >= promo.maxUses)
-        isValidPromo = false;
-      else if (
-        promo.minOrderAmount &&
-        computedSubtotal < Number(promo.minOrderAmount)
-      )
-        isValidPromo = false;
-
-      if (!isValidPromo) {
-        finalPromotionId = null;
-      } else {
-        if (promo!.discountType === "PERCENTAGE") {
-          computedDiscount =
-            (computedSubtotal * Number(promo!.discountValue)) / 100;
-        } else {
-          computedDiscount = Number(promo!.discountValue);
-          if (computedDiscount > computedSubtotal) {
-            // Strip promotion if fixed discount exceeds subtotal
-            finalPromotionId = null;
-            computedDiscount = 0;
-          }
-        }
-      }
-    }
-
-    // Recompute exact effective tax based on the subtotal proportion that remains after discount
-    const taxProportion = Math.max(
-      0,
-      computedSubtotal > 0
-        ? (computedSubtotal - computedDiscount) / computedSubtotal
-        : 0,
-    );
-    const finalTaxTotal = computedTaxTotal * taxProportion;
-    const computedGrandTotal = Math.max(
-      0,
-      computedSubtotal - computedDiscount + finalTaxTotal,
-    );
-
     // Use a transaction to delete old items, insert new items, and update order details
-    const updatedOrder = await prisma.$transaction(async (tx) => {
+    const updatedOrderParams = await prisma.$transaction(async (tx) => {
       // 1. Delete existing items
       await tx.orderItem.deleteMany({
         where: { orderId: id },
@@ -151,17 +99,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
         });
       }
 
-      // 3. Update order details
+      // 3. Update order details (exclude calculated totals)
       const updated = await tx.order.update({
         where: { id },
         data: {
           tableId: tableId || null,
           customerId: customerId || null,
-          promotionId: finalPromotionId,
-          discountTotal: computedDiscount,
-          subtotal: computedSubtotal,
-          taxTotal: finalTaxTotal,
-          grandTotal: computedGrandTotal,
+          promotionId: requestedPromotionId || null,
           customerNote: customerNote || null,
           sessionId: sessionId || existingOrder.sessionId,
           updatedAt: new Date(),
@@ -174,16 +118,16 @@ export async function PUT(request: Request, { params }: RouteParams) {
       });
 
       // 4. Sync promotion usedCount if the promotion was changed
-      if (existingOrder.promotionId !== finalPromotionId) {
+      if (existingOrder.promotionId !== requestedPromotionId) {
         if (existingOrder.promotionId) {
           await tx.promotion.update({
             where: { id: existingOrder.promotionId },
             data: { usedCount: { decrement: 1 } },
           });
         }
-        if (finalPromotionId) {
+        if (requestedPromotionId) {
           await tx.promotion.update({
-            where: { id: finalPromotionId },
+            where: { id: requestedPromotionId },
             data: { usedCount: { increment: 1 } },
           });
         }
@@ -191,6 +135,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
       return updated;
     });
+
+    const { recalculateOrderTotals } = await import("@/lib/order-recalc");
+    const updatedOrder = await recalculateOrderTotals(updatedOrderParams.id);
+    if (!updatedOrder) throw new Error("Failed to recalculate order totals");
 
     // Notify admin/cashier rooms that order was updated
     const io = getIO();

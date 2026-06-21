@@ -18,6 +18,7 @@ interface Promotion {
   isActive: boolean;
   validUntil: string | null;
   productId: string | null;
+  categoryId: string | null;
   minQuantity: number | null;
   createdAt: string;
 }
@@ -25,6 +26,7 @@ interface Promotion {
 export function PromotionsManager() {
   const [promos, setPromos] = useState<Promotion[]>([]);
   const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editPromo, setEditPromo] = useState<Promotion | null>(null);
@@ -38,6 +40,7 @@ export function PromotionsManager() {
     validUntil: "",
     isActive: true,
     productId: "",
+    categoryId: "",
     minQuantity: "",
   });
   const [saving, setSaving] = useState(false);
@@ -46,9 +49,11 @@ export function PromotionsManager() {
     Promise.all([
       fetch("/api/promotions").then((r) => r.json()),
       fetch("/api/products").then((r) => r.json()),
-    ]).then(([promosData, productsData]) => {
+      fetch("/api/categories").then((r) => r.json()),
+    ]).then(([promosData, productsData, categoriesData]) => {
       setPromos(promosData.data || []);
       setProducts(productsData.data || []);
+      setCategories(categoriesData.data || []);
       setLoading(false);
     });
   }, []);
@@ -64,6 +69,7 @@ export function PromotionsManager() {
       validUntil: "",
       isActive: true,
       productId: "",
+      categoryId: "",
       minQuantity: "",
     });
     setEditPromo(null);
@@ -81,6 +87,7 @@ export function PromotionsManager() {
       validUntil: p.validUntil ? p.validUntil.split("T")[0] : "",
       isActive: p.isActive,
       productId: p.productId || "",
+      categoryId: p.categoryId || "",
       minQuantity: p.minQuantity ? String(p.minQuantity) : "",
     });
     setEditPromo(p);
@@ -99,6 +106,7 @@ export function PromotionsManager() {
         ? parseFloat(form.minOrderAmount)
         : null,
       productId: form.productId || null,
+      categoryId: form.categoryId || null,
       minQuantity: form.minQuantity ? parseInt(form.minQuantity) : null,
       maxUses: form.maxUses ? parseInt(form.maxUses) : null,
       validUntil: form.validUntil
@@ -114,9 +122,15 @@ export function PromotionsManager() {
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        setPromos((prev) =>
-          prev.map((p) => (p.id === editPromo.id ? data.data : p)),
-        );
+        if (data.ok) {
+          setPromos((prev) =>
+            prev.map((p) => (p.id === editPromo.id ? data.data : p)),
+          );
+          setShowModal(false);
+          toast.success("Promotion updated");
+        } else {
+          toast.error(data.error || "Failed to update promotion");
+        }
       } else {
         const res = await fetch("/api/promotions", {
           method: "POST",
@@ -124,9 +138,14 @@ export function PromotionsManager() {
           body: JSON.stringify(payload),
         });
         const data = await res.json();
-        setPromos((prev) => [data.data, ...prev]);
+        if (data.ok) {
+          setPromos((prev) => [data.data, ...prev]);
+          setShowModal(false);
+          toast.success("Promotion created");
+        } else {
+          toast.error(data.error || "Failed to create promotion");
+        }
       }
-      setShowModal(false);
     } finally {
       setSaving(false);
     }
@@ -139,13 +158,21 @@ export function PromotionsManager() {
   };
 
   const toggleActive = async (p: Promotion) => {
-    const res = await fetch(`/api/promotions/${p.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: !p.isActive }),
-    });
-    const data = await res.json();
-    setPromos((prev) => prev.map((pr) => (pr.id === p.id ? data.data : pr)));
+    try {
+      const res = await fetch(`/api/promotions/${p.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !p.isActive }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setPromos((prev) => prev.map((pr) => (pr.id === p.id ? data.data : pr)));
+      } else {
+        toast.error(data.error || "Failed to toggle status");
+      }
+    } catch (err) {
+      toast.error("Failed to toggle status");
+    }
   };
 
   return (
@@ -588,6 +615,22 @@ export function PromotionsManager() {
                     {products.map((prod) => (
                       <option key={prod.id} value={prod.id}>
                         {prod.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label>Target Category</label>
+                  <select
+                    value={form.categoryId}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, categoryId: e.target.value }))
+                    }
+                  >
+                    <option value="">Order Level (No Category)</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
                       </option>
                     ))}
                   </select>

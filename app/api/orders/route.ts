@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { getCustomerSession } from "@/lib/customer-auth";
 import { prisma } from "@/lib/prisma";
+import { OrderStatus } from "@prisma/client";
 import { createOrderSchema } from "@/lib/validations/order";
 import { SOCKET_EVENTS } from "@/lib/socket-events";
 
@@ -78,8 +79,8 @@ export async function GET(request: Request) {
     where: {
       ...(status
         ? status.includes(",")
-          ? { status: { in: status.split(",") as any[] } }
-          : { status: status as any }
+          ? { status: { in: status.split(",").map(s => s.trim() as OrderStatus) } }
+          : { status: status as OrderStatus }
         : {}),
       ...(tableId ? { tableId } : {}),
       ...dateFilter,

@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     validUntil,
     isActive,
     productId,
+    categoryId,
     minQuantity,
   } = body;
 
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
         discountValue,
         minOrderAmount: minOrderAmount || null,
         productId: productId || null,
+        categoryId: categoryId || null,
         minQuantity: minQuantity || null,
         maxUses: maxUses || null,
         validUntil: validUntil ? new Date(validUntil) : null,

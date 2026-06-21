@@ -5,6 +5,7 @@ import { getCustomerSession } from "@/lib/customer-auth";
 import { prisma } from "@/lib/prisma";
 import { addOrderItemSchema } from "@/lib/validations/order";
 import { SOCKET_EVENTS } from "@/lib/socket-events";
+import { recalculateOrderTotals } from "@/lib/order-recalc";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -101,24 +102,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     });
   }
 
-  // Recalculate order totals (preserve existing discountTotal)
-  const allItems = await prisma.orderItem.findMany({
-    where: { orderId: id },
-    include: { product: true },
-  });
-
-  const subtotal = allItems.reduce((sum, i) => sum + Number(i.lineTotal), 0);
-  const taxTotal = allItems.reduce(
-    (sum, i) => sum + Number(i.lineTotal) * (Number(i.product.taxRate) / 100),
-    0,
-  );
-  const discountTotal = Number(order.discountTotal) || 0;
-  const grandTotal = Math.max(0, subtotal + taxTotal - discountTotal);
-
-  const updatedOrder = await prisma.order.update({
-    where: { id },
-    data: { subtotal, taxTotal, grandTotal },
-  });
+  // Recalculate order totals (including discounts)
+  const updatedOrder = await recalculateOrderTotals(id);
+  if (!updatedOrder) {
+    return NextResponse.json(
+      { ok: false, error: "Failed to recalculate totals" },
+      { status: 500 },
+    );
+  }
 
   // Emit update
   const io = getIO();
@@ -169,25 +160,14 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
   await prisma.orderItem.delete({ where: { id: itemId, orderId: id } });
 
-  // Recalculate totals (preserve existing discountTotal)
-  const allItems = await prisma.orderItem.findMany({
-    where: { orderId: id },
-    include: { product: true },
-  });
-
-  const subtotal = allItems.reduce((sum, i) => sum + Number(i.lineTotal), 0);
-  const taxTotal = allItems.reduce(
-    (sum, i) => sum + Number(i.lineTotal) * (Number(i.product.taxRate) / 100),
-    0,
-  );
-  const currentOrder = await prisma.order.findUnique({ where: { id } });
-  const discountTotal = Number(currentOrder?.discountTotal) || 0;
-  const grandTotal = Math.max(0, subtotal + taxTotal - discountTotal);
-
-  const updatedOrder = await prisma.order.update({
-    where: { id },
-    data: { subtotal, taxTotal, grandTotal },
-  });
+  // Recalculate totals (including discounts)
+  const updatedOrder = await recalculateOrderTotals(id);
+  if (!updatedOrder) {
+    return NextResponse.json(
+      { ok: false, error: "Failed to recalculate totals" },
+      { status: 500 },
+    );
+  }
 
   const io = getIO();
   if (io) {

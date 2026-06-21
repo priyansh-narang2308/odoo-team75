@@ -7,6 +7,7 @@ import { processPaymentSchema } from "@/lib/validations/payment";
 import { sendReceiptEmail } from "@/lib/email";
 import { SOCKET_EVENTS } from "@/lib/socket-events";
 import { rateLimitPayment } from "@/lib/cache/rate-limit";
+import { recalculateOrderTotals } from "@/lib/order-recalc";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -131,9 +132,21 @@ export async function POST(request: Request, { params }: RouteParams) {
         },
       });
 
+      // Recalculate totals from items so grandTotal is always correct before marking PAID
+      const recalculated = await recalculateOrderTotals(id, tx);
+
       const o = await tx.order.update({
         where: { id },
-        data: { status: "PAID" },
+        data: {
+          status: "PAID",
+          // If grandTotal was 0 (edge case), restore it from recalculation
+          ...(recalculated && Number(recalculated.grandTotal) > 0 ? {
+            subtotal: recalculated.subtotal,
+            taxTotal: recalculated.taxTotal,
+            discountTotal: recalculated.discountTotal,
+            grandTotal: recalculated.grandTotal,
+          } : {}),
+        },
       });
 
       return { p, o };
