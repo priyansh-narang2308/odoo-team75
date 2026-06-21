@@ -190,7 +190,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       }
 
       return updated;
-    });
+    }, { maxWait: 15000, timeout: 30000 });
 
     // Notify admin/cashier rooms that order was updated
     const io = getIO();

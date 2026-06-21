@@ -137,7 +137,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       });
 
       return { p, o };
-    });
+    }, { maxWait: 15000, timeout: 30000 });
     payment = result.p;
     updatedOrder = result.o;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

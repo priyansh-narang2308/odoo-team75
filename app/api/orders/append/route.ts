@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       });
 
       return { finalOrder, newOrderItems };
-    });
+    }, { maxWait: 15000, timeout: 30000 });
 
     const io = getIO();
     if (io) {

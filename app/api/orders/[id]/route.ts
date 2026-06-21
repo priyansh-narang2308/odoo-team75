@@ -115,7 +115,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         },
       },
     });
-  });
+  }, { maxWait: 15000, timeout: 30000 });
 
   // Emit WebSocket events
   const io = getIO();
@@ -195,7 +195,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       where: { id },
       data: { status: "CANCELLED" },
     });
-  });
+  }, { maxWait: 15000, timeout: 30000 });
 
   // Audit log
   await prisma.auditLog.create({
