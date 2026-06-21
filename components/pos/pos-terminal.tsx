@@ -36,6 +36,47 @@ import Image from "next/image";
 import { PaymentDialog } from "@/components/pos/payment-dialog";
 import { ReceiptPrinter } from "@/components/shared/receipt-printer";
 
+const AVAILABLE_IMAGES = [
+  "Affogato shake.jpg", "Affogato.jpg", "Americano.jpg", "Avocado Toast.jpg",
+  "Caesar Salad.jpg", "Cappucino.jpg", "Chai.jpg", "Chamomile.jpg", "Chocolate Brownie.jpg",
+  "Cold brew.jpg", "Cortado.jpg", "Darjeeling.jpg", "Earl grey.jpg", "Espresso.jpg",
+  "Flat white.jpg", "French Fries.jpg", "Garden Salad.jpg", "Garlic Bread.jpg",
+  "Greek Salad.jpg", "Green tea.jpg", "Hibiscus.jpg", "Iced latte.jpg", "Jasmine.jpg",
+  "Latte.jpg", "Mac and Cheese.jpg", "Machiato.jpg", "Matcha.jpg", "Mocha.jpg",
+  "Onion Rings.jpg", "Oolong.jpg", "Pancake Stack.jpg", "Penne Alfredo.jpg",
+  "Peppermint.jpg", "Red Velve.jpg", "Ristretto.jpg", "Spaghetti Bolognese.jpg",
+  "cheese burger.jpg", "chicken burger.jpg", "frappe.jpg", "iced americano.jpg",
+  "iced mocha.jpg", "margherita.jpg", "nitro brew.jpg", "pepperoni.jpg",
+  "tonic espresso.jpg", "veg burger.jpg", "veggie delight.jpg",
+  "Almond Milk.png", "Cheesecake.png", "Chicken Sandwich.png", "Croissant.png",
+  "Fresh Lime Soda.png", "Oat Milk.png", "Paneer Tikka.png", "Tiramisu.png",
+  "Veg Sandwich.png", "Whipped Cream.png"
+];
+
+function getProductImage(productName: string) {
+  const normalized = productName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  
+  if (normalized.includes("redvelvet")) return "/Red Velve.jpg";
+  if (normalized.includes("cappuccino")) return "/Cappucino.jpg";
+  if (normalized.includes("macchiato")) return "/Machiato.jpg";
+  if (normalized.includes("cheeseburger")) return "/cheese burger.jpg";
+  if (normalized.includes("chickenburger")) return "/chicken burger.jpg";
+  if (normalized.includes("vegburger")) return "/veg burger.jpg";
+  if (normalized.includes("doubleespresso")) return "/Espresso.jpg";
+  if (normalized.includes("extrashot")) return "/Espresso.jpg";
+  if (normalized.includes("lattelarge")) return "/Latte.jpg";
+  if (normalized.includes("lattesmall")) return "/Latte.jpg";
+  if (normalized.includes("masalachai")) return "/Chai.jpg";
+  
+  for (const img of AVAILABLE_IMAGES) {
+    const imgNormalized = img.split(".")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (imgNormalized === normalized) {
+      return "/" + img;
+    }
+  }
+  return "";
+}
+
 interface Product {
   id: string;
   name: string;
@@ -2232,15 +2273,16 @@ export function POSTerminal() {
                   background: "var(--color-bg-elevated)",
                   border: `1px solid ${product.category.color ? product.category.color + "33" : "var(--color-border)"}`,
                   borderRadius: "12px",
-                  padding: "16px 14px",
+                  padding: "0",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "6px",
+                  gap: "0",
                   textAlign: "left",
                   cursor: "pointer",
                   transition: "all 0.15s",
                   position: "relative",
                   width: "100%",
+                  overflow: "hidden"
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor =
@@ -2256,53 +2298,69 @@ export function POSTerminal() {
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "11px",
-                    color: "var(--color-text-muted)",
-                    fontWeight: "600",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {product.category.name}
+                <div style={{ width: "100%", height: "120px", background: product.category.color ? `${product.category.color}22` : "var(--color-bg-overlay)" }}>
+                  {getProductImage(product.name) && (
+                    <img 
+                      src={getProductImage(product.name)} 
+                      alt={product.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  )}
                 </div>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "var(--color-text)",
-                    lineHeight: "1.3",
-                  }}
-                >
-                  {product.name}
-                </div>
-                <div
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: "700",
-                    color: product.category.color || "var(--color-primary)",
-                    marginTop: "4px",
-                  }}
-                >
-                  {formatCurrency(Number(product.price))}
+                <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: "6px", flex: 1, width: "100%" }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "var(--color-text-muted)",
+                      fontWeight: "600",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {product.category.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "var(--color-text)",
+                      lineHeight: "1.3",
+                    }}
+                  >
+                    {product.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: "700",
+                      color: product.category.color || "var(--color-primary)",
+                      marginTop: "auto",
+                    }}
+                  >
+                    {formatCurrency(Number(product.price))}
+                  </div>
                 </div>
                 <div
                   style={{
                     position: "absolute",
                     top: "10px",
                     right: "10px",
-                    width: "22px",
-                    height: "22px",
+                    width: "24px",
+                    height: "24px",
                     borderRadius: "50%",
                     background:
                       product.category.color || "var(--color-primary)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    opacity: 0.7,
+                    opacity: 0.9,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
                   }}
                 >
-                  <Plus size={12} color="#fff" />
+                  <Plus size={14} color="#fff" />
                 </div>
               </button>
             ))}
