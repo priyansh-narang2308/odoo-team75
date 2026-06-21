@@ -409,6 +409,7 @@ export function ReservationsManager() {
   } | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchReservations();
   }, []);
 
@@ -1133,7 +1134,7 @@ export function ReservationsManager() {
           </div>
         ) : reservations.length === 0 ? (
           <div style={{ padding: "40px", textAlign: "center", color: "var(--color-text-muted)", fontSize: "14px" }}>
-            No active reservations listed. Click "New Reservation" to add one.
+            No active reservations listed. Click &quot;New Reservation&quot; to add one.
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>

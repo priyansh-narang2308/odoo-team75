@@ -448,7 +448,7 @@ export function TablesManager() {
         const chunk = sortedTables.slice(i, i + 4);
         content += `<div class="page"><div class="grid">`;
         chunk.forEach((table) => {
-          const qrUrl = `/qrcodes/table-${table.tableNumber.replace(/\\s+/g, "-")}-${table.id}.png`;
+          const qrUrl = `/api/qrcodes/table-${table.tableNumber.replace(/\s+/g, "-")}-${table.id}.png`;
           content += `
             <div class="qr-card">
               <h1>Table ${table.tableNumber}</h1>
@@ -1585,7 +1585,7 @@ export function TablesManager() {
                   }),
                 )
                 .map((table) => {
-                  const qrUrl = `/qrcodes/table-${table.tableNumber.replace(/\s+/g, "-")}-${table.id}.png`;
+                  const qrUrl = `/api/qrcodes/table-${table.tableNumber.replace(/\s+/g, "-")}-${table.id}.png`;
                   return (
                     <div
                       key={table.id}

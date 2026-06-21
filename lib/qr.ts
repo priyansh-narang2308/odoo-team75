@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SignJWT, jwtVerify } from "jose";
 import QRCode from "qrcode";
 import fs from "fs";
@@ -35,7 +36,11 @@ export async function verifyQRToken(
 }
 
 // Generate QR code token and save image to disk
-export async function generateAndSaveQR(table: { id: string; floorId: string; tableNumber: string }): Promise<string> {
+export async function generateAndSaveQR(table: {
+  id: string;
+  floorId: string;
+  tableNumber: string;
+}): Promise<string> {
   const token = await signQRToken({
     tableId: table.id,
     floorId: table.floorId,
@@ -58,9 +63,14 @@ export async function generateAndSaveQR(table: { id: string; floorId: string; ta
   const pythonCmd = process.platform === "win32" ? "python" : "python3";
 
   try {
-    execSync(`${pythonCmd} "${pythonScript}" "${qrUrl}" "${qrFilePath}" "${logoPath}"`);
+    execSync(
+      `${pythonCmd} "${pythonScript}" "${qrUrl}" "${qrFilePath}" "${logoPath}"`,
+    );
   } catch (error: any) {
-    console.error("Python QR generation failed, using standard fallback:", error.message || error);
+    console.error(
+      "Python QR generation failed, using standard fallback:",
+      error.message || error,
+    );
     await QRCode.toFile(qrFilePath, qrUrl, {
       width: 512,
       margin: 2,

@@ -56,10 +56,11 @@ export async function POST(_req: Request, { params }: RouteParams) {
       data: {
         table: updatedTable,
         qrUrl,
-        qrImageUrl: `/qrcodes/${qrFilename}`,
+        qrImageUrl: `/api/qrcodes/${qrFilename}`,
         token,
       },
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Manual QR generation route failed:", error);
     return NextResponse.json(

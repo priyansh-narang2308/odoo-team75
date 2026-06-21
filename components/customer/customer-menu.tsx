@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -75,25 +76,68 @@ const KDS_STATUS_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 const AVAILABLE_IMAGES = [
-  "Affogato shake.jpg", "Affogato.jpg", "Americano.jpg", "Avocado Toast.jpg",
-  "Caesar Salad.jpg", "Cappucino.jpg", "Chai.jpg", "Chamomile.jpg", "Chocolate Brownie.jpg",
-  "Cold brew.jpg", "Cortado.jpg", "Darjeeling.jpg", "Earl grey.jpg", "Espresso.jpg",
-  "Flat white.jpg", "French Fries.jpg", "Garden Salad.jpg", "Garlic Bread.jpg",
-  "Greek Salad.jpg", "Green tea.jpg", "Hibiscus.jpg", "Iced latte.jpg", "Jasmine.jpg",
-  "Latte.jpg", "Mac and Cheese.jpg", "Machiato.jpg", "Matcha.jpg", "Mocha.jpg",
-  "Onion Rings.jpg", "Oolong.jpg", "Pancake Stack.jpg", "Penne Alfredo.jpg",
-  "Peppermint.jpg", "Red Velve.jpg", "Ristretto.jpg", "Spaghetti Bolognese.jpg",
-  "cheese burger.jpg", "chicken burger.jpg", "frappe.jpg", "iced americano.jpg",
-  "iced mocha.jpg", "margherita.jpg", "nitro brew.jpg", "pepperoni.jpg",
-  "tonic espresso.jpg", "veg burger.jpg", "veggie delight.jpg",
-  "Almond Milk.png", "Cheesecake.png", "Chicken Sandwich.png", "Croissant.png",
-  "Fresh Lime Soda.png", "Oat Milk.png", "Paneer Tikka.png", "Tiramisu.png",
-  "Veg Sandwich.png", "Whipped Cream.png"
+  "Affogato shake.jpg",
+  "Affogato.jpg",
+  "Americano.jpg",
+  "Avocado Toast.jpg",
+  "Caesar Salad.jpg",
+  "Cappucino.jpg",
+  "Chai.jpg",
+  "Chamomile.jpg",
+  "Chocolate Brownie.jpg",
+  "Cold brew.jpg",
+  "Cortado.jpg",
+  "Darjeeling.jpg",
+  "Earl grey.jpg",
+  "Espresso.jpg",
+  "Flat white.jpg",
+  "French Fries.jpg",
+  "Garden Salad.jpg",
+  "Garlic Bread.jpg",
+  "Greek Salad.jpg",
+  "Green tea.jpg",
+  "Hibiscus.jpg",
+  "Iced latte.jpg",
+  "Jasmine.jpg",
+  "Latte.jpg",
+  "Mac and Cheese.jpg",
+  "Machiato.jpg",
+  "Matcha.jpg",
+  "Mocha.jpg",
+  "Onion Rings.jpg",
+  "Oolong.jpg",
+  "Pancake Stack.jpg",
+  "Penne Alfredo.jpg",
+  "Peppermint.jpg",
+  "Red Velve.jpg",
+  "Ristretto.jpg",
+  "Spaghetti Bolognese.jpg",
+  "cheese burger.jpg",
+  "chicken burger.jpg",
+  "frappe.jpg",
+  "iced americano.jpg",
+  "iced mocha.jpg",
+  "margherita.jpg",
+  "nitro brew.jpg",
+  "pepperoni.jpg",
+  "tonic espresso.jpg",
+  "veg burger.jpg",
+  "veggie delight.jpg",
+  "Almond Milk.png",
+  "Cheesecake.png",
+  "Chicken Sandwich.png",
+  "Croissant.png",
+  "Fresh Lime Soda.png",
+  "Oat Milk.png",
+  "Paneer Tikka.png",
+  "Tiramisu.png",
+  "Veg Sandwich.png",
+  "Whipped Cream.png",
 ];
 
 function getProductImage(productName: string) {
   const normalized = productName.toLowerCase().replace(/[^a-z0-9]/g, "");
-  
+
   if (normalized.includes("redvelvet")) return "/Red Velve.jpg";
   if (normalized.includes("cappuccino")) return "/Cappucino.jpg";
   if (normalized.includes("macchiato")) return "/Machiato.jpg";
@@ -105,9 +149,12 @@ function getProductImage(productName: string) {
   if (normalized.includes("lattelarge")) return "/Latte.jpg";
   if (normalized.includes("lattesmall")) return "/Latte.jpg";
   if (normalized.includes("masalachai")) return "/Chai.jpg";
-  
+
   for (const img of AVAILABLE_IMAGES) {
-    const imgNormalized = img.split(".")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
+    const imgNormalized = img
+      .split(".")[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
     if (imgNormalized === normalized) {
       return "/" + img;
     }
@@ -307,8 +354,12 @@ export function CustomerMenu({
         body: JSON.stringify({
           tableId,
           source: "CUSTOMER",
-          items: cart.map(i => ({ productId: i.productId, quantity: i.quantity, notes: i.notes }))
-        })
+          items: cart.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            notes: i.notes,
+          })),
+        }),
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
@@ -672,7 +723,7 @@ export function CustomerMenu({
           >
             Request Bill / Settle Up
           </button>
-          
+
           <button
             id="add-more-btn"
             onClick={() => setView("menu")}
@@ -934,18 +985,34 @@ export function CustomerMenu({
                 padding: "8px 14px",
               }}
             >
-              <span style={{ marginRight: "8px", color: styleVars.muted }}>🔍</span>
+              <span style={{ marginRight: "8px", color: styleVars.muted }}>
+                🔍
+              </span>
               <input
                 type="text"
                 placeholder="Search product"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ background: "transparent", border: "none", color: styleVars.text, outline: "none", width: "100%", fontSize: "14px" }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: styleVars.text,
+                  outline: "none",
+                  width: "100%",
+                  fontSize: "14px",
+                }}
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  style={{ background: "transparent", border: "none", color: styleVars.muted, cursor: "pointer", display: "flex", alignItems: "center" }}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: styleVars.muted,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
                 >
                   <X size={14} />
                 </button>
@@ -954,8 +1021,13 @@ export function CustomerMenu({
           </div>
 
           {/* ── Book Menu Card ── */}
-          <div style={{ padding: "6px 14px 16px", maxWidth: "640px", margin: "0 auto" }}>
-
+          <div
+            style={{
+              padding: "6px 14px 16px",
+              maxWidth: "640px",
+              margin: "0 auto",
+            }}
+          >
             {/* Bookmark category tabs */}
             <div
               id="menu-book-tabs"
@@ -1006,22 +1078,26 @@ export function CustomerMenu({
             {/* Book pages stack */}
             <div style={{ position: "relative" }}>
               {/* Depth shadows – stacked pages illusion */}
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "0 16px 16px 4px",
-                background: "rgba(255,255,255,0.025)",
-                transform: "translate(6px, 5px)",
-                zIndex: 0,
-              }} />
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "0 16px 16px 4px",
-                background: "rgba(255,255,255,0.015)",
-                transform: "translate(3px, 2.5px)",
-                zIndex: 0,
-              }} />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "0 16px 16px 4px",
+                  background: "rgba(255,255,255,0.025)",
+                  transform: "translate(6px, 5px)",
+                  zIndex: 0,
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "0 16px 16px 4px",
+                  background: "rgba(255,255,255,0.015)",
+                  transform: "translate(3px, 2.5px)",
+                  zIndex: 0,
+                }}
+              />
 
               {/* ── Main animated page ── */}
               <div
@@ -1029,11 +1105,13 @@ export function CustomerMenu({
                 style={{
                   position: "relative",
                   zIndex: 1,
-                  background: "linear-gradient(160deg, #ffffff 0%, #fcfbfa 100%)",
+                  background:
+                    "linear-gradient(160deg, #ffffff 0%, #fcfbfa 100%)",
                   borderRadius: "0 16px 16px 4px",
                   border: "1px solid #e7e5e4",
                   borderLeft: "5px solid rgba(0, 0, 0, 0.08)",
-                  boxShadow: "-7px 0 0 rgba(0,0,0,0.1), 0 22px 55px rgba(0,0,0,0.15), inset 12px 0 28px rgba(0,0,0,0.05)",
+                  boxShadow:
+                    "-7px 0 0 rgba(0,0,0,0.1), 0 22px 55px rgba(0,0,0,0.15), inset 12px 0 28px rgba(0,0,0,0.05)",
                   padding: "28px 20px 32px",
                   minHeight: "55vh",
                   overflow: "hidden",
@@ -1043,8 +1121,8 @@ export function CustomerMenu({
                     flipPhase === "out"
                       ? `${flipDir === "forward" ? "pageFlipOut" : "pageFlipOutReverse"} 0.28s ease-in forwards`
                       : flipPhase === "in"
-                      ? `${flipDir === "forward" ? "pageFlipIn" : "pageFlipInReverse"} 0.52s ease-out forwards`
-                      : "none",
+                        ? `${flipDir === "forward" ? "pageFlipIn" : "pageFlipInReverse"} 0.52s ease-out forwards`
+                        : "none",
                 }}
                 onTouchStart={(e) => {
                   touchStartX.current = e.touches[0].clientX;
@@ -1052,9 +1130,13 @@ export function CustomerMenu({
                 }}
                 onTouchEnd={(e) => {
                   const dx = touchStartX.current - e.changedTouches[0].clientX;
-                  const dy = Math.abs(touchStartY.current - e.changedTouches[0].clientY);
+                  const dy = Math.abs(
+                    touchStartY.current - e.changedTouches[0].clientY,
+                  );
                   if (Math.abs(dx) > 55 && dy < 100) {
-                    const curIdx = categories.findIndex((c) => c.id === selectedCat);
+                    const curIdx = categories.findIndex(
+                      (c) => c.id === selectedCat,
+                    );
                     if (dx > 0 && curIdx < categories.length - 1) {
                       navigateCategory(categories[curIdx + 1].id, "forward");
                     } else if (dx < 0 && curIdx > 0) {
@@ -1064,98 +1146,150 @@ export function CustomerMenu({
                 }}
               >
                 {/* Spine gradient shadow */}
-                <div style={{
-                  position: "absolute",
-                  left: 0, top: 0, bottom: 0,
-                  width: "32px",
-                  background: "linear-gradient(to right, rgba(0,0,0,0.2), transparent)",
-                  pointerEvents: "none",
-                  zIndex: 10,
-                }} />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: "32px",
+                    background:
+                      "linear-gradient(to right, rgba(0,0,0,0.2), transparent)",
+                    pointerEvents: "none",
+                    zIndex: 10,
+                  }}
+                />
 
                 {/* Page content */}
                 {(() => {
-                  const currentCat = categories.find((c) => c.id === selectedCat);
+                  const currentCat = categories.find(
+                    (c) => c.id === selectedCat,
+                  );
                   if (!currentCat) return null;
-                  const catIdx = categories.findIndex((c) => c.id === selectedCat);
+                  const catIdx = categories.findIndex(
+                    (c) => c.id === selectedCat,
+                  );
                   const catProducts = products.filter(
                     (p) =>
                       p.category.id === selectedCat &&
                       (!searchQuery ||
-                        p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                        p.name
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase())),
                   );
 
                   return (
                     <>
                       {/* Category heading */}
-                      <div style={{ textAlign: "center", marginBottom: "26px" }}>
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          marginBottom: "14px",
-                        }}>
-                          <div style={{
-                            flex: 1, height: "1px",
-                            background: `linear-gradient(to right, transparent, ${currentCat.color || styleVars.primary}55)`,
-                          }} />
-                          <span style={{ color: `${currentCat.color || styleVars.primary}99`, fontSize: "14px" }}>✦</span>
-                          <div style={{
-                            flex: 1, height: "1px",
-                            background: `linear-gradient(to left, transparent, ${currentCat.color || styleVars.primary}55)`,
-                          }} />
+                      <div
+                        style={{ textAlign: "center", marginBottom: "26px" }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            marginBottom: "14px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: 1,
+                              height: "1px",
+                              background: `linear-gradient(to right, transparent, ${currentCat.color || styleVars.primary}55)`,
+                            }}
+                          />
+                          <span
+                            style={{
+                              color: `${currentCat.color || styleVars.primary}99`,
+                              fontSize: "14px",
+                            }}
+                          >
+                            ✦
+                          </span>
+                          <div
+                            style={{
+                              flex: 1,
+                              height: "1px",
+                              background: `linear-gradient(to left, transparent, ${currentCat.color || styleVars.primary}55)`,
+                            }}
+                          />
                         </div>
 
-                        <h2 style={{
-                          fontFamily: "var(--font-caveat), 'Georgia', serif",
-                          fontSize: "38px",
-                          color: currentCat.color || styleVars.primary,
-                          margin: 0,
-                          letterSpacing: "2px",
-                          fontWeight: "normal",
-                          textShadow: `0 0 40px ${currentCat.color || styleVars.primary}33`,
-                        }}>
+                        <h2
+                          style={{
+                            fontFamily: "var(--font-caveat), 'Georgia', serif",
+                            fontSize: "38px",
+                            color: currentCat.color || styleVars.primary,
+                            margin: 0,
+                            letterSpacing: "2px",
+                            fontWeight: "normal",
+                            textShadow: `0 0 40px ${currentCat.color || styleVars.primary}33`,
+                          }}
+                        >
                           {currentCat.name}
                         </h2>
 
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          marginTop: "10px",
-                        }}>
-                          <div style={{
-                            flex: 1, height: "1px",
-                            background: "linear-gradient(to right, transparent, #e7e5e4)",
-                          }} />
-                          <span style={{
-                            fontSize: "10px",
-                            color: "#57534e",
-                            letterSpacing: "4px",
-                          }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            marginTop: "10px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              flex: 1,
+                              height: "1px",
+                              background:
+                                "linear-gradient(to right, transparent, #e7e5e4)",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              color: "#57534e",
+                              letterSpacing: "4px",
+                            }}
+                          >
                             {catIdx + 1} / {categories.length}
                           </span>
-                          <div style={{
-                            flex: 1, height: "1px",
-                            background: "linear-gradient(to left, transparent, #e7e5e4)",
-                          }} />
+                          <div
+                            style={{
+                              flex: 1,
+                              height: "1px",
+                              background:
+                                "linear-gradient(to left, transparent, #e7e5e4)",
+                            }}
+                          />
                         </div>
                       </div>
 
                       {/* Items */}
                       {catProducts.length === 0 ? (
-                        <div style={{
-                          textAlign: "center",
-                          padding: "60px 20px",
-                          color: styleVars.muted,
-                          fontStyle: "italic",
-                        }}>
+                        <div
+                          style={{
+                            textAlign: "center",
+                            padding: "60px 20px",
+                            color: styleVars.muted,
+                            fontStyle: "italic",
+                          }}
+                        >
                           No items available
                         </div>
                       ) : (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "22px",
+                          }}
+                        >
                           {catProducts.map((product) => {
-                            const inCart = cart.find((i) => i.productId === product.id);
+                            const inCart = cart.find(
+                              (i) => i.productId === product.id,
+                            );
                             const imgSrc = getProductImage(product.name);
                             return (
                               <div
@@ -1178,83 +1312,175 @@ export function CustomerMenu({
                                   transition: "background 0.2s",
                                 }}
                                 onMouseEnter={(e) =>
-                                  (e.currentTarget.style.background = "rgba(0,0,0,0.03)")
+                                  (e.currentTarget.style.background =
+                                    "rgba(0,0,0,0.03)")
                                 }
                                 onMouseLeave={(e) =>
-                                  (e.currentTarget.style.background = "transparent")
+                                  (e.currentTarget.style.background =
+                                    "transparent")
                                 }
                               >
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ display: "flex", alignItems: "baseline" }}>
-                                    <span style={{ fontSize: "16px", fontWeight: "700", color: "#1c1917" }}>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "baseline",
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        color: "#1c1917",
+                                      }}
+                                    >
                                       {product.name}
                                     </span>
-                                    <div style={{
-                                      flex: 1,
-                                      borderBottom: "2px dotted rgba(0,0,0,0.15)",
-                                      margin: "0 10px",
-                                      alignSelf: "center",
-                                      position: "relative",
-                                      top: "-3px",
-                                    }} />
-                                    <span style={{
-                                      fontSize: "16px",
-                                      fontWeight: "700",
-                                      color: currentCat.color || styleVars.primary,
-                                      flexShrink: 0,
-                                    }}>
+                                    <div
+                                      style={{
+                                        flex: 1,
+                                        borderBottom:
+                                          "2px dotted rgba(0,0,0,0.15)",
+                                        margin: "0 10px",
+                                        alignSelf: "center",
+                                        position: "relative",
+                                        top: "-3px",
+                                      }}
+                                    />
+                                    <span
+                                      style={{
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        color:
+                                          currentCat.color || styleVars.primary,
+                                        flexShrink: 0,
+                                      }}
+                                    >
                                       {formatCurrency(Number(product.price))}
                                     </span>
                                   </div>
 
                                   {product.description && (
-                                    <p style={{
-                                      margin: "4px 0 0",
-                                      fontSize: "12px",
-                                      color: "#57534e",
-                                      lineHeight: 1.4,
-                                      fontStyle: "italic",
-                                    }}>
+                                    <p
+                                      style={{
+                                        margin: "4px 0 0",
+                                        fontSize: "12px",
+                                        color: "#57534e",
+                                        lineHeight: 1.4,
+                                        fontStyle: "italic",
+                                      }}
+                                    >
                                       {product.description}
                                     </p>
                                   )}
 
                                   <div style={{ marginTop: "10px" }}>
                                     {inCart ? (
-                                      <div style={{
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: "8px",
-                                        background: "rgba(0,0,0,0.05)",
-                                        padding: "3px 6px",
-                                        borderRadius: "8px",
-                                        border: "1px solid rgba(0,0,0,0.08)",
-                                      }}>
+                                      <div
+                                        style={{
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          background: "rgba(0,0,0,0.05)",
+                                          padding: "3px 6px",
+                                          borderRadius: "8px",
+                                          border: "1px solid rgba(0,0,0,0.08)",
+                                        }}
+                                      >
                                         <button
-                                          onClick={(e) => { e.stopPropagation(); updateQty(product.id, inCart.quantity - 1); }}
-                                          style={{ width: "24px", height: "24px", borderRadius: "6px", background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            updateQty(
+                                              product.id,
+                                              inCart.quantity - 1,
+                                            );
+                                          }}
+                                          style={{
+                                            width: "24px",
+                                            height: "24px",
+                                            borderRadius: "6px",
+                                            background: "transparent",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                          }}
                                         >
-                                          <span style={{ fontSize: "16px", fontWeight: "800", color: "#1c1917", lineHeight: 1, position: "relative", top: "-1px" }}>−</span>
+                                          <span
+                                            style={{
+                                              fontSize: "16px",
+                                              fontWeight: "800",
+                                              color: "#1c1917",
+                                              lineHeight: 1,
+                                              position: "relative",
+                                              top: "-1px",
+                                            }}
+                                          >
+                                            −
+                                          </span>
                                         </button>
-                                        <span style={{ fontSize: "14px", fontWeight: "700", minWidth: "14px", textAlign: "center", color: "#1c1917" }}>
+                                        <span
+                                          style={{
+                                            fontSize: "14px",
+                                            fontWeight: "700",
+                                            minWidth: "14px",
+                                            textAlign: "center",
+                                            color: "#1c1917",
+                                          }}
+                                        >
                                           {inCart.quantity}
                                         </span>
                                         <button
-                                          onClick={(e) => { e.stopPropagation(); updateQty(product.id, inCart.quantity + 1); }}
-                                          style={{ width: "24px", height: "24px", borderRadius: "6px", background: currentCat.color || styleVars.primary, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            updateQty(
+                                              product.id,
+                                              inCart.quantity + 1,
+                                            );
+                                          }}
+                                          style={{
+                                            width: "24px",
+                                            height: "24px",
+                                            borderRadius: "6px",
+                                            background:
+                                              currentCat.color ||
+                                              styleVars.primary,
+                                            border: "none",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                          }}
                                         >
-                                          <span style={{ fontSize: "16px", fontWeight: "800", color: "#fff", lineHeight: 1, position: "relative", top: "-1px" }}>+</span>
+                                          <span
+                                            style={{
+                                              fontSize: "16px",
+                                              fontWeight: "800",
+                                              color: "#fff",
+                                              lineHeight: 1,
+                                              position: "relative",
+                                              top: "-1px",
+                                            }}
+                                          >
+                                            +
+                                          </span>
                                         </button>
                                       </div>
                                     ) : (
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          addToCart(product);
+                                        }}
                                         style={{
                                           padding: "5px 12px",
                                           borderRadius: "8px",
                                           background: "transparent",
                                           border: `1px solid ${(currentCat.color || styleVars.primary) + "55"}`,
-                                          color: currentCat.color || styleVars.primary,
+                                          color:
+                                            currentCat.color ||
+                                            styleVars.primary,
                                           fontSize: "12px",
                                           fontWeight: "600",
                                           cursor: "pointer",
@@ -1267,20 +1493,29 @@ export function CustomerMenu({
                                 </div>
 
                                 {imgSrc && (
-                                  <div style={{
-                                    width: "80px", height: "80px",
-                                    borderRadius: "10px",
-                                    overflow: "hidden",
-                                    flexShrink: 0,
-                                    border: `1px solid ${styleVars.border}`,
-                                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                                  }}>
+                                  <div
+                                    style={{
+                                      width: "80px",
+                                      height: "80px",
+                                      borderRadius: "10px",
+                                      overflow: "hidden",
+                                      flexShrink: 0,
+                                      border: `1px solid ${styleVars.border}`,
+                                      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                                    }}
+                                  >
                                     <img
                                       src={imgSrc}
                                       alt={product.name}
-                                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                      style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
                                       onError={(e) => {
-                                        (e.target as HTMLImageElement).style.display = "none";
+                                        (
+                                          e.target as HTMLImageElement
+                                        ).style.display = "none";
                                       }}
                                     />
                                   </div>
@@ -1292,13 +1527,15 @@ export function CustomerMenu({
                       )}
 
                       {/* Bottom ornament */}
-                      <div style={{
-                        marginTop: "28px",
-                        textAlign: "center",
-                        color: `${styleVars.muted}44`,
-                        fontSize: "16px",
-                        letterSpacing: "10px",
-                      }}>
+                      <div
+                        style={{
+                          marginTop: "28px",
+                          textAlign: "center",
+                          color: `${styleVars.muted}44`,
+                          fontSize: "16px",
+                          letterSpacing: "10px",
+                        }}
+                      >
                         ✦ ✦ ✦
                       </div>
                     </>
@@ -1306,32 +1543,37 @@ export function CustomerMenu({
                 })()}
 
                 {/* Page-corner curl */}
-                <div style={{
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  width: 0,
-                  height: 0,
-                  borderStyle: "solid",
-                  borderWidth: "0 0 38px 38px",
-                  borderColor: `transparent transparent ${styleVars.bg} transparent`,
-                  opacity: 0.65,
-                }} />
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    width: 0,
+                    height: 0,
+                    borderStyle: "solid",
+                    borderWidth: "0 0 38px 38px",
+                    borderColor: `transparent transparent ${styleVars.bg} transparent`,
+                    opacity: 0.65,
+                  }}
+                />
               </div>
             </div>
 
             {/* Navigation bar */}
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginTop: "14px",
-            }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "14px",
+              }}
+            >
               <button
                 id="menu-prev-page"
                 onClick={() => {
                   const idx = categories.findIndex((c) => c.id === selectedCat);
-                  if (idx > 0) navigateCategory(categories[idx - 1].id, "backward");
+                  if (idx > 0)
+                    navigateCategory(categories[idx - 1].id, "backward");
                 }}
                 disabled={
                   flipPhase !== "idle" ||
@@ -1362,15 +1604,24 @@ export function CustomerMenu({
               </button>
 
               {/* Page dot indicators */}
-              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <div
+                style={{ display: "flex", gap: "6px", alignItems: "center" }}
+              >
                 {categories.map((cat) => (
                   <div
                     key={cat.id}
                     onClick={() => {
-                      const curIdx = categories.findIndex((c) => c.id === selectedCat);
-                      const tgtIdx = categories.findIndex((c) => c.id === cat.id);
+                      const curIdx = categories.findIndex(
+                        (c) => c.id === selectedCat,
+                      );
+                      const tgtIdx = categories.findIndex(
+                        (c) => c.id === cat.id,
+                      );
                       if (tgtIdx !== curIdx)
-                        navigateCategory(cat.id, tgtIdx > curIdx ? "forward" : "backward");
+                        navigateCategory(
+                          cat.id,
+                          tgtIdx > curIdx ? "forward" : "backward",
+                        );
                     }}
                     style={{
                       width: cat.id === selectedCat ? "22px" : "7px",
@@ -1474,17 +1725,17 @@ export function CustomerMenu({
               alignItems: "center",
               justifyContent: "center",
               fontSize: "80px",
-              overflow: "hidden"
+              overflow: "hidden",
             }}
           >
             {getProductImage(selectedProduct.name) && (
-              <img 
-                src={getProductImage(selectedProduct.name)} 
+              <img
+                src={getProductImage(selectedProduct.name)}
                 alt={selectedProduct.name}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
+                  target.style.display = "none";
                 }}
               />
             )}
@@ -1891,7 +2142,18 @@ export function CustomerMenu({
                       border: "none",
                     }}
                   >
-                    <span style={{ fontSize: "16px", fontWeight: "800", color: styleVars.text, lineHeight: 1, position: "relative", top: "-1px" }}>−</span>
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "800",
+                        color: styleVars.text,
+                        lineHeight: 1,
+                        position: "relative",
+                        top: "-1px",
+                      }}
+                    >
+                      −
+                    </span>
                   </button>
                   <span style={{ fontWeight: "700" }}>{item.quantity}</span>
                   <button
@@ -1909,7 +2171,18 @@ export function CustomerMenu({
                       border: "none",
                     }}
                   >
-                    <span style={{ fontSize: "16px", fontWeight: "800", color: "#fff", lineHeight: 1, position: "relative", top: "-1px" }}>+</span>
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "800",
+                        color: "#fff",
+                        lineHeight: 1,
+                        position: "relative",
+                        top: "-1px",
+                      }}
+                    >
+                      +
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1953,17 +2226,20 @@ export function CustomerMenu({
                   {formatCurrency(cartTotal + cartTax)}
                 </span>
               </div>
-              <div style={{
-                background: "rgba(245,158,11,0.1)",
-                border: "1px solid rgba(245,158,11,0.3)",
-                color: "#d97706",
-                padding: "10px",
-                borderRadius: "8px",
-                fontSize: "12px",
-                marginBottom: "16px",
-                textAlign: "center"
-              }}>
-                ⚠️ Items are sent directly to the kitchen and <strong>cannot be cancelled</strong> once placed.
+              <div
+                style={{
+                  background: "rgba(245,158,11,0.1)",
+                  border: "1px solid rgba(245,158,11,0.3)",
+                  color: "#d97706",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  marginBottom: "16px",
+                  textAlign: "center",
+                }}
+              >
+                ⚠️ Items are sent directly to the kitchen and{" "}
+                <strong>cannot be cancelled</strong> once placed.
               </div>
               <button
                 id="place-order-btn"
@@ -2035,7 +2311,9 @@ export function CustomerMenu({
           cart={cart}
           existingOrderId={activeOrder?.orderId || null}
           existingOrderNumber={activeOrder?.orderNumber || null}
-          grandTotal={activeOrder ? activeOrder.grandTotal : cartTotal + cartTax}
+          grandTotal={
+            activeOrder ? activeOrder.grandTotal : cartTotal + cartTax
+          }
           subtotal={activeOrder ? activeOrder.subtotal : cartTotal}
           taxTotal={activeOrder ? activeOrder.taxTotal : cartTax}
           customerName={customer.name}
