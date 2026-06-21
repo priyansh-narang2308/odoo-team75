@@ -11,18 +11,18 @@ function getIO() {
 }
 
 export async function POST(request: Request) {
+  const body = await request.json();
+  const { tableId, items, source } = body;
+
   const staffSession = await getServerSession(authOptions);
   const customerSession = await getCustomerSession();
 
-  if (!staffSession && !customerSession) {
+  if (!staffSession && !customerSession && source !== "CUSTOMER") {
     return NextResponse.json(
       { ok: false, error: "Unauthorized" },
       { status: 401 },
     );
   }
-
-  const body = await request.json();
-  const { tableId, items, source } = body;
 
   if (!tableId || !items || !items.length) {
     return NextResponse.json(
