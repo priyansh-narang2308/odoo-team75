@@ -42,12 +42,20 @@ export async function POST(request: Request) {
       });
 
       if (!order) {
+        // Validate customerId still exists in DB before linking
+        let validCustomerId = null;
+        if (customerSession?.customerId) {
+          const cust = await tx.customer.findUnique({ where: { id: customerSession.customerId }});
+          if (cust) validCustomerId = cust.id;
+        }
+
         // Create new order
         order = await tx.order.create({
           data: {
             tableId,
             source: source || (customerSession ? "CUSTOMER" : "CASHIER"),
-            customerId: customerSession?.customerId || null,
+            customerId: validCustomerId,
+            userId: staffSession?.user?.id || null,
             status: "SENT",
             subtotal: 0,
             taxTotal: 0,
