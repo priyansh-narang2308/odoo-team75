@@ -73,9 +73,7 @@ function useElapsed(createdAt: string, stoppedAt?: string) {
   useEffect(() => {
     const tick = () => {
       const end = stoppedAt ? new Date(stoppedAt).getTime() : Date.now();
-      const secs = Math.floor(
-        (end - new Date(createdAt).getTime()) / 1000,
-      );
+      const secs = Math.floor((end - new Date(createdAt).getTime()) / 1000);
       setElapsed(Math.max(0, secs));
     };
     tick();
@@ -87,7 +85,13 @@ function useElapsed(createdAt: string, stoppedAt?: string) {
   return elapsed;
 }
 
-function ElapsedBadge({ createdAt, stoppedAt }: { createdAt: string; stoppedAt?: string }) {
+function ElapsedBadge({
+  createdAt,
+  stoppedAt,
+}: {
+  createdAt: string;
+  stoppedAt?: string;
+}) {
   const secs = useElapsed(createdAt, stoppedAt);
   const mins = Math.floor(secs / 60);
   const s = secs % 60;
@@ -105,16 +109,20 @@ function ElapsedBadge({ createdAt, stoppedAt }: { createdAt: string; stoppedAt?:
         borderRadius: "999px",
         fontSize: "12px",
         fontWeight: "700",
-        background: isCompleted 
+        background: isCompleted
           ? "rgba(34,197,94,0.15)"
           : isUrgent
-          ? "rgba(239,68,68,0.2)"
-          : isWarning
-            ? "rgba(245,158,11,0.15)"
-            : "rgba(107,114,128,0.15)",
+            ? "rgba(239,68,68,0.2)"
+            : isWarning
+              ? "rgba(245,158,11,0.15)"
+              : "rgba(107,114,128,0.15)",
         color: isCompleted
           ? "#4ade80"
-          : isUrgent ? "#f87171" : isWarning ? "#fbbf24" : "#9ca3af",
+          : isUrgent
+            ? "#f87171"
+            : isWarning
+              ? "#fbbf24"
+              : "#9ca3af",
         animation: isUrgent ? "pulse 1s infinite" : "none",
       }}
     >
@@ -190,7 +198,9 @@ export function KDSBoard() {
   // Fetch initial tickets
   const fetchTickets = useCallback(async () => {
     try {
-      const res = await fetch("/api/orders?status=SENT,PAID,PREPARING,READY&limit=50");
+      const res = await fetch(
+        "/api/orders?status=SENT,PAID,PREPARING,READY&limit=50",
+      );
       const data = await res.json();
       if (data.ok) {
         const mapped: KDSTicket[] = (data.data || []).map((o: any) => ({
@@ -312,7 +322,9 @@ export function KDSBoard() {
     setTickets((prev) =>
       prev.map((t) => ({
         ...t,
-        updatedAt: t.items.some(i => i.id === itemId) ? new Date().toISOString() : t.updatedAt,
+        updatedAt: t.items.some((i) => i.id === itemId)
+          ? new Date().toISOString()
+          : t.updatedAt,
         items: t.items.map((i) =>
           i.id === itemId ? { ...i, kdsStatus: nextStatus } : i,
         ),
@@ -328,19 +340,18 @@ export function KDSBoard() {
 
   const filteredVisibleTickets = tickets
     .filter((t) => {
-      const allCompleted = t.items.length > 0 && t.items.every(i => i.kdsStatus === "COMPLETED");
+      const allCompleted =
+        t.items.length > 0 && t.items.every((i) => i.kdsStatus === "COMPLETED");
       if (filter === "ACTIVE") return !allCompleted;
       return allCompleted;
     })
     .map((t) => {
       const filteredItems = t.items.filter(
         (i) =>
-          (!searchQuery ||
-            i.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (i.categoryName &&
-              i.categoryName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()))),
+          !searchQuery ||
+          i.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (i.categoryName &&
+            i.categoryName.toLowerCase().includes(searchQuery.toLowerCase())),
       );
       return { ...t, items: filteredItems };
     })
@@ -398,8 +409,18 @@ export function KDSBoard() {
                 borderRadius: "999px",
                 fontSize: "12px",
                 fontWeight: "600",
-                background: filter === f ? (f === "ACTIVE" ? "rgba(59,130,246,0.15)" : STATUS_COLORS.COMPLETED.bg) : "transparent",
-                color: filter === f ? (f === "ACTIVE" ? "#3b82f6" : STATUS_COLORS.COMPLETED.text) : "var(--color-text-muted)",
+                background:
+                  filter === f
+                    ? f === "ACTIVE"
+                      ? "rgba(59,130,246,0.15)"
+                      : STATUS_COLORS.COMPLETED.bg
+                    : "transparent",
+                color:
+                  filter === f
+                    ? f === "ACTIVE"
+                      ? "#3b82f6"
+                      : STATUS_COLORS.COMPLETED.text
+                    : "var(--color-text-muted)",
                 border: `1px solid ${filter === f ? (f === "ACTIVE" ? "#3b82f6" : STATUS_COLORS.COMPLETED.border) : "var(--color-border)"}`,
                 cursor: "pointer",
               }}
@@ -600,7 +621,10 @@ export function KDSBoard() {
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <ElapsedBadge createdAt={ticket.createdAt} stoppedAt={allDone ? ticket.updatedAt : undefined} />
+                  <ElapsedBadge
+                    createdAt={ticket.createdAt}
+                    stoppedAt={allDone ? ticket.updatedAt : undefined}
+                  />
                   {allDone && (
                     <span style={{ color: "#4ade80" }}>
                       <CheckCircle2 size={18} />
@@ -719,7 +743,6 @@ export function KDSBoard() {
                   );
                 })}
               </div>
-
             </div>
           );
         })}
