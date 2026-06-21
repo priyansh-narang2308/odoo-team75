@@ -61,7 +61,7 @@ export function TablesManager() {
     gridHeight: 8,
   });
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
-  const [deleteTableId, setDeleteTableId] = useState<string | null>(null);
+
   const [editForm, setEditForm] = useState({
     tableNumber: "",
     seats: 4,
@@ -638,7 +638,30 @@ export function TablesManager() {
   };
 
   const deactivateTable = (id: string) => {
-    setDeleteTableId(id);
+    setConfirmDialog({
+      isOpen: true,
+      title: "Remove Table",
+      message:
+        "Are you sure you want to remove this table? This cannot be undone.",
+      confirmVariant: "danger",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/tables/${id}`, { method: "DELETE" });
+          const data = await res.json();
+          if (data.ok) {
+            setTables((prev) => prev.filter((t) => t.id !== id));
+            setSelectedTable(null);
+            toast.success("Table removed successfully!");
+          } else {
+            toast.error(data.error || "Failed to remove table");
+          }
+        } catch {
+          toast.error("Failed to remove table");
+        } finally {
+          setConfirmDialog(null);
+        }
+      },
+    });
   };
 
   const selectedFloor = floors.find((f) => f.id === selectedFloorId);

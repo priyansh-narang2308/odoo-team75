@@ -79,8 +79,22 @@ export function CustomerOrderGate({
             alignItems: "center",
           }}
         >
-          <div style={{ animation: "splashFloat 2s ease-in-out infinite", marginBottom: "16px" }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <div
+            style={{
+              animation: "splashFloat 2s ease-in-out infinite",
+              marginBottom: "16px",
+            }}
+          >
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#a78bfa"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
               <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
               <line x1="6" y1="2" x2="6" y2="4" />
@@ -88,7 +102,15 @@ export function CustomerOrderGate({
               <line x1="14" y1="2" x2="14" y2="4" />
             </svg>
           </div>
-          <p style={{ letterSpacing: "0.05em", color: "rgba(255,255,255,0.7)", fontWeight: "500" }}>Preparing Your Experience...</p>
+          <p
+            style={{
+              letterSpacing: "0.05em",
+              color: "rgba(255,255,255,0.7)",
+              fontWeight: "500",
+            }}
+          >
+            Preparing Your Experience...
+          </p>
         </div>
         <style>{`
           @keyframes splashFloat {
@@ -126,7 +148,8 @@ export function CustomerOrderGate({
             transform: "translate(-50%, -50%)",
             width: "600px",
             height: "600px",
-            background: "radial-gradient(circle, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0) 70%)",
+            background:
+              "radial-gradient(circle, rgba(147, 51, 234, 0.15) 0%, rgba(147, 51, 234, 0) 70%)",
             filter: "blur(60px)",
             pointerEvents: "none",
             zIndex: 0,
@@ -138,7 +161,8 @@ export function CustomerOrderGate({
             bottom: "10%",
             width: "400px",
             height: "400px",
-            background: "radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%)",
+            background:
+              "radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, rgba(236, 72, 153, 0) 70%)",
             filter: "blur(50px)",
             pointerEvents: "none",
             zIndex: 0,
@@ -157,7 +181,8 @@ export function CustomerOrderGate({
             borderRadius: "28px",
             padding: "48px 32px",
             textAlign: "center",
-            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
+            boxShadow:
+              "0 24px 60px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.05)",
             zIndex: 1,
             animation: "splashFloat 6s ease-in-out infinite",
           }}
@@ -211,8 +236,23 @@ export function CustomerOrderGate({
               margin: "0 auto 12px",
             }}
           >
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#a78bfa", display: "inline-block" }} />
-            <span style={{ fontSize: "14px", fontWeight: "600", color: "#e8e5ef", letterSpacing: "0.02em" }}>
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "#a78bfa",
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                fontSize: "14px",
+                fontWeight: "600",
+                color: "#e8e5ef",
+                letterSpacing: "0.02em",
+              }}
+            >
               {floorName} · Table {tableNumber}
             </span>
           </div>
@@ -233,15 +273,23 @@ export function CustomerOrderGate({
           {/* Order Here CTA */}
           <button
             id="splash-order-btn"
-            onClick={() => {
-              // Automatically start a guest session instead of forcing sign-in
-              setSession({
-                id: `guest_${Math.random().toString(36).substring(7)}`,
-                name: `Guest (Table ${tableNumber})`,
-                email: "guest@thepurplecup.com",
-                tableId: tableId,
-              });
-              setShowSplash(false);
+            onClick={async () => {
+              try {
+                const res = await fetch("/api/customer/guest", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ tableId, tableNumber }),
+                });
+                const data = await res.json();
+                if (data.ok) {
+                  setSession(data.data);
+                  setShowSplash(false);
+                } else {
+                  console.error("Guest login failed:", data.error);
+                }
+              } catch (e) {
+                console.error("Guest login error:", e);
+              }
             }}
             style={{
               width: "100%",
@@ -253,7 +301,8 @@ export function CustomerOrderGate({
               fontWeight: "750",
               border: "none",
               cursor: "pointer",
-              boxShadow: "0 10px 30px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2)",
+              boxShadow:
+                "0 10px 30px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2)",
               letterSpacing: "0.02em",
               transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
               position: "relative",
@@ -265,11 +314,13 @@ export function CustomerOrderGate({
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 15px 35px rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.3)";
+              e.currentTarget.style.boxShadow =
+                "0 15px 35px rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.3)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "0 10px 30px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 30px rgba(255, 255, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.2)";
             }}
           >
             Order Here

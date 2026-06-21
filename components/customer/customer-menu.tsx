@@ -162,6 +162,38 @@ function getProductImage(productName: string) {
   return "";
 }
 
+const playFlipSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const bufferSize = ctx.sampleRate * 0.12; // 120ms
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      // White noise with exponential decay to simulate paper brushing
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.02));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 1000; // Muffled paper sound
+    
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.6, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start();
+  } catch {
+    // Ignore if audio fails
+  }
+};
+
 export function CustomerMenu({
   tableId,
   tableNumber,
@@ -409,6 +441,9 @@ export function CustomerMenu({
     const curIdx = categories.findIndex((c) => c.id === selectedCat);
     const tgtIdx = categories.findIndex((c) => c.id === targetId);
     if (tgtIdx === curIdx || tgtIdx < 0) return;
+    
+    playFlipSound(); // Play the flipping noise!
+    
     const direction = dir ?? (tgtIdx > curIdx ? "forward" : "backward");
     setFlipDir(direction);
     setFlipPhase("out");
@@ -1033,10 +1068,11 @@ export function CustomerMenu({
               id="menu-book-tabs"
               style={{
                 display: "flex",
-                gap: "4px",
+                gap: "10px",
                 overflowX: "auto",
                 scrollbarWidth: "none",
-                marginBottom: "-1px",
+                marginBottom: "20px",
+                padding: "4px 8px",
                 position: "relative",
                 zIndex: 2,
               }}
@@ -1049,24 +1085,23 @@ export function CustomerMenu({
                     onClick={() => navigateCategory(cat.id)}
                     disabled={flipPhase !== "idle"}
                     style={{
-                      padding: "6px 14px",
-                      borderRadius: "8px 8px 0 0",
-                      fontSize: "12px",
-                      fontWeight: "600",
+                      padding: "8px 16px",
+                      borderRadius: "999px",
+                      fontSize: "13px",
+                      fontWeight: "700",
                       flexShrink: 0,
                       background: isActive
-                        ? "#ffffff"
-                        : "rgba(255,255,255,0.02)",
-                      border: `1px solid ${isActive ? cat.color + "55" : styleVars.border}`,
-                      borderBottom: isActive
-                        ? "2px solid #ffffff"
-                        : `1px solid ${styleVars.border}`,
-                      color: isActive ? cat.color : styleVars.muted,
+                        ? cat.color || styleVars.primary
+                        : "rgba(0,0,0,0.04)",
+                      border: "1px solid",
+                      borderColor: isActive 
+                        ? cat.color || styleVars.primary 
+                        : "rgba(0,0,0,0.02)",
+                      color: isActive ? "#ffffff" : styleVars.muted,
                       cursor: flipPhase !== "idle" ? "not-allowed" : "pointer",
-                      transition: "all 0.2s",
-                      transform: isActive ? "translateY(2px)" : "none",
-                      position: "relative",
-                      zIndex: isActive ? 3 : 1,
+                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                      boxShadow: isActive ? `0 4px 12px ${cat.color || styleVars.primary}40` : "none",
+                      transform: isActive ? "translateY(-1px)" : "none",
                     }}
                   >
                     {cat.name}
@@ -1082,7 +1117,7 @@ export function CustomerMenu({
                 style={{
                   position: "absolute",
                   inset: 0,
-                  borderRadius: "0 16px 16px 4px",
+                  borderRadius: "16px 16px 16px 4px",
                   background: "rgba(255,255,255,0.025)",
                   transform: "translate(6px, 5px)",
                   zIndex: 0,
@@ -1092,7 +1127,7 @@ export function CustomerMenu({
                 style={{
                   position: "absolute",
                   inset: 0,
-                  borderRadius: "0 16px 16px 4px",
+                  borderRadius: "16px 16px 16px 4px",
                   background: "rgba(255,255,255,0.015)",
                   transform: "translate(3px, 2.5px)",
                   zIndex: 0,
@@ -1107,7 +1142,7 @@ export function CustomerMenu({
                   zIndex: 1,
                   background:
                     "linear-gradient(160deg, #ffffff 0%, #fcfbfa 100%)",
-                  borderRadius: "0 16px 16px 4px",
+                  borderRadius: "16px 16px 16px 4px",
                   border: "1px solid #e7e5e4",
                   borderLeft: "5px solid rgba(0, 0, 0, 0.08)",
                   boxShadow:

@@ -7,7 +7,6 @@ import { prisma } from "@/lib/prisma";
 import { SOCKET_EVENTS } from "@/lib/socket-events";
 
 function getIO() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (global as any).io;
 }
 
@@ -16,14 +15,20 @@ export async function POST(request: Request) {
   const customerSession = await getCustomerSession();
 
   if (!staffSession && !customerSession) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Unauthorized" },
+      { status: 401 },
+    );
   }
 
   const body = await request.json();
   const { tableId, items, source } = body;
 
   if (!tableId || !items || !items.length) {
-    return NextResponse.json({ ok: false, error: "Missing tableId or items" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Missing tableId or items" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -60,7 +65,9 @@ export async function POST(request: Request) {
       // Add new items
       const newOrderItems = [];
       for (const item of items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+        });
         if (!product) throw new Error(`Product ${item.productId} not found`);
 
         const lineTotal = Number(product.price) * item.quantity;
@@ -75,8 +82,8 @@ export async function POST(request: Request) {
             kdsStatus: "TO_COOK",
           },
           include: {
-            product: { select: { name: true, showInKds: true } }
-          }
+            product: { select: { name: true, showInKds: true } },
+          },
         });
         newOrderItems.push(orderItem);
       }
@@ -87,9 +94,13 @@ export async function POST(request: Request) {
         include: { product: true },
       });
 
-      const subtotal = allItems.reduce((sum, i) => sum + Number(i.lineTotal), 0);
+      const subtotal = allItems.reduce(
+        (sum, i) => sum + Number(i.lineTotal),
+        0,
+      );
       const taxTotal = allItems.reduce(
-        (sum, i) => sum + Number(i.lineTotal) * (Number(i.product.taxRate) / 100),
+        (sum, i) =>
+          sum + Number(i.lineTotal) * (Number(i.product.taxRate) / 100),
         0,
       );
       const discountTotal = Number(order.discountTotal) || 0;
@@ -98,7 +109,7 @@ export async function POST(request: Request) {
       const finalOrder = await tx.order.update({
         where: { id: order.id },
         data: { subtotal, taxTotal, grandTotal },
-        include: { table: true }
+        include: { table: true },
       });
 
       return { finalOrder, newOrderItems };
@@ -147,6 +158,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, data: updatedOrder.finalOrder });
   } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: error.message },
+      { status: 400 },
+    );
   }
 }
