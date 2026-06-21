@@ -83,7 +83,7 @@ export default async function HomePage() {
           </div>
 
           <div className={styles.ctaButtons}>
-            <Link href="/" className={styles.btnPrimary}>
+            <Link href="/customer/login" className={styles.btnPrimary}>
               Start now - It&apos;s free
             </Link>
           </div>

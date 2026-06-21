@@ -159,12 +159,21 @@ function getProductImage(productName: string) {
       return "/" + img;
     }
   }
-  return "";
+
+  // Fallback: Pick a consistent random image based on the product name hash
+  // This ensures every product in the menu has a beautiful image!
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVAILABLE_IMAGES.length;
+  return "/" + AVAILABLE_IMAGES[index];
 }
 
 const playFlipSound = () => {
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContext =
+      window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) return;
     const ctx = new AudioContext();
     const bufferSize = ctx.sampleRate * 0.12; // 120ms
@@ -172,19 +181,20 @@ const playFlipSound = () => {
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
       // White noise with exponential decay to simulate paper brushing
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.02));
+      data[i] =
+        (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.02));
     }
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
-    
+
     const filter = ctx.createBiquadFilter();
     filter.type = "lowpass";
     filter.frequency.value = 1000; // Muffled paper sound
-    
+
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.6, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-    
+
     noise.connect(filter);
     filter.connect(gain);
     gain.connect(ctx.destination);
@@ -441,9 +451,9 @@ export function CustomerMenu({
     const curIdx = categories.findIndex((c) => c.id === selectedCat);
     const tgtIdx = categories.findIndex((c) => c.id === targetId);
     if (tgtIdx === curIdx || tgtIdx < 0) return;
-    
+
     playFlipSound(); // Play the flipping noise!
-    
+
     const direction = dir ?? (tgtIdx > curIdx ? "forward" : "backward");
     setFlipDir(direction);
     setFlipPhase("out");
@@ -515,7 +525,6 @@ export function CustomerMenu({
 
         {/* View toggle */}
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-
           {activeOrder && (
             <button
               id="view-status-btn"
@@ -1053,13 +1062,15 @@ export function CustomerMenu({
                         ? cat.color || styleVars.primary
                         : "rgba(0,0,0,0.04)",
                       border: "1px solid",
-                      borderColor: isActive 
-                        ? cat.color || styleVars.primary 
+                      borderColor: isActive
+                        ? cat.color || styleVars.primary
                         : "rgba(0,0,0,0.02)",
                       color: isActive ? "#ffffff" : styleVars.muted,
                       cursor: flipPhase !== "idle" ? "not-allowed" : "pointer",
                       transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                      boxShadow: isActive ? `0 4px 12px ${cat.color || styleVars.primary}40` : "none",
+                      boxShadow: isActive
+                        ? `0 4px 12px ${cat.color || styleVars.primary}40`
+                        : "none",
                       transform: isActive ? "translateY(-1px)" : "none",
                     }}
                   >
