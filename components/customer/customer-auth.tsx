@@ -416,7 +416,7 @@ export function CustomerAuth({
         {/* Not a Customer Button */}
         <div style={{ marginTop: "20px", textAlign: "center" }}>
           <a
-            href="http://localhost:3001/login"
+            href="/login"
             id="not-a-customer-btn"
             style={{
               display: "inline-flex",

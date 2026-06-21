@@ -478,7 +478,7 @@ export default function CustomerLoginPage() {
             }}
           >
             <a
-              href="http://localhost:3001/login"
+              href="https://odoo-team75.onrender.com/login"
               id="not-a-customer-btn"
               style={{
                 display: "inline-flex",
