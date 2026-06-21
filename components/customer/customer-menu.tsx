@@ -515,48 +515,7 @@ export function CustomerMenu({
 
         {/* View toggle */}
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-          <button
-            id="customer-logout-btn"
-            onClick={handleLogout}
-            disabled={loggingOut}
-            style={{
-              padding: "7px 12px",
-              borderRadius: "8px",
-              fontSize: "12px",
-              fontWeight: "600",
-              background: "transparent",
-              border: `1px solid ${styleVars.border}`,
-              color: styleVars.muted,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              cursor: "pointer",
-            }}
-          >
-            <LogOut size={13} />
-          </button>
-          <button
-            id="view-profile-btn"
-            onClick={loadProfile}
-            style={{
-              padding: "7px 12px",
-              borderRadius: "8px",
-              fontSize: "12px",
-              fontWeight: "600",
-              background:
-                view === "profile"
-                  ? "rgba(var(--color-primary-rgb),0.2)"
-                  : "transparent",
-              border: `1px solid ${view === "profile" ? "var(--color-primary)" : styleVars.border}`,
-              color:
-                view === "profile" ? "var(--color-primary)" : styleVars.muted,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <User size={13} /> {customer.name.split(" ")[0]}
-          </button>
+
           {activeOrder && (
             <button
               id="view-status-btn"
