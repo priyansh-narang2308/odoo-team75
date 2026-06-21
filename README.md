@@ -1,6 +1,6 @@
-# Café (CafePOS)
+# The Purple Cup Café
 
-A dark-first, premium café management ecosystem and Point-of-Sale (POS) application built with React, Next.js, and Socket.IO. The platform features real-time ordering sync, drag-and-drop floor plan editing, a Kitchen Display System (KDS), promotional tools, and online customer payments.
+A premium café management ecosystem and Point-of-Sale (POS) application built with React, Next.js, and Socket.IO. The platform features real-time ordering sync, drag-and-drop floor plan editing, a Kitchen Display System (KDS), promotional tools, and online customer payments.
 
 ---
 
