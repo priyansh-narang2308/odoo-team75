@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const orderTotalParam = searchParams.get("orderTotal");
   const orderTotal = orderTotalParam ? parseFloat(orderTotalParam) : 0;
   const itemsParam = searchParams.get("items");
-  let items: { productId: string; quantity: number; price: number }[] = [];
+  let items: { productId: string; quantity: number; price: number; categoryId?: string }[] = [];
   try {
     if (itemsParam) items = JSON.parse(itemsParam);
   } catch {}
